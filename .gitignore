@@ -1,0 +1,12 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+.rds
+.csv
+.xlsx
+.docx
+plots/
+chapter_3_data/
+3_ML_quantitative_v1.2_cache/
+3_ML_quantitative_v1.2_files/

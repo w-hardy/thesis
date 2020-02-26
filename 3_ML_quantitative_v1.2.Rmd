@@ -1,0 +1,1765 @@
+---
+title: "Chapter 3"
+author: "Will Hardy"
+date: "`r Sys.Date()`"
+
+output: 
+  - bookdown::html_document2
+papersize: a4
+fontsize: 12pt
+linestretch: 2.0
+geometry: margin=1in
+always_allow_html: true
+
+toc: FALSE
+
+bibliography: 
+  - [../../../references/library.bib]
+  - packages.bib
+biblio-style: apalike
+  
+---
+
+```{r setup, include=FALSE}
+library(plyr)
+library(tidyverse)
+library(lubridate)
+library(readxl)
+library(knitr)
+library(kableExtra)
+library(ggthemes)
+library(plotly)
+library(mousetrap)
+library(randomizr)
+library(data.table)
+library(lavaan)
+library(survival)
+library(survminer)
+library(papaja)
+library(tidytidbits)
+
+
+knitr::opts_chunk$set(echo = FALSE, cache = TRUE, warning = FALSE, message = FALSE)
+knitr::write_bib(c(.packages(), 'bookdown', 'knitr', 'rmarkdown'), 'packages.bib')
+doc.type <- knitr::opts_knit$get('rmarkdown.pandoc.to')
+
+########################################
+################# DATA #################
+########################################
+feature_retention <- 
+  read_xlsx("../3 eshot/PRA_Results/FeatureRetention.xlsx", 
+            sheet = "Sheet1")[1:150,]
+
+Group1to4 <- readRDS("chapter_3_data/Group1to4.rds")
+
+Group5 <- readRDS("chapter_3_data/Group5.rds")
+
+
+Group5_GTA = read_csv("../3 eshot/Data/Group5_GTA_v3.csv")
+Group5_FTP = read_csv("../3 eshot/Data/Group5_FTP_v3.csv")
+G5_female_GTA_18m_comb <- read_csv("../3 eshot/Data/G5_female_GTA_18m_comb_v3.csv")
+G5_female_GTA_18m_train <- read_csv("../3 eshot/Data/G5_female_GTA_18m_train_v3.csv")
+G5_male_GTA_18m_train <- read_csv("../3 eshot/Data/G5_male_GTA_18m_train_v3.csv")
+G5_male_GTA_18m_test <- read_csv("../3 eshot/Data/G5_male_GTA_18m_test_v3.csv")
+G5_male_GTA_18m_pred <- read_csv("../3 eshot/Data/G5_male_GTA_18m_pred_v3.csv")
+G5_FTP_consol <- read_csv("../3 eshot/Data/G5_FTP_consol_v3.csv")
+
+
+### PRA results ###
+#### Feature subsets ####
+gta_female_g5_18m_FS <- 
+  read_csv("../3 eshot/PRA_Results/v3/gta_female_g5_18m_FS.csv", 
+           col_types = "cci")
+gta_male_g5_18m_FS <- 
+  read_csv("../3 eshot/PRA_Results/v3/gta_male_g5_18m_FS.csv", 
+           col_types = "cci")
+
+ftp_zsex_g5_FS <- 
+  read_csv("../3 eshot/PRA_Results/v3/ftp_g5_18m_FS.csv", 
+           col_types = "cci")
+
+#### Classification rates ####
+G5_female_GTA18m_PRA <- read_xlsx("../3 eshot/PRA_Results/v3/g5_female_gta18m_comb_classification.xlsx", sheet = "Sheet1", range = "A10:J38")  %>% 
+  left_join(gta_female_g5_18m_FS, 
+            by = c("Dataset" = "feature_subset")) %>% 
+  select(Dataset, n, NB, SMO, IBk, J48, mean, median)
+
+
+G5_male_GTA18m_train_PRA <- 
+  read_xlsx("../3 eshot/PRA_Results/v3/g5_male_gta18m_train_classification.xlsx", sheet = "Sheet1", range = "A10:J38") %>% 
+  left_join(gta_male_g5_18m_FS, 
+            by = c("Dataset" = "feature_subset")) %>% 
+  select(Dataset, n, NB, SMO, IBk, J48, mean, median)
+
+G5_zsex_ftp_train_PRA <- 
+  read_xlsx("../3 eshot/PRA_Results/v3/g5_zsex_consol_ftp_classification.xlsx", sheet = "Sheet1", range = "A10:J36") %>% 
+  left_join(ftp_zsex_g5_FS, 
+            by = c("Dataset" = "feature_subset")) %>% 
+  select(Dataset, n, NB, SMO, IBk, J48, mean, median)
+
+
+
+GTA_Survival <- readr::read_rds("chapter_3_data/GTA_Survival.rds")
+
+
+eshot_vars <- 
+  read_xlsx("../3 eshot/Design/eshot_variables.xlsx", sheet = "Sheet1", na = "NA") %>%
+  mutate(full_model = full_model %>%  str_remove_all("\r"),
+    short_model = short_model %>%  str_remove_all("\r"))
+
+#############################################
+################# FUNCTIONS #################
+#############################################
+normalize <- 
+  function(x) {
+    return ((x - min(x)) / (max(x) - min(x)))
+  }
+
+##   conf.interval: the percent range of the confidence interval (default is 95%)
+summarySE <- 
+  function(data=NULL, measurevar, groupvars=NULL, na.rm=FALSE,
+           conf.interval=.95, .drop=TRUE) {
+    
+
+    # New version of length which can handle NA's: if na.rm==T, don't count them
+    length2 <- 
+      function (x, na.rm=FALSE) {
+        if (na.rm) sum(!is.na(x))
+        else       length(x)
+      }
+    
+    # This does the summary. For each group's data frame, return a vector with
+    # N, mean, and sd
+    datac <- plyr::ddply(data, groupvars, .drop=.drop,
+      .fun = function(xx, col) {
+        c(N    = length2(xx[[col]], na.rm=na.rm),
+          mean = mean   (xx[[col]], na.rm=na.rm),
+          sd   = sd     (xx[[col]], na.rm=na.rm)
+        )
+      },
+      measurevar
+    )
+
+    # Rename the "mean" column    
+    datac <- plyr::rename(datac, c("mean" = measurevar))
+
+    datac$se <- datac$sd / sqrt(datac$N)  # Calculate standard error of the mean
+
+    # Confidence interval multiplier for standard error
+    # Calculate t-statistic for confidence interval: 
+    # e.g., if conf.interval is .95, use .975 (above/below), and use df=N-1
+    ciMult <- qt(conf.interval/2 + .5, datac$N-1)
+    datac$ci <- datac$se * ciMult
+
+    return(datac)
+  }
+
+if (is_latex_output()) {font = "serif" } else {font = "sans"}
+
+```
+
+
+# The path to becoming a Mountain Leader: A pattern recognition approach
+
+## Introduction
+
+The findings reported in this paper are part of a larger, Mountain Training United Kingdom and Ireland (MTUKI) sponsored, project. This paper builds on a large qualitative study reported in Chapter 2, the aim of which was to identify factors that may influence the completion of the Mountain Leader qualification. From the results of that study, it was clear that there was no single factor that influenced completion, but instead the results suggested that a myriad of factors are important and there are multiple interactions between them.
+
+### The Mountain Leader qualification
+
+The Mountain Leader qualification is a qualification for "people who want to lead groups in the mountains, hills and moorlands of the UK and Ireland" [@MountainTrainingUK2015]. To become a Mountain Leader, candidates must complete a training pathway, involving four distinct steps, which have remained broadly similar since 1954 when the qualification was created. 
+
+* Something about projects in other countries being based on the ML - UIAA w/Steve Long
+
+To qualify, candidates must first *register for the qualification* and gain a minimum of 20 Quality Mountain Days (QMDs)^[There is not a simple definition for a QMD, however it is expected that a QMD will "make a positive contribution towards a person’s development and maturity as an all round mountaineer" [@MountainTraining2019]], then they complete a six day *training course*, following that they are required to gain a minimum of 20 additional QMDS as *further experience to consolidate skills*, and finally they need to successfully complete a five day *assessment course*. Therefore, to become a Mountain Leader, one must spend a minimum of 51 days in the mountains. Most successful candidates will have more experience than this, whether that is additional QMDs, experience of mountain walking that does not meet the QMD criteria, or other mountaineering experience. Becoming a Mountain Leader requires candidates to commit a significant amount of time and money in order for them to qualify as Mountain Leaders.
+
+Between 2009 and 2018 an average of 2278 candidates registered for the Mountain Leader qualification each year, but only 559 qualified. When looking more closely at the numbers of candidates who did qualify it became clear that there are two main components to qualifying: 1) getting to an assessment and 2) passing an assessment. Interestingly, most candidates who got to an assessment passed their first assessment (Figure \@ref(fig:PassRate)), but most candidates did not get to an assessment (Figure \@ref(fig:survival-sex)). It is also noteworthy that, as shown in Figure \@ref(fig:survival-sex), becoming a Mountain Leader is not a quick process, the mean time from training to assessment was `r GTA_Survival %>% filter(year(firstMLTrainingDate) > 2008 & Assessed == 1) %>%  .$TimeToAssessment %>% mean() %>% round(2)` years. 
+
+Mountain Training UKI would like to understand why people do not complete the Mountain Leader qualification and identify if there are any changes to the pathway that they can make in order to better support their candidates. It is unlikely that there is a single factor that would be a “silver bullet” to improve completion rates. Instead there are likely a myriad of factors which influence completion at various stages of the pathway. Some of these factors will be generic to all candidates, whilst some may be specific to individual (groups of) candidates.
+
+```{r}
+cap <- paste0("Pass rates for female and male candidates assessed since 2000 ", "(n = ", nrow(GTA_Survival %>%
+  filter(Assessed == 1 & year(firstMLAssessmentDate) > 1999 & 
+           (SexId == 1 | SexId == 2))), ").")
+```
+
+
+```{r PassRate, fig.cap=cap}
+
+GTA_Survival %>%
+  filter(Assessed == 1 & year(firstMLAssessmentDate) > 1999 & 
+           (SexId == 1 | SexId == 2)) %>% 
+  mutate(SexId = rename_factor(SexId, `1` = "male", `2` = "female")) -> df
+
+df %>%
+  mutate(
+    Sex =
+      rename_factor(
+        SexId,
+        "male" = paste("Male \nn =",
+                       nrow(filter(df, SexId == "male"))),
+        "female" = paste("Female \nn =",
+                         nrow(filter(df, SexId == "female")))
+      ),
+    firstMLAssessmentDate =
+      round_date(firstMLAssessmentDate, unit = "week")
+  ) %>%
+  ggplot(aes(x = firstMLAssessmentDate, 
+             y = 100 * FirstTimePass, 
+             colour = Sex, fill = Sex)) +
+  geom_smooth(method = "loess") +
+  coord_cartesian(xlim = c(ymd(20000101), ymd(20200101))) +
+  labs(x = "Assessment Year",
+       y = "First Time Pass Rate %") +
+  theme_few(base_size = 10, base_family = font) +
+  theme(legend.position = "bottom")
+```
+
+
+```{r}
+cap <- 
+  paste0("Survival rates for female and male candidates post-training.", "Candidates trained 2009-2019. (n = ", 
+        filter(GTA_Survival, year(firstMLTrainingDate) > 2008) %>% nrow(), 
+      ") \nBlue dashed line at mean time to assessment.")
+```
+
+
+```{r survival-sex, warning=FALSE, fig.cap=cap, cache=TRUE}
+
+GTA_Survival2008 =
+  GTA_Survival %>%
+  filter(year(firstMLTrainingDate) > 2008 &
+           (firstMLTrainingDate < firstMLAssessmentDate |
+              is.na(firstMLAssessmentDate) == TRUE) &
+           (SexId == 1 | SexId == 2)) %>%
+  mutate(Sex = rename_factor(SexId, `1` = "Male", `2` = "Female"))
+
+surv_object <-
+  Surv(time = GTA_Survival2008$TimeToAssessment,
+       event = GTA_Survival2008$Assessed)
+
+fit1 <-
+  survfit(surv_object ~ Sex, GTA_Survival2008)
+
+ggsurvplot(
+  fit1, 
+  # data = GTA_Survival2008,
+  fun = "event",
+  surv.scale = "percent",
+  pval = TRUE,
+  pval.coord = c(4, .05),
+  # xlim = c(0, 5),
+  # ylim = c(0,.45),
+  break.x.by = 1,
+  break.y.by = .05,
+  xlab = "Time after training in years",
+  ylab = "% of candidates assessed",
+  censor = FALSE,
+  conf.int = TRUE,
+  legend.position = "bottom",
+  ggtheme = theme_few(base_size = 10,
+                      base_family = font),
+  tables.theme = 
+    theme_survminer(font.main = 10, font.x = 10,
+                    font.y = 10, base_family = font,
+                    base_size = 10)
+) -> p
+
+p$plot + #theme(legend.position = "bottom") +
+  geom_vline(xintercept = (GTA_Survival2008 %>% filter(Assessed == 1) %>%  .$TimeToAssessment %>% mean()), lty = 2, colour = "blue")
+  
+```
+
+
+### Pathways
+
+> Need to add something about talent ID and development
+
+* Some studies focus on understanding the exact relationship between a small number of variables and an outcome, e.g., PhD Delays [@VandeSchoot2013a]
+* Other studies aim to understand which variables, potentially from a large list, are the most important predictors of an outcome.
+
+Having a combination of factors that influence an outcome is not unique to becoming a Mountain Leader. Recently there have been a number of projects, in the sport domain, that have tried to find the most important factors in the development of athlete in elite pathways. Examples of projects that have sought to identify the most important discriminatory variables for pathways are: The Great British Medallist Project [GBM; @Gullich2019; @Hardy2017; @Rees2016]; "Game Changers" Discriminating Features within the Microstructure of Practice and Developmental Histories of Super-Elite Cricketers [@Jones2019a; @Jones2019b].
+
+
+### This paper
+
+* We identified `r nrow(eshot_vars)` variables that were deemed as potentially important to the completion of the Mountain Leader qualification in a large qualitative study (see results of Chapter 2 **LINK?? APPENDIX**) and a workshop with the Mountain Training UKI council.
+* We wanted to collect quantitative data from candidates for these variables
+* This manuscript has three studies in it:
+    1) Item selection
+    2) Item reduction
+    3) Model identification
+
+> How will this look for the thesis vs a manuscript? And does it matter?
+>
+> * Write as thesis chapter
+
+
+## Study 1 - Item selection
+
+The aim of this study was to identify a suitable measure for each construct identified in Chapter 2 **LINK**, which could then be used to identify the most important variables for discriminating candidates who do complete the Mountain Leader qualification from those who do not. Given that we wanted to collect data from candidates for `r nrow(eshot_vars)` variables, using full-length measures of the relevant constructs would be unreasonable for participants. To measure each construct of interest with a full length measure would create a survey so long that few candidates would complete it and those that did would likely not be representative of the population. Horvath and Röthlin [-@Horvath2018] discuss additional issues associated with using "basic research questionnaires" that are not best suited to use in an applied sport psychology setting, where instead, one may only want to use a questionnaire as a screening tool, or help provide "a complete picture about an athlete's situation." As such we were particularly interested in identifying short-form measures as using such measures was most likely to allow us to create a suitably short survey to collect data with. 
+
+The development of short-form measures to reduce the burden on participants has been of interest to researchers for over 100 years [@Smith2000]. However, the development of short-form measures has attracted some criticism [e.g., @Levy1968; @Smith2000; @Wechsler1967]. One of the main criticisms of short-form measures has been that "rigorous, valid, comprehensive assessment is crucial for the evaluation and treatment of many psychological problems" [@Smith2000, p 102] and that the time saving afforded by a short-form measure does not warrant the loss of validity associated with measuring a construct with fewer items.
+
+When creating, or identifying, a short-form measure one should not assume that the evidence for the validity and reliability of the original measure applies to the short-from, therefore it is important to provide evidence for the reliability and validity of the short-form [@Smith2000]. This evidence should include, but is not limited to, reliability of the short-from, shared variance between the full- and short-form measure, content validity/coverage of the construct, and also that the reduction in items offers a meaningful reduction in the time taken for the measure to be completed [@Horvath2018; @Smith2000].
+
+This project's aim was to identify the most important discriminatory variables for identifying candidates who do or do not complete the Mountain Leader qualification using Machine Learning techniques rather than testing the relationships between variables using regression based techniques or structural equation modelling. Therefore, instead of using full-length measures to collect data for each construct, we used one or two item *indicators* for each construct, unless a suitable short-form measure existed [e.g., the Ten Item Personality Inventory @Gosling2003]. 
+
+
+```{r study-1-data-sets}
+### FUNCTIONS ###
+prepare_lavaan <- 
+  function(data_path, pattern = NULL, case = "snake"){
+    # function to read and prepare data for CFA
+    require(tidyverse)
+    require(janitor)
+    
+    if (is.null(pattern)) {
+      read_csv(data_path) %>% 
+        na.omit() %>% 
+        clean_names(case = case) %>% 
+        scale() %>% 
+        as.data.frame
+    } 
+    else 
+      if (!is.null(pattern)) {
+        read_csv(data_path) %>% 
+          na.omit() %>% 
+          clean_names(case = case) %>% 
+          select(starts_with(pattern)) %>%
+          scale() %>% 
+          as.data.frame()
+    }
+  }
+
+### DATA ###
+PASSQ <- 
+  prepare_lavaan(
+    data_path = "../3 eshot/Design/Validation data/Social Support/PASSQ_ARSQ.csv",
+                 pattern = "pass")
+
+ARSQ <- 
+  prepare_lavaan(
+               data_path = "../3 eshot/Design/Validation data/Social Support/PASSQ_ARSQ.csv",
+               pattern = "received")
+
+MCBS <-  prepare_lavaan(
+               data_path = "../3 eshot/Design/Validation data/MCBS/Coach_Study2_1.csv")
+
+colnames(MCBS) <- 
+  c("Clust", "ob1", "ob2", "ob3", "ob4", "eq1", "eq2", "eq3", "eq4","gs1",
+    "gs2", "gs3", "gs4", "gs5", "df1", "df2", "df3", "df4", "mf1", "mf2",
+    "mf3", "mf4", "Obeservation", "Effective Questioning", "Goal Setting",
+    "Developmental Feedback", "Motivational Feedback")
+
+TROSCI <- 
+  read_csv("../3 eshot/Design/Validation data/TROSCI/Maulin and Sholto.csv") %>% 
+  psych::reverse.code(items = ., keys = c(-1,-1,-1,1,-1,1,1,1,1,1,1,-1,1,-1,1), 
+                      mini = 1, maxi = 9) %>% 
+  data.frame() %>% 
+  scale()
+
+colnames(TROSCI) <- 
+  c("trosci_1", "trosci_2", "trosci_3", "trosci_4", "trosci_5", "trosci_6",
+    "trosci_7", "trosci_8", "trosci_9", "trosci_10", "trosci_11", "trosci_12", 
+    "trosci_13", "trosci_14", "trosci_15")
+
+FMPS <- 
+  read_csv("../3 eshot/Design/Validation data/FMPS/FMPS.csv", 
+           col_names = paste0("fmps_", 1:35)) %>% 
+  scale()
+
+BRS <- 
+  read_csv("../../3 Robustness/Study 3/Data/SPSP.csv") %>% 
+  select(starts_with("BRS")) %>% 
+  scale()
+
+colnames(BRS) <- c(paste0("brs_", 1:6), "BRS")
+
+conflict <- read_csv("../3 eshot/Design/Validation data/conflict/matt_conflict_data.csv", na = "999") %>% 
+  na.omit()
+
+conflict[,3:16] <- sapply(conflict[,3:16], scale)
+
+
+study1_data_sets <- list(PASSQ, ARSQ, MCBS, TROSCI, FMPS, BRS, conflict)
+```
+
+
+### Method
+
+#### Procedure
+
+Although using full measures was not a realistic aim in the project, we still felt that the reliability and validity of the indicators that we would use was paramount. Researchers have suggested a variety of ways in which short-form measures can be developed whilst remaining both reliable and valid. Considering the guidance provided by @Smith2000 and @Horvath2018 along with the aim of this research, we used the steps below to identify items which would be used to collect data from candidates.
+
+Our first choice was to identify existing suitable short-form measure. When this was not possible, but there was an existing measure that we were able to access secondary data for, we used the following steps. Firstly, we checked that existing measure did measure the construct of interest and that there was sufficient evidence for its reliability and validity. Secondly, we identified which items we wanted to retain based on both content validity and factor loadings. It was important that the items retained still provided adequate coverage of the construct. In some instances, this meant retaining an item which had a (relatively) low factor loading, but measured a unique aspect of that construct, was more important than it was to retain items with high factor loadings. This will necessarily have lowered the reliability coefficient for the short-form measure, however, it is important to note that internal consistency is only one aspect of valididty. If we did not feel that this process left us with items that provided adequate coverage of the construct of interest, we made a note of how the new, narrower, construct differed from the original.
+
+Once we had identifed the items we wished to retain, we fitted a single factor latent variable model for both the full- and short-form measure to the secondary data, using `lavaan` [@R-lavaan], to estimate factor scores for each participant. These factor scores were then used to calculate a Pearson's correlation coefficient  between predicted factor sores for full- and short-form measure as an estimate of shared variance. We believe that this method is better than correlating the item sum-scores as latent variables account for measurement error, thus, reducing the likelihood of receiving an optimistically biased estimate due to error correlation. Shared variance with the full measure was our main concern for this study as if the correlations are high enough then the two measures can be thought of as approximately equal [@Smith2000]. Finally, we calculated the composite reliability for the new short-form measure [$\omega$; @Fornell1981]^[Horvath and Röthlin [-@Horvath2018] highlight the fact that a measure of internal consistency such as Cronbach's alpha may be lower for a short-form measure simply because it has fewer items, therefore this may be a less useful metric than it would be in a longer measure. Composite reliability does not include the number of items in its calculation therefore is more suitable for assessing the internal consistency of short-form measures.].
+
+If secondary data were not available but we identified a suitable measure, we chose the best item(s) based on face validity of the items and factor loadings reported in the original paper validating the full measure. Finally, if none of the options above were possible, we developed item(s) within the research team in collaboration with Mountain Training UKI.
+
+
+#### Measures
+
+> How much detail do I need to go into in the section - particularly for scales that already exist? Is it enough to say that there is a list of variables and measures in the supplementary information?
+
+##### Personality measures
+
+* To measure the "Big-Five" personality traits (openness, conscientiousness, extraversion, agreeableness and emotional stability), we used the Ten Item Personality Inventory [TIPI; @Gosling2003]. The TIPI comprises ten pairs of items (e.g., "Critical, quarrelsome"), one positively worded and one negatively worded for each trait. Each item has the same stem, "I see myself as..." Participants are then asked to score each item on a seven-point Likert scale from "Disagree strongly" (1) to "Agree strongly" (7) and sum scores are calculated for each of the five traits.
+* Resilience and Robustness - Brief Resilience Scale [BRS; @Smith2008]
+* Perfectionism (Personal Standards and Concern Over Mistakes) - Frost Multidimensional Perfectionism Scale [FMPS; @Frost1990]
+  * **Do I want to include something about reanlaysing the YIPS study and finding similar results? What is the difference in classification rates/discriminant function?**
+* Robustness of confidence - Trait Robustness of Self-Confidence Inventory [TROSCI; @Beattie2011]
+
+
+##### Socio-demographic
+
+Some socio-demographic data are available on the CMS; however, some is not (e.g., income level, education level). To measure these, we used standard socio-demographic questions (e.g., "What is the highest level of school you had completed or the highest degree you had received when you registered?")
+
+
+##### Self-efficacy scale
+
+> Ross: I'd turn this paragraph a little on its head. Start with following Banduras guidelines and the importance of creating a situation specific measure. Then say how you achieved creating this measure
+
+Perceived self-efficacy is domain specific and individuals will have varying levels of self-effiacy beliefs across different domains of their lives, therefore it is important that any measure of perceived self-efficacy is domain specific [@Bandura1997; @Bandura2006]. Mountain Training provide clear documentation about what will be required of candidates during their assessment, this includes a candidate handbook and syllabus [@MountainTrainingUK2015a], and a separate skills checklist [@MountainTrainingUK2015]. The first author conducted an inductive content analysis [@Cho2014] of these documents to identify a list of skills, which should be able to perform on a Mountain Leader assessment. This list of skills was then discussed with Mountain Training UKI who agreed that it provided good coverage of the skills that would be covered on an assessment. 
+
+Using the list of skills, a self-efficacy scale was created following Bandura's [-@Bandura2006] guidelines. The resultant scale was then piloted with Mountain Training UKI staff who provided feedback on the items, which was then collated and used to refine the scale. The final scale was made up of eleven items (e.g., "lead a group effectively in the mountains") rated on a scale of 0 (could not do at all) to 100 (highly certain could do) with a mid-point anchor (50; moderately could do). The items could then be presented to participants three times, each with a different introduction as we wanted to measure efficacy at two points along the pathway and also candidates' ideal efficacy levels:
+
+1) Please rate how confident you were that you could do them immediately after your training course.
+2) Please rate your degree of confidence, as of now/at your (first) assessment^[Different wording was presented to candidates based on whether or not they had been assessed.].
+3) Now we know about your levels of confidence to perform these tasks as of now/at your (first) assessment, we would like to understand how confident you feel that your ideal self would be/have been at your (first) assessment. The Ideal Self: “Your ideal self is the kind of person you’d really like to be. It is defined by the characteristics you would ideally like to have. It’s not necessary that you have these characteristics now, only that you believe you want to have them."
+
+
+##### Personal projects
+
+We used a modified version of Little's [-@Little1983] Personal Project Analysis, similar to that used by Beattie et al. [-@Beattie2015]. The instructions were adapted and read:
+
+> We are interested in studying the kinds of personal projects that candidates have at different stages of their life and how they relate to candidates’ motivation to become a Mountain Leader. All of us have a number of personal projects at any given time that we think about, plan for, and sometimes (though not always) complete. 
+>
+> Please take a moment to think about the projects or goals that you were working on before your assessment, these may include things that you have already told us about.
+
+Participants were then given examples of goals (e.g., "Completing another outdoor qualification," "Spending more time with my family") and asked to "write down the two goals that you were most likely to work towards in the six-months before your assessment, *not-including* becoming a Mountain Leader." On the following page, for each of their stated goals and for the goal of "becoming a Mountain Leader," they were then asked to rate the: importance of the goal, "not at all important to me" (0) to "extremely important to me" (100); progress towards the goal in the last six months/six months before their assessment, "no progress" (0) to "most progress" (100); and their perceived self-efficacy of attaining the goal, "I definitely do/did not have" (0) to "I definitely have/had" (100). 
+
+Using the scores provided, the following can then be calculated: relative importance, relative progress, and relative efficacy score using the following formula^[To avoid returning an undefined value one is added to both the numerator and denominator.]:
+
+$$
+Relative = \frac{Mountain\,Leader + 1 }{(Goal\,1 + Goal\,2) \div 2 + 1}
+$$
+
+
+##### Motives
+
+In Chapter 2 it appeared that two different levels of motive were important to the completion of the Mountain Leader qualification: participatory (the goal content) and regulatory (the "why"). To measure the participatory motives, we employed a similar methodology to Sheldon and Elliot's [-@Sheldon1999] adaptation of Little's [-@Little1983] Personal Project Analysis. First, we asked participants to list two goals that they hoped to achieve by registering for the Mountain Leader qualification. These reasons were then coded by the first author on a scale of definitely intrinsic (1) to definetly extrinsic (5) and a mean score was calculated. Examples for each value are as follows: (1) "To have fun," (2) "Being better equipped to enjoy the mountains safely for myself,"(3) "Assessing my own ability,"(4) "Confidence in leading groups in the moutnains,"(5) "Gain the ML qualification."
+
+On the next page of the survey participants were asked to rate each reason they had given in terms of their behavioural regulation. Each item had the same stem, "I pursue this goal because..." The intrinsic item was "of the fun and enjoyment it provides me," the integrated reason was "it is a part of who I am or aspire to be," the identified reason was "I really believe it's an important goal to have," the interjected reason was "I would feel ashamed, guilty, or anxious if I didn't," the external reason was "someone else wants me to or because the situation demands it." Participants scored each of these reasons on a visual analogue scale with five equally spaced anchors from strongly agree (0) to strongly disagree (100), a mean score for each of the regulatory motives was then calculated.
+
+
+##### Course staff coaching behaviours
+
+The Military Coaching Behaviour Scale [MCBS; @Wagstaff2018] is a 22-item scale that assesses five coaching behaviours: observing and performance analysis, effective questioning, goal setting, developmental feedback, and motivational feedback.
+
+
+##### Need supportive environment
+
+The Perceived Environmental Supportiveness Scale [PESS; @Markland2010] measures autonomy support, structure, and involvement, each with five items.
+
+
+##### Perceived conflict on courses
+
+* Stuff from Matt
+* Intra group conflict scale for sport (manuscript in prep Boulder, Hardy, Roberts, Woodman)
+
+
+##### Social Support
+
+* The Perceived Available Support in Sport Questionnaire [PASSQ; @Freeman2011]
+* The Athletes' Received Support Questionnaire [ARSQ; @Freeman2014]
+
+
+##### Preparation for assessment
+
+Preparation for an assessment may encompass a variety of different things for different candidates and we were interested in how much candidates felt that they had done to prepare for an assessment. We asked participants to complete the sentence, "I have done ____ to prepare effectively for a Mountain Leader assessment" using a visual analogue scale, anchored at "nothing" and "all that I could." Given the complex nature of this question, we first asked participants to list some of the things that they had done in the last six-months/six-months prior to their assessment to prepare. This was done to help improve accuracy in responses in a similar fashion to the decomposition questions used in The World Health Organization Health and Work Performance Questionnaire [@Kessler2003a; @Means1991].
+
+
+##### Life events
+
+Based on the results of Chapter 2, we wanted to measure change in three domains of candidates lives: social, professional, and health. The Recent Life Change Questionnaire [RLCQ; @Miller1997] has items covering these domains. At this point, we were not concerned about the exact events that may, or may not, have occurred, therefore we presented items from the RLCQ as examples for each domain and then asked participants to rate the extent to which they had experienced change in that domain of their life since their training course using a visual analogue scale (no change to major change). Another consideration when choosing this method was the sensitive nature of some life events. Allowing participants to indicate a magnitude of perceived change rather than explicitly responding to a sensitive item (e.g., "Miscarriage or abortion," "Being held in jail") was deemed more appropriate for this study.
+
+
+##### Aspirations, intentions, and expectations
+
+
+
+#### Data
+
+
+### Results
+
+```{r short-measure-correlations}
+
+### FUNCTIONS ###
+latent_cor <-
+  function(data = eval(parse(text = measure_code)), full_model = full_model, short_model = short_model) {
+    
+    require(lavaan)
+    
+    full_fit <-
+      cfa(full_model, data = data, std.lv = FALSE)
+    
+    if (str_detect(short_model, "=~") == TRUE) {
+      short_fit <-
+        cfa(short_model, data = data, std.lv = FALSE)
+      
+      cor_tab <-
+        cor.test(predict(full_fit), predict(short_fit))
+    }
+    else stop("no short latent variable found")
+    
+    return(cor_tab)
+  }
+
+
+latent_cor_comp_rel <- 
+    function(data = eval(parse(text = measure_code)), model) {
+    
+      if (str_detect(model, "\\+") == TRUE) {
+        require(lavaan)
+        
+        fit <-
+          cfa(model = model, data = data, std.lv = FALSE)
+        
+        comp_rel <-
+          sum(fit@Model@GLIST$lambda)^2 /
+          (sum(fit@Model@GLIST$lambda)^2 +
+             sum(1-(fit@Model@GLIST$lambda^2)))
+      } else
+        comp_rel <- NA
+    return(comp_rel)
+  }
+
+### ANALYSIS
+eshot_vars %>% 
+  #filter(short_available == FALSE) %>% # variables that need a short-form measure creating
+  filter(!is.na(full_model) & is_duplicate == FALSE) %>% 
+  rowwise() %>% 
+  transmute(Measure = measure_code,
+            Reference = paste0("@", source),
+            Variable = tools::toTitleCase(subscale_code),
+            Variable = str_replace_all(Variable, "_", " "),
+            n = nrow(eval(parse(text = measure_code))),
+            r = round(latent_cor(data = eval(parse(text = measure_code)), 
+                                 short_model = short_model, 
+                                 full_model = full_model)$estimate, digits = 2),
+            `95%_CI` = paste0(
+              round(
+                latent_cor(
+                  data = eval(parse(text = measure_code)), 
+                  short_model = short_model, 
+                  full_model = full_model)$conf.int[1], digits = 2), ",",
+              round(
+                latent_cor(data = eval(parse(text = measure_code)),
+                           short_model = short_model, 
+                           full_model = full_model)$conf.int[2], digits = 2)),
+            `$\\omega$ full` = round(
+              latent_cor_comp_rel(data = eval(parse(text = measure_code)),
+                                  model = full_model), digits = 2), 
+            `$\\omega$ short` = round(
+              latent_cor_comp_rel(data = eval(parse(text = measure_code)),
+                                  model = short_model), digits = 2)) %>% 
+  kable(booktabs = TRUE, 
+        caption = "Latent variable correlations between full- and short-form measures.") %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = FALSE) %>% 
+  collapse_rows(c(1:2,4), valign = "top")
+
+```
+
+> Need to add PESS data if available - UK Sport/Dave Markland?
+
+* Validity
+  * Variables with validity evidence from other study `r nrow(filter(eshot_vars, short_available == TRUE))`
+  * Variables with validity evidence from this study `r nrow(eshot_vars %>% filter(!is.na(full_model) & is_duplicate == FALSE)) + nrow(filter(eshot_vars, is_duplicate == TRUE))`
+  * Variables that were self-efficacy items constructed specifically for this project `r sum(str_detect(tolower(eshot_vars$var_label), "efficacy")) - 3 + sum(str_detect(tolower(eshot_vars$var_label), "discrep"))`
+  * Variables available on CMS `r sum(str_detect(tolower(eshot_vars$item_wording), "cms"), na.rm = TRUE)`
+  * Variables that are total scores `r sum(eshot_vars$is_total == TRUE)`
+  * **WHICH variables don't have any validity evidence??**
+
+* FMPS correlations are high, but the internal consistency measure is low
+    * Was this because we wanted to keep items in that captured part of the construct that other bits didn't?
+
+Using the process described above, `r sum(eshot_vars$n_items_full, na.rm = TRUE) - sum(eshot_vars$n_items_short, na.rm = TRUE) %>% round()` items were removed, assuming 7 seconds per item [@Qualtrics], this equates to a survey that is approximately `r round(((sum(eshot_vars$n_items_full, na.rm = TRUE) - sum(eshot_vars$n_items_short, na.rm = TRUE))*7)/60)` minutes shorter. 
+
+
+### Discussion
+
+Study 1 identified suitable short measures for each construct of interest. Whilst this study significantly reduced the number of items that participants would be required to answer, there were still too many to ask a single participant to answer. Including all of the items identified thus far would require candidates to spend approximately `r round((sum(eshot_vars$n_items_short, na.rm = TRUE)*7)/60)` minutes answering questions; participants would also be required to read the information sheet, transition between pages, etc. Therefore, Study 2 sought to reduce the number of constructs, by identifying those which were not important discriminatory variables.
+
+
+## Study 2 - Item reduction
+
+Having selected appropriate items for the variables we wanted to collect data for, we were left with an item pool of `r sum(feature_retention$nItems) %>% round()`, which was deemed too many to ask any individual participant as most would not complete the survey and those who did, would probably not be representative of the population. Therefore, we created four surveys, each of which contained a subset of the variables that we wanted to collect data for. Each variable was included in at least two of the surveys and each pairwise combination of variables was included in at least one survey. This was done to both collect as much data as possible and also to ensure that two-way interactions could be explored.
+
+Figure \@ref(fig:survey-tool-overlap) shows a visual representation of the distribution of constructs between the four groups, a full list of variables and the groups that they were asked in can be found in **REF**.
+
+> Add appendix/figure as example of overlap and also comprehensive list of which variables were asked to each group.
+>
+> * Need to edit image to make it more simple.
+
+```{r survey-tool-overlap, fig.cap="Survey tool overlap"}
+include_graphics("plots/SurveyToolOverlap.png")
+```
+
+
+### Method
+
+#### Participants 
+
+In November 2018, we contacted all candidates trained between 2008 and 2016 ($n =$ `r 948 + 950 + 949 + 947`). Each candidate had been randomly assigned to one of four groups (stratified by year of training) using the `randomizr` package [@R-randomizr] and candidates from each of these groups were invited to complete one of the surveys described above using the Qualtrics survey platform [@Qualtrics]. Complete responses were collected from `r nrow(Group1to4)` participants (Table \@ref(tab:study-2-participants)).
+
+
+```{r study-2-participants, results = "asis"}
+Group1to4 %>% 
+  mutate(Sex = case_when(SexId == 1 ~ "Male",
+                         SexId == 2 ~ "Female"),
+         Group = str_replace_all(Group, "Group", "")) %>% 
+  group_by(Group) %>% 
+  summarise(n = n(),
+            `% female` = mean(if_else(SexId == 2, 1 ,0) * 100),
+            age = mean(v142, na.rm = TRUE),
+            time = mean(interval(firstMLTrainingDate, EndDate)/years(1), 
+            na.rm = TRUE)) %>% 
+  kable(caption = "Survey participants per group", digits = 2, booktab = TRUE) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = FALSE)
+```
+
+
+Once data collection was complete, each of the four groups was then split in two, one group for those candidates who had DLOG data and one group who did not have DLOG data. This was done as the pattern recognition procedure cannot handle missing data and we would then have had to omit all DLOG data, which would have left us unable to identify interactions between the survey and experience data. Once the groups had been split into these two groups, we created two data sets within each one for those who did not and then for each classification problem. This resulted in the following data sets for each survey group:
+
+  1) Getting to assessment within 18 months of training - no DLOG data
+  2) Getting to assessment within 18 months of training - with DLOG data
+  3) Passing the first assessment - no DLOG data
+  4) Passing the first assessment - with DLOG data
+
+Figure \@ref(fig:study2-participant-sankey) provides a visual representation of the groups described above.
+
+> * need to manually position nodes
+
+
+```{r study2-participant-sankey, fig.cap="Study 2 participants."}
+plot_ly(
+    type = "sankey",
+    orientation = "h",
+
+    node = list(
+      label = c("Completed survey", "DLOG", "No DLOG", 
+                "GTA_Group 1", "GTA_Group 2", "GTA_Group 3", "GTA_Group 4", # GTA DLOG groups
+                "GTA_Group 1", "GTA_Group 2", "GTA_Group 3", "GTA_Group 4", # GTA No DLOG groups
+                "Not assessed",
+                "FTP_Group 1", "FTP_Group 2", "FTP_Group 3", "FTP_Group 4", # FTP DLOG groups
+                "FTP_Group 1", "FTP_Group 2", "FTP_Group 3", "FTP_Group 4", # FTP No DLOG groups
+                "Passed", "Did not pass"),
+      color = c("blue", "blue", "blue", 
+                rep(c("gold", "darkcyan", "blueviolet", "deeppink"), 2),
+                "blue",
+                rep(c("gold", "darkcyan", "blueviolet", "deeppink"), 2),
+                "green", "red"),
+      pad = 15,
+      thickness = 20,
+      line = list(
+        color = "black",
+        width = 0.5
+      )
+    ),
+
+    link = list(
+      # node that data originates from
+      source = c(
+        # DLOG or non-DLOG
+        0,0,
+        # Split into 4 DLOG and 4 non-dlog groups
+                 rep(1, 4),
+                 rep(2, 4),
+        # Not assessed candidates
+                 3:10, 
+        # Assessed groups
+                 3:10
+        ), 
+      
+      # node that data is going to
+      target = c(
+        # DLOG or non-DLOG
+                 1,2,
+        # Split into 4 DLOG and 4 non-dlog groups
+                 3:6,
+                 7:10,
+        # Not assessed candidates
+                 rep(11, 8),
+        # Assessed groups
+                 12:19), 
+      
+      # number of cases being transferred
+      value =  c(
+        # DLOG or non-DLOG
+                 nrow(filter(Group1to4, LogbookType1 != 2)),
+                 nrow(filter(Group1to4, LogbookType1 == 2)),
+        # Split into 4 groups for DLOG then non DLOG
+                 nrow(filter(Group1to4, LogbookType1 != 2 &
+                               Group == "Group1")),
+                 nrow(filter(Group1to4, LogbookType1 != 2 &
+                               Group == "Group2")),
+                 nrow(filter(Group1to4, LogbookType1 != 2 &
+                               Group == "Group3")),
+                 nrow(filter(Group1to4, LogbookType1 != 2 &
+                               Group == "Group4")),
+                 nrow(filter(Group1to4, LogbookType1 == 2 &
+                               Group == "Group1")),
+                 nrow(filter(Group1to4, LogbookType1 == 2 &
+                               Group == "Group2")),
+                 nrow(filter(Group1to4, LogbookType1 == 2 &
+                               Group == "Group3")),
+                 nrow(filter(Group1to4, LogbookType1 == 2 &
+                               Group == "Group4")),
+          # Not-assessed
+                 nrow(filter(Group1to4, LogbookType1 != 2 &
+                               Group == "Group1" &
+                               is.na(FirstTimePass) == TRUE)),
+                 nrow(filter(Group1to4, LogbookType1 != 2 &
+                               Group == "Group2" &
+                               is.na(FirstTimePass) == TRUE)),
+                 nrow(filter(Group1to4, LogbookType1 != 2 &
+                               Group == "Group3" &
+                               is.na(FirstTimePass) == TRUE)),
+                 nrow(filter(Group1to4, LogbookType1 != 2 &
+                               Group == "Group4" &
+                               is.na(FirstTimePass) == TRUE)),
+                 nrow(filter(Group1to4, LogbookType1 == 2 &
+                               Group == "Group1" &
+                               is.na(FirstTimePass) == TRUE)),
+                 nrow(filter(Group1to4, LogbookType1 == 2 &
+                               Group == "Group2" &
+                               is.na(FirstTimePass) == TRUE)),
+                 nrow(filter(Group1to4, LogbookType1 == 2 &
+                               Group == "Group3" &
+                               is.na(FirstTimePass) == TRUE)),
+                 nrow(filter(Group1to4, LogbookType1 == 2 &
+                               Group == "Group4" &
+                               is.na(FirstTimePass) == TRUE)),
+        # Assessed
+                 nrow(filter(Group1to4, LogbookType1 != 2 &
+                               Group == "Group1" &
+                               is.na(FirstTimePass) == FALSE)),
+                 nrow(filter(Group1to4, LogbookType1 != 2 &
+                               Group == "Group2" &
+                               is.na(FirstTimePass) == FALSE)),
+                 nrow(filter(Group1to4, LogbookType1 != 2 &
+                               Group == "Group3" &
+                               is.na(FirstTimePass) == FALSE)),
+                 nrow(filter(Group1to4, LogbookType1 != 2 &
+                               Group == "Group4" &
+                               is.na(FirstTimePass) == FALSE)),
+                 nrow(filter(Group1to4, LogbookType1 == 2 &
+                               Group == "Group1" &
+                               is.na(FirstTimePass) == FALSE)),
+                 nrow(filter(Group1to4, LogbookType1 == 2 &
+                               Group == "Group2" &
+                               is.na(FirstTimePass) == FALSE)),
+                 nrow(filter(Group1to4, LogbookType1 == 2 &
+                               Group == "Group3" &
+                               is.na(FirstTimePass) == FALSE)),
+        nrow(filter(Group1to4, LogbookType1 == 2 &
+                      Group == "Group4" &
+                      is.na(FirstTimePass) == FALSE))
+        
+      )  
+    )
+) %>% 
+  layout(
+    font = list(
+      size = 10
+    )
+  ) -> p
+
+if (knitr::is_html_output()) {
+  p
+} else
+{
+  p %>%
+    orca(file = "plots/study2-participant-sankey.png")
+  
+  include_graphics("plots/study2-participant-sankey.png",
+                   auto_pdf = TRUE)
+}
+
+```
+
+
+In our data (and the population), most candidates have not been assessed 18 months after their training course. To ensure an orthogonal design (i.e., both groups were of equal size) we selected a random sample of candidates who had not been assessed 18 months after their training course of equal size to the group of candidates who had been assessed.
+
+> Could/should I do something to check the representativeness of the samples (e.g., using sex, age, board)? Equivilance testing?
+
+
+#### Analytical method - pattern recognition
+
+We used pattern recognition analyses to identify the most important discriminatory variables within each group; by identifying the most important, we were able to infer which variables were not important discriminatory variables. Pattern recognition analyses, originally developed in bioinformatics [@Duda2000], use machine learning algorithms to identify a set of discriminatory features (variables), which can be used to identify the class of an object. Pattern recognition analysis is more appropriate for these data than "traditional" methods (e.g., discriminant function analyses) as they employ both linear and non-linear functions and therefore reflect multiple and complex interactions and not just "main-effects". Pattern recognition analyses have also been used in a number of recent studies to examine differences between athletes of different performance levels [e.g., @Gullich2019; @Jones2019a].
+
+More specifically, we used a pattern recognition procedure that has been developed for analysing what are known as *short and wide* data sets [i.e., data sets that contain more variables than cases; @Jones2017a]. This procedure is a three-part process. First, we aimed to identify a set of features which correlated well with the class but had a low correlation with one another (feature selection). Then we tested the ability of this feature subset to correctly classify the candidates according to the criterion variable for that analysis (classification). Finally, we refined the feature subset to identify the simplest solution that best explained the data (recursive feature elimination). 
+
+We carried out the pattern recognition procedure outlined above twice for each of the four pilot surveys. The first set of analyses identified the most important features for discriminating candidates who get to assessment within 18 months of their training from those who do not. The second set of analyses identified the features which best discriminated candidates who passed their first assessment from those who did not.
+
+Analyses were carried out using WEKA 3-9-3 open source software issued under the GNU General Public License version 3 [@Bouckaert2018; @Frank2016]. WEKA is a machine learning workbench with a collection of algorithms widely used for data mining, machine learning, and pattern recognition.
+
+> Something about using ensembles [@Bolon-Canedo2012; @Bolon-Canedo2014] and also combination of supervised and unsupervised
+> Is this still distributed feature selection but horizontally?
+> Difference between individual and subset evaluation methods
+> Tables 1 & 2 in Bolón-Canedo et al [-@Bolon-Canedo2015] have info about 3 of the 4 FS methods we use and their strengths & weaknesses
+
+
+##### Pre-processing
+
+For feature selection and model identification, it is important that good quality data is used and that there are no missing values **REF**. Where there was missing data, we had a choice, remove the case or remove the variable^[Imputing values would not be appropriate for these data as this was usually due to candidate: (a) not having completed the survey, (b) having had an atypical journey through the pathway (e.g., received an exemption from training), or (c) provided an inappropriate answer for a question.]. The choice of removing the case or variable was decided by the amount of missing data within the variable in an effort to use as much data as possible. Where there were few cases with missing data for that variable, we removed the cases and where there were many cases with missing data for that variable, we removed the variable. Once each of the 16 data sets had been cleaned, the data were standardised within sex using the `mousetrap` package [@R-mousetrap], to control for sex differences^[We considered exploring the data having standardised them by training provider, however, we felt that the variance in number of candidates trained by each provider was too high.].
+
+> How many variables and cases were excluded and what was the rationale?
+
+
+##### Feature Selection
+
+Best practice guidelines for short and wide data recommend that feature selection is carried out using a number of different methods [@Jones2017a]. With this in mind we used four feature selection algorithms: Correlation Feature Subset with a Best First Evaluator [CFS; @Hall1999], Correlation Attribute Evaluator [CAE; @Bouckaert2018], Relief-f [@Kira1992], and Support Vector Machine - Recursive Feature Elimination [SVM-RFE; @Guyon2002]. CAE, Relief-f, and SVM-RFE rank all variables in order of merit (magnitude of relationship), whereas CFS selects a subset of features that are highly correlated with the class but not with one another. As only CFS provides a subset of features, the top 20 features were selected from the rankings provided by the other three algorithms (as long as the merit was greater than zero).
+
+These analyses were carried out in a centralised fashion, with all variables being included at the same time [@Bolon-Canedo2015a]. We employed a *leave-one-out* (LOO) protocol, a special case of $K$-fold cross-validation, where $K = N$, as it reduces the impact of each object on the feature selection process by increasing the generalisability of the model [@Hastie2009]. Each data set was split into $K$ parts or *folds*, with each part having an approximately equal number of cases. The $K$th fold is then removed from the data and the feature selection algorithm is then applied to the remaining data, with each feature being assigned a merit score (or being selected/not for CFS), once this has been repeated $K$ times the merit score for each attribute is averaged across the $K$ iterations.
+
+All of these are well established feature selection methods and the most important point to note about these four methods is that each works in very a different way. Therefore, the greater the number of algorithms which select a feature, the more confident one can be that it is important as it is less likely that the feature has been chosen by chance [@Visa2011]. For each of the 16 data sets this process yielded a number feature subsets, one containing those features which had been selected by at least two feature selection algorithms (2s), another containing those features which had been selected by at least three feature selection algorithms (3s), and where possible a third subset where features has been selected by all four algorithms (4s). 
+
+
+##### Initial Classification
+
+For each of the feature subsets, we carried out *initial classification* experiments. Each of these experiments used four different classification algorithms: Naïve Bayes [NB; @John1995], Sequential Minimal Optimization [SMO; @Platt1998], Instance Based Learning [IBk; @Aha1991], J48 Decision Tree [J48; @Quinlan1993]. As with feature selection, the more consistent the results from each algorithm (classification accuracy) for a feature subset, the more confidence we can place in the predictive validity of that subset.
+
+Again, we used a LOO protocol for the classification experiments; for each classifier, one candidate would be removed from the object set (candidates) whilst the classifier used the remaining objects to identify relationships between the features (learn) that best discriminated the different classes of objects. The classifier would then use this information to try and correctly classify the object that had been removed from the object set. Once all iterations of this process have been carried out the accuracy of that classifier can be calculated.
+
+An important point to note that as all of the data have been seen during the feature selection stage the classification rates may be slightly higher than they would be for previously unseen data  [@Kuncheva2018; @Smialowski2010]. However, in this instance, the aim is not to create a predictive model, but to identify which features should be retained to create a survey tool and classification rates are only being used to compare the predictive power of feature subsets from the same data set - any inflation of classification rates will be shared by the feature subsets under consideration.
+
+> Ross: It's very possible that I have missed this, but I don’t remember reading about 2’s, 3’s and 4’s and what that all means. Is there a part missing from the analysis description? Also, would a table/flowchart of the pattern recognition process help?
+>
+> * Will try to make the bit expalining the 2s, 3s, and 4s more clear and also RFE versions - this is important and will be useful for the reader in Study 3 too.
+> * I am not sure if a flow chart will help, I think I might need to do one for this study and study 3 if I do as the process is slightly different. 
+> * Would a general method bit be useful for this chapter and then explain the deviations from this in each study? - leave seperate
+
+
+##### Final Classification
+
+Having conducted the initial classification experiments, we sought to identify more parsimonious models, potentially with higher classification accuracies using the Recursive Elimination Method [@Guyon2002]. To do so we took each feature subset with more than five features in, examined the normalised SMO weight provided by the SMO classifier and removed the feature with the lowest weight before re-running the four classifiers on the, now smaller, feature subset. This continued in an iterative fashion until the classification rate no longer improved.
+
+> This isn't strictly true. I usually stopped when the classification rate decreased (rather than no longer improved), but sometimes I continued removing features. This was usually when there were still a lot of features in the model and I did this until the number of features was "small enough" and then picked the model with the highest classification rate. 
+>
+> * Should I have done this or something else? How should I report this?
+
+
+### Results
+
+#### Classification rates
+
+In 15 of the 16 datasets we were able identify a feature subset which could be used to correctly classify candidates with at least *good* accuracy (i.e., at least one classifier for that data set had a classification rate over 70%). For the other data set we were able to identify a feature subset which could be used to classify candidates with *moderate* accuracy (i.e., at least one classifier for that data set had a classification rate over 60%, Table \@ref(tab:study-2-classification-rates)).
+
+
+```{r study-2-classification-rates, results="asis"}
+bind_rows(
+  read_xlsx("../3 eshot/PRA_Results/GTA_Classification_rates.xlsx", 
+            sheet = "Sheet2")[1:16,] %>% 
+    mutate(Analysis = "Getting to assessment within 18 months of training",
+           Group = case_when(str_detect(Model, "G1") ~ "1",
+                             str_detect(Model, "G2") ~ "2",
+                             str_detect(Model, "G3") ~ "3",
+                             str_detect(Model, "G4") ~ "4"),
+           Data = case_when(str_detect(Model, "DLOG") ~ "With DLOG",
+                            str_detect(Model, "PaperLog") ~ "No DLOG"),
+           Subset = case_when(str_detect(Model, "_4s") ~ "4s",
+                              str_detect(Model, "_3s") ~ "3s",
+                              str_detect(Model, "_2s") ~ "2s",
+                              str_detect(Model, "_F3") ~ "3s RFE",
+                              str_detect(Model, "_F2") ~ "2s RFE")) %>% 
+    filter(str_detect(Model, "_CV") == FALSE) %>% 
+    select(-Model, -NN6, -NN10) %>% 
+    select(Analysis, Group, Data, Subset, everything()), 
+  read_xlsx("../3 eshot/PRA_Results/FTP_classification_rates.xlsx", 
+            sheet = "Sheet1") %>% 
+    mutate(Analysis = "Passing first time",
+           Group = case_when(str_detect(Model, "G1") ~ "1",
+                             str_detect(Model, "G2") ~ "2",
+                             str_detect(Model, "G3") ~ "3",
+                             str_detect(Model, "G4") ~ "4"),
+           Data = case_when(str_detect(Model, "DLOG") ~ "With DLOG",
+                            str_detect(Model, "PaperLog") ~ "No DLOG"),
+           Subset = case_when(str_detect(Model, "_4s") ~ "4s",
+                              str_detect(Model, "_3s") ~ "3s",
+                              str_detect(Model, "_2s") ~ "2s",
+                              str_detect(Model, "_F3") ~ "3s RFE",
+                              str_detect(Model, "_F2") ~ "2s RFE")) %>% 
+    filter(str_detect(Model, "_CV") == FALSE) %>% 
+    select(-Model, -NN6) %>% 
+    select(Analysis, Group, Data, Subset, everything())) %>% 
+  #apa_table(caption = "Classificaion rates for the feature subset with the highest classification rates for each data set (percentage accuracy).", note = "J48 = J48 Decision Tree, NN1 = Instance Based Learning (k=1), NB = Naïve Bayes, SMO = Sequential Minimal Optimization", col_spanners = list(`Classifier` = c(5,8))) %>% 
+  kable(caption = "Classification rates for the feature subset with the highest classification rates for each data set (percentage accuracy).", booktab = TRUE, format = if (is_latex_output()) {"latex"} else {"html"}) %>% 
+  add_header_above(header = c(" " = 4, "Classifier" = 4)) %>% 
+  column_spec(1, "5cm", italic = TRUE) %>% 
+  collapse_rows(valign = "top", columns = c(1:2)) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = FALSE) %>%
+  add_footnote(label = "Note: J48 = J48 Decision Tree, NN1 = Instance Based Learning (k=1), NB = Naïve Bayes, \nSMO = Sequential Minimal Optimization", notation = "none")
+
+```
+
+
+Having identified a number of feature subsets that could be used to classify candidates in each group, we identified the items which we wanted to retain for the final survey. As not all items were asked to the same number of groups, we scored each item by the number of times that it was selected divided by the number of times it was asked. This was done so that the item retention process was not biased by the number of times that an item was asked. Items were retained if they were selected for the best models in at least half of the datasets they were asked to.
+
+Of the `r nrow(feature_retention)` variables, `r nrow(feature_retention) - sum(feature_retention$RetainedEither)` variables were retained based on the criteria above. Some of these variables were sum totals of constructs including variables not selected, therefore we chose to retain a further `r sum(!is.na(feature_retention$EitherAdditional))` variables. This process resulted in `r sum(feature_retention$EitherAdditional, na.rm = TRUE) + sum(feature_retention$nItemsEither, na.rm = TRUE) %>% round(.,1)` items being retained for the final survey (see **APPENDIX** for a list of the variables retained for the final survey).
+
+
+### Discussion
+
+This study sought to create a survey tool which could be administered to candidates who had completed a Mountain Leader training course in order to help us identify the most important discriminatory variables for candidates who: (a) did or did not get to an assessment within 18 months of their training course and (b) did or did not pass their first assessment. Whilst no single candidate provided data for all of the variables, we were able to discriminate candidates with a degree of accuracy substantially greater than chance. The findings shows that firstly the measures used in the survey work, and secondly, that we collected data about variables which explain some of the variance in the criterion variables. The next study collected data from candidates who attended a Mountain Leader training course between 2016 and 2018 on all of the variables retained following this study.
+
+* We have reduced the number of constructs - just because something has been removed does not mean it is unimportant, in fact it might be an important commonality between the groups.
+
+> Ross: This implies to me that if there were two items to measure a construct (for example) you put each item and the sum total of the construct into the analysis. If this is what you did (which I am pretty sure it is), I think its important that earlier you make this point clear and explain why it is appropriate/good.
+
+> Something about DLOG data not making the classifcation rates much better, which suggests that the variance explained by those data is better explained by sruvey variables. Possibly due to messy data - not everyone uses their DLOG in the same way. Example, it is hard to tell the difference between a candiate who has only got 40 QMDs to include in their logbook and a candidate who has so much experiene that it would not be practiable for them to log it all and they only feel the need to lof 40 QMDs in order to tick that box.
+
+
+
+## Study 3 - Identifying the most important factors
+
+> Split into study 3a 3b & 3c
+
+The aim of this project was to identify variables that influence completion of the Mountain Leader qualification. In the preceding studies, we created a survey tool of reasonable length to collect data for potentially important variables. In this study, we used this survey tool to collect data in order to identify the most important discriminatory variables. In this study we aimed to identify a feature subset for each of the following classification problems:
+  1. Male candidates who are assessed 18 months after their training from those who are not.
+  2. Female candidates who are assessed 18 months after their training from those who are not.
+  3. Candidates who pass their first assessment from those who do not.
+
+This study is therefore presented in three sections, one for each of the classification problems above.
+
+
+### Method
+
+#### Participants
+
+```{r Group5demo, include = FALSE}
+Group5 %>% 
+  filter(is.na(SelfEfficacyDiscrepancy1) == FALSE) %>% 
+  group_by(SexId) %>% 
+  summarise(survey_age_mean = mean(interval(DOB, SurveyEndDate)/years(), na.rm = TRUE),
+            survey_age_sd = sd(interval(DOB, SurveyEndDate)/years(), na.rm = TRUE)) %>% 
+  round(2) -> Group5demo
+
+```
+
+
+A separate sample of Mountain Leader candidates were used for this study. We contacted all candidates who attended their first Mountain Leader training course in 2017 or 2018, inviting them to participate in the study, 1030 candidates started the survey and `r length(na.omit(Group5$SelfEfficacyDiscrepancy1))` completed the survey (`r round((length(na.omit(Group5$SelfEfficacyDiscrepancy1))/2867)*100,2)`% response rate). Of the `r length(na.omit(Group5$SelfEfficacyDiscrepancy1))` responses, `r Group5 %>% filter(SexId == 2) %>% .$SelfEfficacyDiscrepancy1 %>% na.omit() %>% length()` were from female candidates ($M$~age~ = `r Group5demo %>% filter(SexId == 2) %>% .$survey_age_mean` ±`r Group5demo %>% filter(SexId == 2) %>% .$survey_age_sd` years) and `r Group5 %>% filter(SexId == 1) %>% .$SelfEfficacyDiscrepancy1 %>% na.omit() %>% length()` were from male candidates ($M$~age~ = `r Group5demo %>% filter(SexId == 1) %>% .$survey_age_mean` ±`r Group5demo %>% filter(SexId == 1) %>% .$survey_age_sd` years). These candidates had been trained by `r Group5$firstMLTrainingProviderId %>% unique() %>% length()` different providers and those who had been assessed, had been assessed by `r Group5$firstMLAssessmentProvId %>% unique() %>% length()` different providers.
+
+In Study 2 we split candidates according to whether or not they had DLOG data, which meant that it was not possible to then split each of these groups by gender as well because some groups would have been too small to analyse. However, in this study we only included DLOG data for the passing/not analyses where there does not seem to be a difference in outcomes by gender. This meant that we could analyse the data for male and female candidates separately for getting to assessment.
+
+For the getting to assessment analyses, some candidates completed the survey retrospectively with regards to the criterion variable (i.e., they completed the survey at least 18 months after their training course). Others completed the survey prior to this, although some of them had been assessed and would therefore have answered some of the questions in a retrospective manner. The remaining candidates completed the survey in a truly prospective fashion (i.e., they had been trained less than 18 months before completing the survey and had not been assessed). In an ideal world, we would analyse the retrospective data to develop a model and then test it on the prospective data once a sufficient time period had passed (i.e., all of the candidates had been trained at least 18 months before analysing their data). See Table \@ref(tab:g5-candidate-survey-time) for a summary. Each of the analyses had different inclusion criteria and subsequently, used a different subset of candidates. Details of the candidates included in each analysis are presented below.
+
+> Have I explained the time point thing higher up?
+
+
+```{r g5-candidate-survey-time}
+bind_rows(
+  Group5_GTA %>%
+    filter(is.na(SelfEfficacyDiscrepancy1) == FALSE) %>% 
+    na.omit() %>% 
+    mutate(
+      Analysis = "GTA",
+      Sex = case_when(SexId == 2 ~ "Female",
+                      SexId == 1 ~ "Male"),
+      Time = case_when(
+        TrainToSurvey >= 1.5 ~ "Retrospective",
+        TrainToSurvey < 1.5 ~ "Prospective"
+        ),
+        Outcome = case_when(Assessed_18months == 0 ~ "Not assessed",
+                            Assessed_18months == 1 ~ "Assessed")
+    ) %>%
+    group_by(Analysis,
+             Sex,
+             Time,
+             Outcome) %>%
+    count(),
+  
+  Group5_FTP %>%
+    filter(is.na(SelfEfficacyDiscrepancy1) == FALSE) %>%
+    mutate(
+      Analysis = "FTP",
+      Sex = case_when(SexId == 2 ~ "Female",
+                      SexId == 1 ~ "Male"),
+      Time = case_when(
+        is.na(AssessChangeStandard) == TRUE ~ "Prospective",
+        is.na(AssessChangeStandard) == FALSE ~
+          "Retrospective"
+      ),
+        Outcome = case_when(FirstTimePass == 0 ~ "Did not pass",
+                            FirstTimePass == 1 ~ "Passed")
+    ) %>%
+    group_by(Analysis,
+             Sex,
+             Time,
+             Outcome) %>%
+    count()
+) %>%
+  pivot_wider(
+    id_cols = c(Analysis, Sex, Outcome),
+    names_from = Time,
+    values_from = n
+  ) %>% 
+  kable(caption = "Candidates.", booktab = TRUE, 
+        format = if (is_latex_output()) {"latex"} else {"html"}) %>%
+  collapse_rows(valign = "top", columns = c(1:2)) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), 
+                  full_width = FALSE) %>% 
+    add_footnote(label = "Note: GTA = Getting to assessment within 18 months, FTP = First time pass",
+                 notation = "none")
+```
+
+
+##### Getting to assessment within 18 months of training - Male candidates
+
+There were 65 responses from male candidates who completed the survey more than 18 months after their training course (i.e., retrospectively), 33 of whom had been assessed within 18 months of their training course and 32 who not been assessed at the time of completing the survey^[Candidates who had not been assessed within 18 months of their training course but had been assessed prior to completing the survey were excluded from the analysis as the wording of the questions shown to them meant they would not be comparable to the other candidates.]. Therefore, we were able to create a set of *training data* ($n$ = `r nrow(G5_male_GTA_18m_train)`), which we could use to select variables and a set of *test data* ($n$ = `r nrow(G5_male_GTA_18m_test)`, with an equal split of candidates who had and had not been assessed). 
+
+In addition to this, `r nrow(G5_male_GTA_18m_pred) - 1` male candidates completed the survey more than 12 months after their training but less than 18 months after their training (i.e., prospectively). Using the model developed with the training data, we made predictions for each of these candidates which we have been able to test as all of them are now more than 18 months post training. 
+
+> Is this truly prospective? What about the candidates who had been assessed when they completed the survey?
+> * how many in this have already been assessed? 
+> * get new data and do a genuinally prospective group
+> * call it a "validation group" not truely prospective 
+
+##### Getting to assessment within 18 months of training - Female candidates
+
+
+```{r gta_f_desc, include=FALSE}
+G5_female_GTA_18m_comb %>% 
+  left_join(select(Group5, c(CandidateId, TrainToSurvey)), 
+            by = "CandidateId") %>% 
+  group_by(Assessed_18months) %>% 
+  summarise(age = mean(TrainAge),
+            sd_age = sd(TrainAge)) %>% 
+  round(2) -> G5_gta_f_age
+
+G5_female_GTA_18m_train %>% 
+  left_join(select(Group5, c(CandidateId, TrainToSurvey)), 
+            by = "CandidateId") %>% 
+  group_by(if_else(TrainToSurvey > 1.5, "retro", "pros"), 
+           Assessed_18months) %>% 
+  count()
+```
+
+
+The data used for this analysis were collected from 27 candidates who had been assessed 18-months after their training ($M$~age~ = `r G5_gta_f_age %>% filter(Assessed_18months == 1) %>% select(age)` ± `r G5_gta_f_age %>% filter(Assessed_18months == 1) %>% select(sd_age)` years) and 27 who had not ($M$~age~ = `r G5_gta_f_age %>% filter(Assessed_18months == 0) %>% select(age)` ± `r G5_gta_f_age %>% filter(Assessed_18months == 0) %>% select(sd_age)` years). We received fewer responses from female candidates, therefore we combined the retrospective and prospective data as neither group would be large enough on its own. In each group there were 10 candidates who completed the survey retrospectively (i.e., > 18 months post-training) and 17 who completed the survey prospectively (i.e., 12-18 months post-training).
+
+
+##### Passing first time
+
+```{r ftp_desc, include=FALSE}
+G5_FTP_consol %>% 
+  left_join(select(Group5, 
+                   c(CandidateId, SurveyEndDate, firstMLAssessmentDate)), 
+            by = "CandidateId") %>% 
+  group_by(FirstTimePass) %>% 
+  summarise(age = mean(TrainAge),
+            sd_age = sd(TrainAge)) %>% 
+  round(2) -> G5_ftp_age
+
+G5_FTP_consol %>% 
+  left_join(select(Group5, 
+                   c(CandidateId, SurveyEndDate, firstMLAssessmentDate)), 
+            by = "CandidateId") %>% 
+  group_by(if_else(firstMLAssessmentDate < SurveyEndDate, "retro", "pros"), FirstTimePass) %>%
+  rename(time = `if_else(firstMLAssessmentDate < SurveyEndDate, "retro", "pros")`) %>% 
+  count() -> G5_ftp_count
+```
+
+The data used for this analysis were collected from `r nrow(G5_FTP_consol)` candidates, `r G5_ftp_count %>% group_by(time) %>% summarise(total = sum(n)) %>% filter(time == "retro") %>% select(total)` of whom had been assessed prior to completing the survey and `r G5_ftp_count %>% group_by(time) %>% summarise(total = sum(n)) %>% filter(time == "pros") %>% select(total)` of whom had not been assessed before completing the survey. As with the data in [female candidates getting to assessment](#females), we combined the retrospective and prospective data to increase the sample size^[We have run the analyses on just the retrospective data, which allowed us to include some variables about candidates' experiences of assessment, but none of these variables were selected in the best discriminatory subsets, nor were the classification rates significantly higher.]. Twenty three of the 46 candidates passed their assessment first time. Of the `r G5_ftp_count %>% group_by(FirstTimePass) %>% summarise(total = sum(n)) %>% filter(FirstTimePass == 0) %>% select(total)` who did not pass, `r G5_ftp_count %>% filter(time == "pros" & FirstTimePass == 0) %>% .$n` completed the survey prospectively. Two of the 23 candidates who did not pass withdrew from their first assessment, none failed, and the remainder were deferred. Seven of those who were deferred only needed to log additional days.
+
+
+```{r study3-participant-sankey, fig.cap="Study 3 participants. For simplicity, canddiates who have not been assessed have not been added to this figure as a final group, therefore it can be assumed that candidates not progressing from one node to another have not been assessed."}
+plot_ly(
+    type = "sankey",
+    orientation = "h",
+
+    node = list(
+      label = c("Completed survey", "Female", "Male", 
+                "18+ months", "12-18 months", "0-12 months", # female GTA grouping
+                "18+ months", "12-18 months", "0-12 months", # male GTA grouping
+                "combined", # female analysis
+                "test", "training", "prospective", # male analysis groups
+                #"Not assessed", 
+                "assessed",
+                "Passed", "Did not pass"
+                ),
+      color = c("blue", "blue", "blue", 
+                "gold", "darkcyan", "blueviolet",
+                "gold", "darkcyan", "blueviolet",
+                "blue",
+                "green", "red", "deeppink",
+                "blue", "blue",
+                "green", "red"),
+      pad = 15,
+      thickness = 20,
+      line = list(
+        color = "black",
+        width = 0.5
+      )
+    ),
+
+    link = list(
+      # node that data originates from
+      source = c(
+        
+        # female and male
+        0,0,
+        
+        # split by time since training
+        rep(1, 3),
+        rep(2, 3),
+        
+        # female analysis
+        3:4, 
+        
+        # male analysis groups
+        rep(6, 2), # test & train
+        7, # prospective
+        
+        # not assessed
+        rep(c(5, 8, 9:12), 1),
+        
+        # outcomes
+        rep(13,2)
+      ), 
+      
+      # node that data is going to
+      target = c(
+        
+        # female and male
+        1,2,
+        
+        # split by time since training
+        3:5,
+        6:8,
+        
+        # female analysis
+        rep(9 , 2),
+        
+        # male analysis groups
+        10, 11,  # test & train
+        12, # prospective
+        
+        # # not assessed
+        # rep(13, 6),
+        
+        # assessed
+        rep(13, 6),
+        
+        #outcome
+        14,
+        15
+      ),
+      
+      # number of cases being transferred
+      value =  c(
+        # female and male
+        nrow(filter(na.omit(Group5_GTA), SexId == 2)),
+        nrow(filter(na.omit(Group5_GTA), SexId == 1)),
+
+        # split by time since training
+        nrow(filter(na.omit(Group5_GTA), SexId == 2 & TrainToSurvey >= 1.5)),
+        nrow(filter(na.omit(Group5_GTA), SexId == 2 & between(TrainToSurvey, 1, 1.5))),
+        nrow(filter(na.omit(Group5_GTA), SexId == 2 & TrainToSurvey < 1)),
+        nrow(filter(na.omit(Group5_GTA), SexId == 1 & TrainToSurvey >= 1.5)),
+        nrow(filter(na.omit(Group5_GTA), SexId == 1 & between(TrainToSurvey, 1, 1.5))),
+        nrow(filter(na.omit(Group5_GTA), SexId == 1 & TrainToSurvey < 1)),
+        
+        # female analysis
+        nrow(filter(na.omit(Group5_GTA), SexId == 2 & TrainToSurvey >= 1.5)),
+        nrow(filter(na.omit(Group5_GTA), SexId == 2 & between(TrainToSurvey, 1, 1.5))),
+        
+        # male analysis groups
+        10, # test
+        nrow(filter(na.omit(Group5_GTA), SexId == 1 & TrainToSurvey >= 1.5)) - 10, # train
+        nrow(filter(na.omit(Group5_GTA), SexId == 1 & between(TrainToSurvey, 1, 1.5))), # prospective
+        
+        # # not assessed
+        # nrow(filter(Group5, SexId == 2 & TrainToSurvey < 1 & Assessed == 0)), # 0-12m female
+        # nrow(filter(Group5, SexId == 1 & TrainToSurvey < 1 & Assessed == 0)), # 0-12m male
+        # nrow(filter(Group5, SexId == 2 & TrainToSurvey > 1 & Assessed == 0)), # combined
+        # 5, # test ** this isn't quite right - some went on to be assessed**
+        # nrow(filter(Group5, SexId == 1 & TrainToSurvey >= 1.5 & Assessed == 0)), # train
+        # nrow(filter(Group5, SexId == 1 & between(TrainToSurvey, 1, 1.5) & Assessed == 0)), # prospective
+        
+        # assessed
+        nrow(filter(na.omit(Group5_GTA), SexId == 2 & TrainToSurvey < 1 & Assessed == 1)), # 0-12m female
+        nrow(filter(na.omit(Group5_GTA), SexId == 1 & TrainToSurvey < 1 & Assessed == 1)), # 0-12m male
+        nrow(filter(na.omit(Group5_GTA), SexId == 2 & TrainToSurvey >= 1 & Assessed == 1)), # combined
+        5, # test ** this isn't quite right - some went on to be assessed**
+        nrow(filter(na.omit(Group5_GTA), SexId == 1 & TrainToSurvey >= 1.5 & Assessed == 1)), # train
+        nrow(filter(na.omit(Group5_GTA), SexId == 1 & between(TrainToSurvey, 1, 1.5) & Assessed == 1)), # prospective
+        
+        # outcome
+        nrow(filter(Group5, FirstTimePass == 1 & is.na(SelfEfficacyDiscrepancy1) == FALSE)), # passed
+        nrow(filter(Group5, FirstTimePass == 0 & is.na(SelfEfficacyDiscrepancy1) == FALSE)) # did not pass
+
+      )
+    )
+) %>% 
+  layout(
+    font = list(
+      size = 10
+    )
+  ) -> p
+
+
+if (knitr::is_html_output()) {
+  p
+} else
+{
+  p %>%
+    orca(file = "plots/study3-participant-sankey.png")
+
+  include_graphics("plots/study3-participant-sankey.png",
+                   auto_pdf = TRUE)
+}
+
+```
+
+> Make sure the numbers add up - they don't at the moment, I think this is becasue of the removal of candidates/variables
+
+#### Measures
+
+* The measures identified in Study 2 were used (see **LINK**)
+
+
+#### Procedure
+
+
+#### Analytical method
+
+In this study we were interested in identifying the best combination of discriminatory variables and as such, we used a similar but different method to the one used in Study 2. The three steps were the same, but the way in which we created the data sets and some of the technical specifications for the parameters in the algorithms were different.
+
+##### Feature selection
+
+The most substantive change to the method used in Study 2, was the way that decentralisation for feature selection was carried out. For this study, features were vertically distributed [i.e., split by features and not by case; @Bolon-Canedo2015]. For each classification problem we created the following seven disjoint feature subsets (for a list of variables in each subset see Appendix **REF**):
+
+* Psychosocial (n = 33)
+* Training (n = 35)
+* Consolidation (n = 57)
+* Assessment (for FTP only)
+* DLOG experience prior to training (n = 68; DLOG t)
+* DLOG experience 6 months post training (DLOG t6; for GTA only)
+* DLOG experience 12 months post training (DLOG t12; for GTA only)
+* DLOG experience 18 months post training (DLOG t18; for GTA only)
+* DLOG experience prior to assessment (DLOG a; for FTP only)
+* Previous Mountain Training courses (for FTP only)
+
+We then carried out the feature section process as described in Study 2 on each of the feature subsets above as well as the full set of features, resulting in at least two feature subsets, one for variables selected by at least two FS algorithms and one for variables selected by at least three FS algorithms, for each of the feature (sub-)sets. Where there were at least five variables selected by all four FS algorithms we also retained that feature subset. We then created three sets of omnibus feature subsets for each classification problem; an example of the omnibus features subsets is presented below for getting to assessment:
+
+1. Omnibus survey
+    a) Survey 2s = Psychosocial 2s + Training 2s + Consolidation 2s
+    b) Survey 3s = Psychosocial 3s + Training 3s + Consolidation 3s
+    c) Survey 4s = Psychosocial 4s + Training 4s + Consolidation 4s
+2. Omnibus DLOG
+    a) DLOG 2s = DLOG t 2s + DLOG t6 2s + DLOG t12 2s + DLOG t18 2s
+    a) DLOG 3s = DLOG t 3s + DLOG t6 3s + DLOG t12 3s + DLOG t18 3s
+    a) DLOG 4s = DLOG t 4s + DLOG t6 4s + DLOG t12 4s + DLOG t18 4s
+3. Omnibus survey and DLOG
+    a) Survey and DLOG 2s = Psychosocial 2s + Training 2s + Consolidation 2s + DLOG t 2s + DLOG t6 2s + DLOG t12 2s + DLOG t18 2s
+    a) Survey and DLOG 3s = Psychosocial 3s + Training 3s + Consolidation 3s + DLOG t 3s + DLOG t6 3s + DLOG t12 3s + DLOG t18 3s
+    a) Survey and DLOG 4s = Psychosocial 4s + Training 4s + Consolidation 4s + DLOG t 4s + DLOG t6 4s + DLOG t12 4s + DLOG t18 4s
+
+These analyses were carried out using LOO-CV.
+
+* Selected top 20 as long as merit > 0 for those that used a Ranker search and then selected all from FCBF
+* Leave one out cross validation (LOO-CV)
+* k = 6 for Relief-F and IBk
+* Not keeping a hold-out test data set can increase the estimate of classification accuracy [@Kuncheva2018]
+* Decentralised feature selection [@Bolon-Canedo2015a; @Bolon-Canedo2015]
+  * Vertically distributed [i.e., by features and not by case; @Bolon-Canedo2015].
+  * Partitioned into the following disjoint feature subsets (for a list of variables in each subset see Appendix **REF**):
+   
+  * Following omnibus feature subsets were then created:
+    * Survey data
+    * DLOG data
+    * Survey and DLOG data
+  * We also created a model by including all features in the first instance ("all in").
+* Created **??** models in total, from these we selected three as the "best" models. It is important to recognise that these three solutions are not the only useful ones, however, they were the models that bets classified the training data. It is also important to note that we considered the classification profile for each model, rather than just the mean score. It is not uncommon for one classifier (often J48) to perform much worse than the others, therefore if a model performed well with three classifiers and poorly with another that model was preferred to one that performed better on average (i.e., had a greater mean classification accuracy). For example, consider the classification profiles of the following models: Model A - NB = 85, SMO = 90, IBk = 85, J48 = 50 (mean = 77.5) and Model B - NB = 80, SMO = 80, IBk = 80, J48 = 80 (mean = 80). In this example we would prefer Model A to Model B.
+* Training data and then hold out test data
+  * Preferred way of analysing the data:
+    1. Randomly select x candidates for each category of the criterion variable to be held-out as a test data set $D_{test}$.
+    2. Prepare both the $D_{train}$ and $D_{test}$ data sets separately (e.g., standardising the data).
+    3. With the remaining candidates $D_{train}$, perform the feature selection process.
+    4. Carry out the classification process using $D_{train}$ using k-fold cross validation.
+    5. Carry out the classification process on $D_{test}$ using $D_{train}$ to train the classification model.
+  * As the data in $D_{test}$ has not been "seen" by the model during the feature selection stage, the classification rate does not suffer from the optimistic bias introduced through "peeking" [@Kuncheva2018; @Reunanen2003a; @Smialowski2010].
+
+
+##### Initial classification
+
+##### Final classification
+
+##### Model selection
+
+##### Model testing
+
+### Results
+
+> * Should I consider the consistency of prediction between algorithms and come up with a single prediction for each instance and then test the accuracy of that? How many cases are incorrectly classified by all four algorithms? How many are only misclassified by one algorithm? etc.
+> * Should I present the full tables for each analysis in this section (e.g., Table \@ref(tab:g5-PRA-all-models-classification-rates)? They could go into supplementary information/an appendix and I can just keep Table \@ref(tab:g5-PRA-best-models-classification-rates).
+>    * Add the number of features for each model to each table.
+
+#### Getting to assessment within 18 months of training
+
+##### Male candidates
+
+The classificaiton rates for both the training and test data were very good (i.e., approx 90%), however the predictive classification rates were lower (approx 70%). This suggests that the model developed is not overfitted to the training data, as there is little difference in the training and test classification rates. there are (at least) two plausible reasons for the lower classification rate in the predictive data. Firstly, it is possible that candidates are creating narritives in their minds based on whether or not they have been assessed and that had they answered the survey before being assessed, then their answers may have been different. A second explination is that because candidates were not at the same point in time when they answered the survey, their answers were different to those they would have given six-months later. For example, a candidate may not have felt that they had made much progress towards becoming a Mountian Leader 6-12 months post-training and then may make progress in the 12-18 month period.
+
+
+###### Model selection
+
+We tested `r nrow(G5_male_GTA18m_train_PRA)` models using the training data; the performance of each model can be seen in Table \@ref(tab:g5-male-gta18m-train-models). There were three models tied with the best perfomance, these models were made up of similar variables.
+
+```{r g5-male-gta18m-train-models, eval = TRUE}
+G5_male_GTA18m_train_PRA %>% 
+  mutate(Rating = case_when(between(median, 0, 60) ~ "Poor",
+    between(median, 60, 70) ~ "Modest",
+    between(median, 70, 80) ~ "Good",
+    between(median, 80, 90) ~ "Very Good",
+    between(median, 90, 100) ~ "Excellent")) %>% 
+  select(-c(mean, median)) %>% 
+  kable(caption = "Group 5 male candidates getting to assessment within 18 months of training, training model performance", digits = 2, booktab = TRUE) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), 
+                full_width = FALSE)
+```
+
+
+```{r male-GTA-18m-plot-omnibus-survey-3s-3s, fig.cap="male-GTA-18m-plot-omnibus-survey-3s-3s", cache=FALSE}
+gta_male_g5_18m_FS %>% 
+  filter(feature_subset == "omnibus_survey_3s_3s") %>% 
+  .$variables %>%
+  paste(collapse = ",") %>%
+  str_extract_all("[0-9]+") %>% 
+  table() %>% 
+  as.data.frame() %>% 
+  transmute(var = as.numeric(as.character(.)),
+            Freq = Freq) %>% 
+  arrange(var) -> x
+
+G5_male_GTA_18m_train %>% 
+  select(-c(CandidateId, SexId)) %>% 
+  select(x$var, Assessed_18months) %>% 
+  lapply(normalize) %>% 
+  as.data.frame() %>% 
+  group_by(Assessed_18months) %>% 
+  summarise_all(mean) %>% 
+  reshape2::melt(id.vars = "Assessed_18months", 
+                 measure.vars = colnames(.)) %>% 
+  filter(variable != "Assessed_18months") %>% 
+  mutate(variable = as.character(variable)) -> df
+
+plot_ly(type = 'scatterpolargl',
+  mode = "lines+markers",
+  fill = 'toself') %>%
+  add_trace(r = c(subset(df, Assessed_18months == 0, select = c("variable", "value"))$value,
+          subset(df, Assessed_18months == 0, select = c("variable", "value"))$value[1]),
+    theta = c(subset(df, Assessed_18months == 0, select = c("variable", "value"))$variable, 
+              subset(df, Assessed_18months == 1, select = c("variable", "value"))$variable[1]),
+    name = 'Not assessed') %>%
+  add_trace(r = c(subset(df, Assessed_18months == 1, select = c("variable", "value"))$value, 
+          subset(df, Assessed_18months == 1, select = c("variable", "value"))$value[1]),
+    theta = c(subset(df, Assessed_18months == 1, select = c("variable", "value"))$variable, 
+              subset(df, Assessed_18months == 1, select = c("variable", "value"))$variable[1]),
+    name = 'Assessed') %>%
+  layout(polar = list(radialaxis = list(visible = T, range = c(0,1))),
+         legend = list(orientation = "h"),
+         margin = list( r = 75, t = 50),
+         font = list(size = 11)) -> p
+
+if (knitr::is_html_output()) {
+  p
+} else
+{
+  p %>%
+    orca(file = "plots/male-GTA-18m-plot-omnibus-survey-3s-3s.png")
+  
+  include_graphics("plots/male-GTA-18m-plot-omnibus-survey-3s-3s.png",
+                   auto_pdf = TRUE)
+}
+
+
+```
+
+
+```{r male-GTA-18m-plot-omnibus-2s-3s, fig.cap="male-GTA-18m-plot-omnibus-2s-3s", cache=FALSE}
+gta_male_g5_18m_FS %>% 
+  filter(feature_subset == "omnibus_2s_3s") %>% 
+  .$variables %>%
+  paste(collapse = ",") %>%
+  str_extract_all("[0-9]+") %>% 
+  table() %>% 
+  as.data.frame() %>% 
+  transmute(var = as.numeric(as.character(.)),
+            Freq = Freq) %>% 
+  arrange(var) -> x
+
+G5_male_GTA_18m_train %>% 
+  select(-c(CandidateId, SexId)) %>% 
+  select(x$var, Assessed_18months) %>% 
+  lapply(normalize) %>% 
+  as.data.frame() %>% 
+  group_by(Assessed_18months) %>% 
+  summarise_all(mean) %>% 
+  reshape2::melt(id.vars = "Assessed_18months", 
+                 measure.vars = colnames(.)) %>% 
+  filter(variable != "Assessed_18months") %>% 
+  mutate(variable = as.character(variable)) -> df
+
+plot_ly(type = 'scatterpolargl',
+  mode = "lines+markers",
+  fill = 'toself') %>%
+  add_trace(r = c(subset(df, Assessed_18months == 0, select = c("variable", "value"))$value,
+          subset(df, Assessed_18months == 0, select = c("variable", "value"))$value[1]),
+    theta = c(subset(df, Assessed_18months == 0, select = c("variable", "value"))$variable, 
+              subset(df, Assessed_18months == 1, select = c("variable", "value"))$variable[1]),
+    name = 'Not assessed') %>%
+  add_trace(r = c(subset(df, Assessed_18months == 1, select = c("variable", "value"))$value, 
+          subset(df, Assessed_18months == 1, select = c("variable", "value"))$value[1]),
+    theta = c(subset(df, Assessed_18months == 1, select = c("variable", "value"))$variable, 
+              subset(df, Assessed_18months == 1, select = c("variable", "value"))$variable[1]),
+    name = 'Assessed') %>%
+  layout(polar = list(radialaxis = list(visible = T, range = c(0,1))),
+         legend = list(orientation = "h"),
+         margin = list( r = 75, t = 50),
+         font = list(size = 11)) -> p
+
+if (knitr::is_html_output()) {
+  p
+} else
+{
+  p %>%
+    orca(file = "plots/male-GTA-18m-plot-omnibus-2s-3s.png")
+  
+  include_graphics("plots/male-GTA-18m-plot-omnibus-2s-3s.png",
+                   auto_pdf = TRUE)
+}
+
+
+```
+
+
+###### Model testing
+
+##### Female candidates
+
+```{r g5-female-gta18m-train-models, eval=TRUE}
+G5_female_GTA18m_PRA %>% 
+  mutate(Rating = case_when(between(median, 0, 60) ~ "Poor",
+    between(median, 60, 70) ~ "Modest",
+    between(median, 70, 80) ~ "Good",
+    between(median, 80, 90) ~ "Very Good",
+    between(median, 90, 100) ~ "Excellent")) %>% 
+  select(-c(mean, median)) %>% 
+  kable(caption = "Group 5 female candidates getting to assessment within 18 months of training, training model performance", digits = 2, booktab = TRUE) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), 
+                full_width = FALSE)
+```
+
+
+```{r female-GTA-18m-omnibus-survey-3s-3s-plot, fig.cap="female-GTA-18m-omnibus-survey-3s-3s-plot"}
+gta_female_g5_18m_FS %>% 
+  filter(feature_subset == "omnibus_survey_3s_3s") %>% 
+  .$variables %>%
+  paste(collapse = ",") %>%
+  str_extract_all("[0-9]+") %>% 
+  table() %>% 
+  as.data.frame() %>% 
+  transmute(var = as.numeric(as.character(.)),
+            Freq = Freq) %>% 
+  arrange(var) -> x
+
+G5_female_GTA_18m_comb %>% 
+  select(-c(CandidateId, SexId)) %>% 
+  select(x$var, Assessed_18months) %>% 
+  lapply(normalize) %>% 
+  as.data.frame() %>% 
+  group_by(Assessed_18months) %>% 
+  summarise_all(mean) %>% 
+  reshape2::melt(id.vars = "Assessed_18months", 
+                 measure.vars = colnames(.)) %>% 
+  filter(variable != "Assessed_18months") %>% 
+  mutate(variable = as.character(variable)) -> df
+
+plot_ly(type = 'scatterpolargl',
+  mode = "lines+markers",
+  fill = 'toself') %>%
+  add_trace(r = c(subset(df, Assessed_18months == 0, select = c("variable", "value"))$value,
+          subset(df, Assessed_18months == 0, select = c("variable", "value"))$value[1]),
+    theta = c(subset(df, Assessed_18months == 0, select = c("variable", "value"))$variable, 
+              subset(df, Assessed_18months == 1, select = c("variable", "value"))$variable[1]),
+    name = 'Not assessed') %>%
+  add_trace(r = c(subset(df, Assessed_18months == 1, select = c("variable", "value"))$value, 
+          subset(df, Assessed_18months == 1, select = c("variable", "value"))$value[1]),
+    theta = c(subset(df, Assessed_18months == 1, select = c("variable", "value"))$variable, 
+              subset(df, Assessed_18months == 1, select = c("variable", "value"))$variable[1]),
+    name = 'Assessed') %>%
+  layout(polar = list(radialaxis = list(visible = T, range = c(0,1))),
+         legend = list(orientation = "h"),
+         margin = list( r = 75, t = 50),
+         font = list(size = 11)) -> p
+
+if (knitr::is_html_output()) {
+  p
+} else
+{
+  p %>%
+    orca(file = "plots/female-GTA-18m-omnibus-survey-3s-3s-plot.png")
+  
+  include_graphics("plots/female-GTA-18m-omnibus-survey-3s-3s-plot.png",
+                   auto_pdf = TRUE)
+}
+
+
+```
+
+
+```{r female-GTA-18m-omnibus-3s-3s-plot, fig.cap="female-GTA-18m-omnibus-3s-3s-plot"}
+gta_female_g5_18m_FS %>% 
+  filter(feature_subset == "omnibus_3s_3s") %>% 
+  .$variables %>%
+  paste(collapse = ",") %>%
+  str_extract_all("[0-9]+") %>% 
+  table() %>% 
+  as.data.frame() %>% 
+  transmute(var = as.numeric(as.character(.)),
+            Freq = Freq) %>% 
+  arrange(var) -> x
+
+G5_female_GTA_18m_comb %>% 
+  select(-c(CandidateId, SexId)) %>% 
+  select(x$var, Assessed_18months) %>% 
+  lapply(normalize) %>% 
+  as.data.frame() %>% 
+  group_by(Assessed_18months) %>% 
+  summarise_all(mean) %>% 
+  reshape2::melt(id.vars = "Assessed_18months", 
+                 measure.vars = colnames(.)) %>% 
+  filter(variable != "Assessed_18months") %>% 
+  mutate(variable = as.character(variable)) -> df
+
+plot_ly(type = 'scatterpolargl',
+  mode = "lines+markers",
+  fill = 'toself') %>%
+  add_trace(r = c(subset(df, Assessed_18months == 0, select = c("variable", "value"))$value,
+          subset(df, Assessed_18months == 0, select = c("variable", "value"))$value[1]),
+    theta = c(subset(df, Assessed_18months == 0, select = c("variable", "value"))$variable, 
+              subset(df, Assessed_18months == 1, select = c("variable", "value"))$variable[1]),
+    name = 'Not assessed') %>%
+  add_trace(r = c(subset(df, Assessed_18months == 1, select = c("variable", "value"))$value, 
+          subset(df, Assessed_18months == 1, select = c("variable", "value"))$value[1]),
+    theta = c(subset(df, Assessed_18months == 1, select = c("variable", "value"))$variable, 
+              subset(df, Assessed_18months == 1, select = c("variable", "value"))$variable[1]),
+    name = 'Assessed') %>%
+  layout(polar = list(radialaxis = list(visible = T, range = c(0,1))),
+         legend = list(orientation = "h"),
+         margin = list( r = 75, t = 50),
+         font = list(size = 11)) -> p
+
+if (knitr::is_html_output()) {
+  p
+} else
+{
+  p %>%
+    orca(file = "plots/female-GTA-18m-omnibus-3s-3s-plot.png")
+  
+  include_graphics("plots/female-GTA-18m-omnibus-3s-3s-plot.png",
+                   auto_pdf = TRUE)
+}
+
+
+```
+
+
+##### Passing first time
+
+* Only top 10 features for previous courses & omnibus_DLOG_3s
+
+```{r g5-zsex-ftp-train-models, eval=TRUE}
+G5_zsex_ftp_train_PRA %>% 
+  mutate(Rating = case_when(between(median, 0, 60) ~ "Poor",
+    between(median, 60, 70) ~ "Modest",
+    between(median, 70, 80) ~ "Good",
+    between(median, 80, 90) ~ "Very Good",
+    between(median, 90, 100) ~ "Excellent")) %>% 
+  select(-c(mean, median)) %>% 
+  kable(caption = "Group 5 passing first time, training model performance", digits = 2, booktab = TRUE) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), 
+                full_width = FALSE)
+```
+
+
+```{r zsex-ftp-omnibus-survey-2s-3s-plot, fig.cap="zsex-ftp-omnibus-survey-2s-3s-plot"}
+ftp_zsex_g5_FS %>% 
+  filter(feature_subset == "omnibus_survey_2s_3s") %>% 
+  .$variables %>%
+  paste(collapse = ",") %>%
+  str_extract_all("[0-9]+") %>% 
+  table() %>% 
+  as.data.frame() %>% 
+  transmute(var = as.numeric(as.character(.)),
+            Freq = Freq) %>% 
+  arrange(var) -> x
+
+G5_FTP_consol %>% 
+  select(-CandidateId) %>% 
+  select(x$var, FirstTimePass) %>% 
+  lapply(normalize) %>% 
+  as.data.frame() %>% 
+  group_by(FirstTimePass) %>% 
+  summarise_all(mean) %>% 
+  reshape2::melt(id.vars = "FirstTimePass", 
+                 measure.vars = colnames(.)) %>% 
+  filter(variable != "FirstTimePass") %>% 
+  mutate(variable = as.character(variable)) -> df
+
+plot_ly(type = 'scatterpolargl',
+  mode = "lines+markers",
+  fill = 'toself') %>%
+  add_trace(r = c(subset(df, FirstTimePass == 0, select = c("variable", "value"))$value,
+          subset(df, FirstTimePass == 0, select = c("variable", "value"))$value[1]),
+    theta = c(subset(df, FirstTimePass == 0, select = c("variable", "value"))$variable, 
+              subset(df, FirstTimePass == 1, select = c("variable", "value"))$variable[1]),
+    name = 'Did not pass') %>%
+  add_trace(r = c(subset(df, FirstTimePass == 1, select = c("variable", "value"))$value, 
+          subset(df, FirstTimePass == 1, select = c("variable", "value"))$value[1]),
+    theta = c(subset(df, FirstTimePass == 1, select = c("variable", "value"))$variable, 
+              subset(df, FirstTimePass == 1, select = c("variable", "value"))$variable[1]),
+    name = 'Passed') %>%
+  layout(polar = list(radialaxis = list(visible = T, range = c(0,1))),
+         legend = list(orientation = "h"),
+         margin = list( r = 75, t = 50),
+         font = list(size = 11)) -> p
+
+if (knitr::is_html_output()) {
+  p
+} else
+{
+  p %>%
+    orca(file = "plots/zsex-ftp-omnibus-survey-2s-3s-plot.png")
+  
+  include_graphics("plots/zsex-ftp-omnibus-survey-2s-3s-plot.png",
+                   auto_pdf = TRUE)
+}
+
+
+```
+
+
+
+
+---
+
+
+### Discussion
+
+The studies presented in this report aimed to identify important factors that discriminated candidates who (a) having been trained, went on to be assessed within 18 months of training from those who did not, and (b) having got to their first assessment, pass first time from those who do not. To achieve these aims we considered a wide range of potentially relevant variables. The results presented show that there is no one single factor that is important for discriminating candidates and in fact there are some important commonalities between groups, which are likely fundamental for the successful completion of the Mountain Leader qualification. Some of the discriminatory variables are common to both stages of completion, or to both female and male candidates getting to assessment.
+
+
+#### Male candidates - Getting to assessment
+
+The results presented in [Getting to assessment: Male candidates](#males) suggest that how becoming a Mountain Leader fits into male candidates' lives is important when considering the likelihood of them being assessed. If a candidate **feels that becoming a Mountain Leader is an important life goal, generally or relative to other life goals**, they may be more likely to commit time and resources towards it, thus may feel that they can prepare for an assessment in a shorter period of time, which for many, would include revisiting more technical areas of the syllabus like river crossings or practising skills they rarely use like emergency rope work. Candidates who felt that they had more **available time** to become a Mountain Leader, had done more to **effectively prepare for a Mountain Leader assessment**, had made more **progress towards becoming a Mountain Leader**, and were **more confident that they could become a Mountain Leader than to achieve other life goals** were more likely to have been assessed 18 months after their training course.
+
+Some candidates are less certain in their **understanding of the purpose of the Mountain Leader qualification prior to their training course** and may be attending in order to find out more about the qualification, whereas those who are more certain of the purpose are more likely to be doing it in order to progress to an assessment. The **strength of candidates' intentions to be assessed at the end of their training course** being an important discriminatory variable is in line with the *Theory of Planned Behaviour* [@Ajzen1991]. The Theory of Planned Behaviour suggests that intentions are the strongest predictors of behaviour and that the strength of these intentions also predicts the behaviour [@Armitage2001]. 
+
+The strength of a candidate's intention to be assessed at the end of the training course may be more important than their intention at the start because the candidates who were less sure of the purpose of the Mountain Leader qualification would have had less information to base their intention on. This position is supported by the fact the correlation between being assessed 18 months post-training and the intention to be assessed at the start of the training course (`r (cor.test(G5_male_GTA_18m_train$TrainStartAssessIntention, G5_male_GTA_18m_train$Assessed_18months))$estimate`) is lower than the correlation between being assessed 18 months post-training and the intention to be assessed at the end of the training course (`r (cor.test(G5_male_GTA_18m_train$TrainEndAssessIntention, G5_male_GTA_18m_train$Assessed_18months))$estimate`). [The results in Expectations and intentions](#exp-int) support this, including using prospective data and retrospective data from female candidates, which suggests the strength of intention is important for all candidates, despite not being one of the most important discriminatory variables for female candidates.
+
+Candidates who **expect it to take them longer to get from training to assessment** are less likely to be assessed within a given period^[Of the `r Group5 %>% filter(Assessed_18months == 0 & TrainToSurvey >1.5) %>% .$TrainEndExpTimeToAssess %>% length()` candidates not assessed within 18 months of their training, only `r Group5 %>% filter(Assessed_18months == 0 & TrainToSurvey >1.5 & TrainEndExpTimeToAssess > 18) %>% .$TrainEndExpTimeToAssess %>% length()` expected it to take them more than 18 months.]. Candidates may also expect it to take them longer as they either have less available time, live further from the mountains, or a combination of the two, making it more difficult to fit into their lives. If candidates who expect to take longer do take longer, then there will be more opportunities for things to get in the way of them pursuing that goal and becoming barriers to completion.
+
+Further, experiencing **social change** after a training course may mean that candidates have more or less available time, or have changes in their priorities. The question used in the survey did not ask if candidates had more or less resources (e.g., available time) because of this change, however given that more social change a candidate experienced, the less likely they were to be assessed within 18 months, it would be reasonable to assume that these social changes are more likely to leave candidates with less, rather than more, resources to become Mountain Leaders. 
+
+* PhD delays study found that the effect of having children was greater for men than women [@VandeSchoot2013a], supporting another that suggests the same for *** [@Waite1995].
+
+In our analyses we used the time of year that courses took place as a proxy measurement of weather and daylight hours. We would expect courses near the New Year to have worse weather and less daylight than those nearer to the middle of the year. Given that candidates who were **trained closer to the middle of the year (i.e., June/July)** were more likely to have been assessed 18 months after their training course, it is likely that better weather and more daylight on the training course provides candidates with a more positive experience and possibly a better learning environment. To investigate this further, weather data (held on CMS) and daylight hours data should be included in the feature selection stage of a reanalysis of these data.
+
+There is a broad literature reporting the benefits of resilience [e.g., @Seery2016]. Becoming a Mountain Leader is a difficult process which requires the investment of time, energy, and money and most candidates will have to deal with setbacks during this process. Candidates who are more **resilient** will be better able to overcome adversity [@Smith2008]. For example, bad weather on a training course or changes in life circumstances that become barriers to becoming a Mountain Leader). It is also a central tenet of *self-efficacy* theory that people with firmly established self-efficacy beliefs are more resilient [@Bandura1997] as the stronger self-efficacy beliefs are, the easier they are to maintain following disconfirming events. 
+
+One would normally expect the availability of social support to be a positive influence, however the results in this study suggest that having higher levels of _**perceived esteem support**_ means that candidates are less likely to have been assessed 18 months after their training course. One explanation for this is that candidates who do not feel that they need esteem support answer this question in a different way to those who do (i.e., they don't perceive it as available), therefore those who feel they need it score more highly and with less variation in their responses. Another explanation is that esteem support may be reminding male candidates who are unprepared that they are not ready for an assessment. Similar findings, involving the somewhat paradoxical effects of psychological skills and strategies on performance [@Roberts2013], have been reported elsewhere in the literature and do highlight that some support strategies might need to be utilised with caution.
+
+Candidates who **feel less able to look after themselves and others than they would in an ideal world on steep ground and crossing rivers** may feel that they are not ready to pass an assessment and therefore not attend one. For a number of candidates, these skills will be the most specialist mountaineering skills they possess and will have little reason, beyond passing a Mountain Leader assessment, to practice them. Unless these candidates have spent time deliberately preparing for an assessment, it is likely that they will feel less confident than they would like to at assessment, that they can successfully demonstrate these skills.
+
+
+#### Female candidates - Getting to assessment
+
+As with the results for [Male candidates](#males), **how important becoming a Mountain Leader is to a candidate, relative to other life goals**, is an important discriminatory variable for female candidates. We would expect this variable to have the same implications as those already discussed for male candidates. Again, the more **progress that candidates have made towards becoming a Mountain Leader**, the more likely they are to feel that they have **prepared effectively for a Mountain Leader assessment** and in doing so, they will have gained experience that boosts their confidence in their abilities to perform task related to the assessment. It is likely that **professional change** will have similar effects for female candidates as social change does for male candidates.
+
+We asked candidates to give two reasons that they had registered for the Mountain Leader qualification. For their first reason, most candidates said that they had registered in order to become a Mountain Leader (n.b., this is an extrinsic participatory motive). The candidates who gave an _**extrinsic participatory motive**_ **for their second motive** (e.g., "Qualify as a Mountain Leader) ”) rather than a more intrinsic one (e.g., to spend more time in the mountains) were more likely to have been assessed 18 months after their training course. This finding suggests that having more than one extrinsic participatory motive is important for candidates getting to assessment.
+
+*Goal setting* has been shown to improve outcomes in a number of domains [see @Weinberg2014 p 356]. One way that **goal setting facilitated by training course staff** may have helped candidates is by enabling them to maximise the benefits of the time that they spent consolidating their skills and preparing for a Mountain Leader assessment after the training course. In addition to this, goal setting  may have made it more likely that candidates would prepare for an assessment. The more specific these goals are, the more they will have focused candidates’ attention and efforts towards being at the right level to pass an assessment. Further, *goal setting will have helped facilitate mastery experiences (i.e., having an experience where one is successful)*, the strongest source of self-efficacy [@Bandura1982]; thus, this goal setting will have helped female candidates develop their confidence, which as discussed below, is key for female candidates getting to assessment.
+
+If candidates feel that becoming a Mountain Leader is important to them, they may also feel that it is important that they are good enough to pass when they get there. This suggestion helps to explain why candidates who were assessed felt that **ideally, they would have a higher number of QMDs at assessment**. Another explanation could be that candidates who have not received goal setting support have fewer clear goals and do not feel that they can use the time as efficiently, therefore feel that they would ideally have more QMDs before being assessed.
+
+The results presented in [Female candidates: Getting to assessment](#females) and [Mountain Leader related self-efficacy](#ML-self-efficacy) show that female candidates who are assessed within 18 months of their training have higher levels of **self-efficacy pre-assessment** than those who are not and that these higher levels of self-efficacy are associated with experience gained after the training course. These items are about areas of the syllabus relating to hazards and emergency procedures, where mistakes may have serious and immediate consequences for other people. It may be especially important for course staff to help female candidates set goals that help them develop their confidence to perform these tasks.
+
+Discrepancies between the ideal and post-training levels of self-efficacy were not selected as important discriminatory variables, whilst three of the **pre-assessment self-efficacy** items were. This would suggest that it is not the discrepancy that is important, but the pre-assessment levels of self-efficacy, which will be influenced by candidates' experiences and how much preparation they feel that they have done. This hypothesis is supported in [Sex differences](#sex-diffs) where there is evidence of a positive relationship between experience and confidence, which is stronger for female candidates than it is for male candidates.
+
+**It is both interesting and important to note, that 10 of the 11 the features in this discriminatory subset relate to the consolidation period. Considering this combination of variables, the timing of them, and the relationship between the number of QMDs and pre-assessment self-efficacy, the importance of female candidates gaining additional and relevant experience after their training course becomes paramount.**
+
+
+#### Passing first time
+
+The **further candidates live from a mountainous region**, the more difficult it will be for them to gain relevant experience. Furthermore, it is also less likely that they will be able to access support specific to becoming a Mountain Leader as it is less likely that becoming a Mountain Leader is normal in their social context.
+
+It is clear from analyses not reported here that the first time pass rate for the Mountain Leader qualification is lower for **non-White-European** candidates than it is for White-European candidates^[Analysis of data on CMS shows that the pass rate for non-White-European candidates has been lower than for White-European candidates since at least 2010.] and also that the proportion of non-White-European candidates who are assessed is *much lower* than the proportion of White-European candidates who are assessed^[This is in general and not just after 18-months.]. There are many plausible explanations for this, which may include social, cultural, and economic factors. However, there is little empirical evidence to support any of them at the moment and it is beyond the scope of this report to examine this issue further.
+
+**The facilitation of goal setting by course staff** was also an important factor for passing first time. In addition to helping candidates set goals, the _**provision of structure**_ **by training staff**, by making it clear to candidates what they need to do to be pass an assessment, was important. The provision of structure may have benefited candidates by helping them to set *very clear and specific goals*, which are more effective than broad and/or vague goals for influencing behaviour change [@Gould2005].
+
+There are a number of reasons that **extraversion** may be linked with passing, including differences in levels of physiological arousal, which can influence the breadth of perceptual cues that individuals pay attention to, and decision making [@Hardy1996]. Extraversion has also been linked with effective leadership [@Judge2002]. There is also evidence that *goal setting reduces the distractibility of extraverts*, helping them maintain focus in training [@Woodman2010a], therefore, goal setting may be particularly important for extraverted candidates.
+
+The Mountain Leader assessment is a very stressful experience for many candidates. It is unsurprising that _**received emotional support**_ and **perceived esteem support available** are positive predictors of passing. Having these types of social support may help candidates cope with the pressure of assessment [@Freeman2014; @Freeman2011]. However, as seen above, perceived esteem support is a predictor of male candidates not getting to assessment. These findings would suggest that esteem support should be used sparingly, or only in the right context (i.e., when candidates are ready to be assessed).
+
+Seven of the 23 candidates who did not pass their first assessment were *only* deferred because they had too few **Quality Mountain Days in their logbook at assessment**. *It is important to highlight that the features presented here discriminate between candidates who do and do not pass their assessment, not between candidates who are and are not good enough to pass a Mountain Leader assessment, in terms of their skills and decision making.* If we removed these particular candidates from the sample, we would have too few cases to perform the analysis, therefore, it is difficult at this juncture to answer the question "Is having more than the minimum experience beneficial for passing a Mountain Leader assessment." If anything, it is evidence that one can pass the practical element a Mountain Leader assessment with *fewer than* 40 QMDs.
+
+The results presented in [Passing first time]{#passing} also suggest that candidates who include **Quality Hill/Moorland Days** in their DLOG are less likely to pass. Whilst **it is unlikely that this experience is detrimental to their performance at assessment**, Quality Hill/Moorland Days are not as relevant as QMD experience. One explanation for this finding is that candidates who feel they have a weak logbook want to show all the experience that they feel is relevant, whereas a candidate who feels they have a strong logbook may only feel the need to include the experience they feel is most relevant. Further, candidates who live further from the mountains may be trying to prepare for a Mountain Leader assessment in non-mountainous terrain as it is more accessible to them.
+
+Nine of the 10 candidates who **attended a Mountain Skills** course prior to being assessed and responded to the survey passed their first Mountain Leader assessment^[The candidate who did not pass attended a Mountain Skills course 35 days before the start of their assessment and their training course 107 days before their assessment (all with the same provider). They also had an additional seven days experience (Dartmoor & Snowdonia) between the Mountain Skills course and their assessment.]. This suggests that additional structured training helps candidates to successfully prepare for an assessment. 
+
+**When considering the discriminatory features presented above in a holistic manner, it is important that whilst preparing for their assessment, candidates gain enough relevant experience in the consolidation period, using clear and specific goals developed from training. In addition, it is vital that they are able to cope with the pressures of the assessment process, drawing not only on their experience relevant to the Mountain Leader qualification (i.e., QMDs), but also social support when necessary.**
+
+
+#### Limitations
+
+Several limitations can be identified in this project. Firstly, most of the data used was collected retrospectively. Retrospective data will be less accurate as  time increases between the event and when participants are sampled, and people may create their own narrative retrospectively which may or may not reflect reality. An example of this could be a candidate who did not pass their first assessment attributing their failure to the coaching (or lack thereof) they received on their training course.
+
+Secondly, there is some evidence of sampling bias in the data used to identify the important discriminatory factors for both getting to assessment and passing. The proportion of female and male candidates who did get to assessment within 18 months of their training course is not the same in the retrospective data (females = 23.21% and males = 41.35%) as it is in the population of candidates trained in the same period (females = 19.02% and males = 30.22%). In addition to this, the proportion of males who did not pass their first assessment is not the same in the retrospective data (13.5%) as it is in the prospective data (19.6%) or in the population^[Candidates who were first trained after 2016.] (19.8%); there is no evidence of the same problem in the data collected from female candidates. The simplest explanation for this is that candidates who are not assessed and male candidates who do not pass their first assessment are less likely to _**retrospectively**_ respond to the survey. 
+
+Whilst there may be a subset of candidates that are not represented in the data collected as part of this project, we believe that the findings presented in this report can be used to make a positive impact on the completion rate of the Mountain Leader qualification. This belief is based not only on the analyses of retrospective and prospective data presented here, but their congruence with the results from the [initial qualitative study](#Study1) and existing literature.
+
+Reanalysis of these data in the future should mitigate this sampling bias so that the response rate in the prospective data is similar to that in the population and reduce the impact of recall bias. However, a truly prospective study that collected data from candidates at registration, training, and during their consolidation would likely overcome the limitations described above.
+
+* Indicators not measures
+* Retrospective
+* Dichotomising continuous data?
+
+## Discussion
+
+## Future
+
+* Ethnicity
+* Self-efficacy
+* Life changes
+
+
+## Conclusion
+
+
+\newpage
+## References
+
+\begingroup
+\setlength{\parindent}{-0.5in}
+\setlength{\leftskip}{0.5in}
+\setstretch{1.0}
+
+
+<div id = "refs"></div>
+\endgroup
