@@ -6,6 +6,7 @@
 .csv
 .xlsx
 .docx
+.log
 plots/
 chapter_3_data/
 3_ML_quantitative_v1.2_cache/

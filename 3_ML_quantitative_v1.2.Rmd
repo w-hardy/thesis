@@ -9,9 +9,9 @@ papersize: a4
 fontsize: 12pt
 linestretch: 2.0
 geometry: margin=1in
-always_allow_html: true
+always_allow_html: TRUE
 
-toc: FALSE
+toc: TRUE
 
 bibliography: 
   - [../../../references/library.bib]
@@ -52,10 +52,14 @@ feature_retention <-
 
 Group1to4 <- readRDS("chapter_3_data/Group1to4.rds")
 
-Group5 <- readRDS("chapter_3_data/Group5.rds")
+group_5 <- readRDS("chapter_3_data/Group5.rds")
 
 
-Group5_GTA = read_csv("../3 eshot/Data/Group5_GTA_v3.csv")
+group_5_gta = read_csv("../3 eshot/Data/Group5_GTA_v3.csv") %>% 
+    filter(!CandidateId %in% 
+           c("188254", "292087","130036","184996", "258131", "193950", "112773",
+             "188235") #inappropriate response to personal projects
+         & is.na(RegExpTimeToAssess) == FALSE)
 Group5_FTP = read_csv("../3 eshot/Data/Group5_FTP_v3.csv")
 G5_female_GTA_18m_comb <- read_csv("../3 eshot/Data/G5_female_GTA_18m_comb_v3.csv")
 G5_female_GTA_18m_train <- read_csv("../3 eshot/Data/G5_female_GTA_18m_train_v3.csv")
@@ -67,45 +71,57 @@ G5_FTP_consol <- read_csv("../3 eshot/Data/G5_FTP_consol_v3.csv")
 
 ### PRA results ###
 #### Feature subsets ####
-gta_female_g5_18m_FS <- 
+g5_female_gta_18m_fs <- 
   read_csv("../3 eshot/PRA_Results/v3/gta_female_g5_18m_FS.csv", 
            col_types = "cci")
-gta_male_g5_18m_FS <- 
+g5_male_gta_18m_fs <- 
   read_csv("../3 eshot/PRA_Results/v3/gta_male_g5_18m_FS.csv", 
            col_types = "cci")
 
-ftp_zsex_g5_FS <- 
+g5_zsex_ftp_fs <- 
   read_csv("../3 eshot/PRA_Results/v3/ftp_g5_18m_FS.csv", 
            col_types = "cci")
 
 #### Classification rates ####
-G5_female_GTA18m_PRA <- read_xlsx("../3 eshot/PRA_Results/v3/g5_female_gta18m_comb_classification.xlsx", sheet = "Sheet1", range = "A10:J38")  %>% 
-  left_join(gta_female_g5_18m_FS, 
+G5_female_GTA18m_PRA <- 
+  read_xlsx("../3 eshot/PRA_Results/v3/g5_female_gta18m_comb_classification.xlsx", 
+            sheet = "Sheet1", range = "A10:J38")  %>% 
+  left_join(g5_female_gta_18m_fs, 
             by = c("Dataset" = "feature_subset")) %>% 
   select(Dataset, n, NB, SMO, IBk, J48, mean, median)
 
 
 G5_male_GTA18m_train_PRA <- 
-  read_xlsx("../3 eshot/PRA_Results/v3/g5_male_gta18m_train_classification.xlsx", sheet = "Sheet1", range = "A10:J38") %>% 
-  left_join(gta_male_g5_18m_FS, 
+  read_xlsx("../3 eshot/PRA_Results/v3/g5_male_gta18m_train_classification.xlsx", 
+            sheet = "Sheet1", range = "A10:L38") %>% 
+  left_join(g5_male_gta_18m_fs, 
             by = c("Dataset" = "feature_subset")) %>% 
   select(Dataset, n, NB, SMO, IBk, J48, mean, median)
 
 G5_zsex_ftp_train_PRA <- 
-  read_xlsx("../3 eshot/PRA_Results/v3/g5_zsex_consol_ftp_classification.xlsx", sheet = "Sheet1", range = "A10:J36") %>% 
-  left_join(ftp_zsex_g5_FS, 
+  read_xlsx("../3 eshot/PRA_Results/v3/g5_zsex_consol_ftp_classification.xlsx", 
+            sheet = "Sheet1", range = "A10:J36") %>% 
+  left_join(g5_zsex_ftp_fs, 
             by = c("Dataset" = "feature_subset")) %>% 
   select(Dataset, n, NB, SMO, IBk, J48, mean, median)
 
+G5_male_GTA18m_valid_PRA <- 
+  read_excel("../3 eshot/PRA_Results/v3/g5_male_gta18m_validation_classification.xlsx")
+
+#### PRA predictions ####
+g5_male_GTA_18m_pred_perform <- 
+  read_rds("../3 eshot/PRA_Results/v3/g5_male_gta_18m_pred/g5_male_GTA_18m_pred_perform.rds")
 
 
-GTA_Survival <- readr::read_rds("chapter_3_data/GTA_Survival.rds")
-
+#### Other ####
+GTA_Survival <- 
+  read_rds("chapter_3_data/GTA_Survival.rds")
 
 eshot_vars <- 
-  read_xlsx("../3 eshot/Design/eshot_variables.xlsx", sheet = "Sheet1", na = "NA") %>%
-  mutate(full_model = full_model %>%  str_remove_all("\r"),
-    short_model = short_model %>%  str_remove_all("\r"))
+  read_xlsx("../3 eshot/Design/eshot_variables.xlsx", 
+            sheet = "Sheet1", na = "NA") %>%
+  mutate(full_model = full_model %>% str_remove_all("\r"),
+    short_model = short_model %>% str_remove_all("\r"))
 
 #############################################
 ################# FUNCTIONS #################
@@ -402,6 +418,8 @@ If secondary data were not available but we identified a suitable measure, we ch
 #### Measures
 
 > How much detail do I need to go into in the section - particularly for scales that already exist? Is it enough to say that there is a list of variables and measures in the supplementary information?
+>
+> Talk about domains, full information available in supplementary information.
 
 ##### Personality measures
 
@@ -600,9 +618,10 @@ Having selected appropriate items for the variables we wanted to collect data fo
 
 Figure \@ref(fig:survey-tool-overlap) shows a visual representation of the distribution of constructs between the four groups, a full list of variables and the groups that they were asked in can be found in **REF**.
 
-> Add appendix/figure as example of overlap and also comprehensive list of which variables were asked to each group.
->
+
 > * Need to edit image to make it more simple.
+> * Have I explained the time point thing higher up?
+
 
 ```{r survey-tool-overlap, fig.cap="Survey tool overlap"}
 include_graphics("plots/SurveyToolOverlap.png")
@@ -822,11 +841,11 @@ For feature selection and model identification, it is important that good qualit
 
 ##### Feature Selection
 
-Best practice guidelines for short and wide data recommend that feature selection is carried out using a number of different methods [@Jones2017a]. With this in mind we used four feature selection algorithms: Correlation Feature Subset with a Best First Evaluator [CFS; @Hall1999], Correlation Attribute Evaluator [CAE; @Bouckaert2018], Relief-f [@Kira1992], and Support Vector Machine - Recursive Feature Elimination [SVM-RFE; @Guyon2002]. CAE, Relief-f, and SVM-RFE rank all variables in order of merit (magnitude of relationship), whereas CFS selects a subset of features that are highly correlated with the class but not with one another. As only CFS provides a subset of features, the top 20 features were selected from the rankings provided by the other three algorithms (as long as the merit was greater than zero).
+Best practice guidelines for short and wide data recommend that feature selection is carried out using a number of different methods [@Jones2017a]. With this in mind we used four feature selection algorithms: Correlation Feature Subset with a Best First Evaluator [CFS; @Hall1999], Correlation Attribute Evaluator [CAE; @Bouckaert2018], Relief-f [@Kira1992], and Support Vector Machine - Recursive Feature Elimination [SVM-RFE; @Guyon2002]. CAE, Relief-f, and SVM-RFE rank all variables in order of merit (magnitude of relationship), whereas CFS selects a subset of features that are highly correlated with the class but not with one another. As only CFS provides a subset of features, the top 20 features were selected from the rankings provided by the other three algorithms (as long as the attribute merit was greater than zero).
 
 These analyses were carried out in a centralised fashion, with all variables being included at the same time [@Bolon-Canedo2015a]. We employed a *leave-one-out* (LOO) protocol, a special case of $K$-fold cross-validation, where $K = N$, as it reduces the impact of each object on the feature selection process by increasing the generalisability of the model [@Hastie2009]. Each data set was split into $K$ parts or *folds*, with each part having an approximately equal number of cases. The $K$th fold is then removed from the data and the feature selection algorithm is then applied to the remaining data, with each feature being assigned a merit score (or being selected/not for CFS), once this has been repeated $K$ times the merit score for each attribute is averaged across the $K$ iterations.
 
-All of these are well established feature selection methods and the most important point to note about these four methods is that each works in very a different way. Therefore, the greater the number of algorithms which select a feature, the more confident one can be that it is important as it is less likely that the feature has been chosen by chance [@Visa2011]. For each of the 16 data sets this process yielded a number feature subsets, one containing those features which had been selected by at least two feature selection algorithms (2s), another containing those features which had been selected by at least three feature selection algorithms (3s), and where possible a third subset where features has been selected by all four algorithms (4s). 
+All of these are well established feature selection methods and the most important point to note about these four methods is that each works in very a different way. Therefore, the greater the number of algorithms which select a feature, the more confident one can be that it is important as it is less likely that the feature has been chosen by chance [@Visa2011]. For each of the 16 data sets this process yielded a number feature subsets, one containing those features which had been selected by at least two feature selection algorithms (2s), another containing those features which had been selected by at least three feature selection algorithms (3s), and where possible a third subset where features has been selected by all four algorithms (4s).
 
 
 ##### Initial Classification
@@ -839,9 +858,7 @@ An important point to note that as all of the data have been seen during the fea
 
 > Ross: It's very possible that I have missed this, but I don’t remember reading about 2’s, 3’s and 4’s and what that all means. Is there a part missing from the analysis description? Also, would a table/flowchart of the pattern recognition process help?
 >
-> * Will try to make the bit expalining the 2s, 3s, and 4s more clear and also RFE versions - this is important and will be useful for the reader in Study 3 too.
 > * I am not sure if a flow chart will help, I think I might need to do one for this study and study 3 if I do as the process is slightly different. 
-> * Would a general method bit be useful for this chapter and then explain the deviations from this in each study? - leave seperate
 
 
 ##### Final Classification
@@ -858,54 +875,6 @@ Having conducted the initial classification experiments, we sought to identify m
 #### Classification rates
 
 In 15 of the 16 datasets we were able identify a feature subset which could be used to correctly classify candidates with at least *good* accuracy (i.e., at least one classifier for that data set had a classification rate over 70%). For the other data set we were able to identify a feature subset which could be used to classify candidates with *moderate* accuracy (i.e., at least one classifier for that data set had a classification rate over 60%, Table \@ref(tab:study-2-classification-rates)).
-
-
-```{r study-2-classification-rates, results="asis"}
-bind_rows(
-  read_xlsx("../3 eshot/PRA_Results/GTA_Classification_rates.xlsx", 
-            sheet = "Sheet2")[1:16,] %>% 
-    mutate(Analysis = "Getting to assessment within 18 months of training",
-           Group = case_when(str_detect(Model, "G1") ~ "1",
-                             str_detect(Model, "G2") ~ "2",
-                             str_detect(Model, "G3") ~ "3",
-                             str_detect(Model, "G4") ~ "4"),
-           Data = case_when(str_detect(Model, "DLOG") ~ "With DLOG",
-                            str_detect(Model, "PaperLog") ~ "No DLOG"),
-           Subset = case_when(str_detect(Model, "_4s") ~ "4s",
-                              str_detect(Model, "_3s") ~ "3s",
-                              str_detect(Model, "_2s") ~ "2s",
-                              str_detect(Model, "_F3") ~ "3s RFE",
-                              str_detect(Model, "_F2") ~ "2s RFE")) %>% 
-    filter(str_detect(Model, "_CV") == FALSE) %>% 
-    select(-Model, -NN6, -NN10) %>% 
-    select(Analysis, Group, Data, Subset, everything()), 
-  read_xlsx("../3 eshot/PRA_Results/FTP_classification_rates.xlsx", 
-            sheet = "Sheet1") %>% 
-    mutate(Analysis = "Passing first time",
-           Group = case_when(str_detect(Model, "G1") ~ "1",
-                             str_detect(Model, "G2") ~ "2",
-                             str_detect(Model, "G3") ~ "3",
-                             str_detect(Model, "G4") ~ "4"),
-           Data = case_when(str_detect(Model, "DLOG") ~ "With DLOG",
-                            str_detect(Model, "PaperLog") ~ "No DLOG"),
-           Subset = case_when(str_detect(Model, "_4s") ~ "4s",
-                              str_detect(Model, "_3s") ~ "3s",
-                              str_detect(Model, "_2s") ~ "2s",
-                              str_detect(Model, "_F3") ~ "3s RFE",
-                              str_detect(Model, "_F2") ~ "2s RFE")) %>% 
-    filter(str_detect(Model, "_CV") == FALSE) %>% 
-    select(-Model, -NN6) %>% 
-    select(Analysis, Group, Data, Subset, everything())) %>% 
-  #apa_table(caption = "Classificaion rates for the feature subset with the highest classification rates for each data set (percentage accuracy).", note = "J48 = J48 Decision Tree, NN1 = Instance Based Learning (k=1), NB = Naïve Bayes, SMO = Sequential Minimal Optimization", col_spanners = list(`Classifier` = c(5,8))) %>% 
-  kable(caption = "Classification rates for the feature subset with the highest classification rates for each data set (percentage accuracy).", booktab = TRUE, format = if (is_latex_output()) {"latex"} else {"html"}) %>% 
-  add_header_above(header = c(" " = 4, "Classifier" = 4)) %>% 
-  column_spec(1, "5cm", italic = TRUE) %>% 
-  collapse_rows(valign = "top", columns = c(1:2)) %>% 
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = FALSE) %>%
-  add_footnote(label = "Note: J48 = J48 Decision Tree, NN1 = Instance Based Learning (k=1), NB = Naïve Bayes, \nSMO = Sequential Minimal Optimization", notation = "none")
-
-```
-
 
 Having identified a number of feature subsets that could be used to classify candidates in each group, we identified the items which we wanted to retain for the final survey. As not all items were asked to the same number of groups, we scored each item by the number of times that it was selected divided by the number of times it was asked. This was done so that the item retention process was not biased by the number of times that an item was asked. Items were retained if they were selected for the best models in at least half of the datasets they were asked to.
 
@@ -926,114 +895,80 @@ This study sought to create a survey tool which could be administered to candida
 
 ## Study 3 - Identifying the most important factors
 
-> Split into study 3a 3b & 3c
-
 The aim of this project was to identify variables that influence completion of the Mountain Leader qualification. In the preceding studies, we created a survey tool of reasonable length to collect data for potentially important variables. In this study, we used this survey tool to collect data in order to identify the most important discriminatory variables. In this study we aimed to identify a feature subset for each of the following classification problems:
+
   1. Male candidates who are assessed 18 months after their training from those who are not.
   2. Female candidates who are assessed 18 months after their training from those who are not.
   3. Candidates who pass their first assessment from those who do not.
 
-This study is therefore presented in three sections, one for each of the classification problems above.
+This results for study are therefore presented in three sections, one for each of the classification problems above.
 
 
 ### Method
 
 #### Participants
 
-```{r Group5demo, include = FALSE}
-Group5 %>% 
+```{r group-5-demo, include = FALSE}
+group_5 %>% 
   filter(is.na(SelfEfficacyDiscrepancy1) == FALSE) %>% 
   group_by(SexId) %>% 
   summarise(survey_age_mean = mean(interval(DOB, SurveyEndDate)/years(), na.rm = TRUE),
             survey_age_sd = sd(interval(DOB, SurveyEndDate)/years(), na.rm = TRUE)) %>% 
-  round(2) -> Group5demo
-
+  round(2) -> group_5_demo
 ```
 
 
-A separate sample of Mountain Leader candidates were used for this study. We contacted all candidates who attended their first Mountain Leader training course in 2017 or 2018, inviting them to participate in the study, 1030 candidates started the survey and `r length(na.omit(Group5$SelfEfficacyDiscrepancy1))` completed the survey (`r round((length(na.omit(Group5$SelfEfficacyDiscrepancy1))/2867)*100,2)`% response rate). Of the `r length(na.omit(Group5$SelfEfficacyDiscrepancy1))` responses, `r Group5 %>% filter(SexId == 2) %>% .$SelfEfficacyDiscrepancy1 %>% na.omit() %>% length()` were from female candidates ($M$~age~ = `r Group5demo %>% filter(SexId == 2) %>% .$survey_age_mean` ±`r Group5demo %>% filter(SexId == 2) %>% .$survey_age_sd` years) and `r Group5 %>% filter(SexId == 1) %>% .$SelfEfficacyDiscrepancy1 %>% na.omit() %>% length()` were from male candidates ($M$~age~ = `r Group5demo %>% filter(SexId == 1) %>% .$survey_age_mean` ±`r Group5demo %>% filter(SexId == 1) %>% .$survey_age_sd` years). These candidates had been trained by `r Group5$firstMLTrainingProviderId %>% unique() %>% length()` different providers and those who had been assessed, had been assessed by `r Group5$firstMLAssessmentProvId %>% unique() %>% length()` different providers.
+A separate sample of Mountain Leader candidates were used for this study. We contacted all candidates who attended their first Mountain Leader training course in 2017 or 2018, inviting them to participate in the study, 1030 candidates started the survey and `r length(na.omit(group_5$SelfEfficacyDiscrepancy1))` completed the survey (`r round((length(na.omit(group_5$SelfEfficacyDiscrepancy1))/2867)*100,2)`% response rate). Of the `r length(na.omit(group_5$SelfEfficacyDiscrepancy1))` responses, `r group_5 %>% filter(SexId == 2) %>% .$SelfEfficacyDiscrepancy1 %>% na.omit() %>% length()` were from female candidates ($M$~age~ = `r group_5_demo %>% filter(SexId == 2) %>% .$survey_age_mean` ±`r group_5_demo %>% filter(SexId == 2) %>% .$survey_age_sd` years) and `r group_5 %>% filter(SexId == 1) %>% .$SelfEfficacyDiscrepancy1 %>% na.omit() %>% length()` were from male candidates ($M$~age~ = `r group_5_demo %>% filter(SexId == 1) %>% .$survey_age_mean` ±`r group_5_demo %>% filter(SexId == 1) %>% .$survey_age_sd` years). These candidates had been trained by `r group_5$firstMLTrainingProviderId %>% unique() %>% length()` different providers and those who had been assessed, had been assessed by `r group_5$firstMLAssessmentProvId %>% unique() %>% length()` different providers.
 
-In Study 2 we split candidates according to whether or not they had DLOG data, which meant that it was not possible to then split each of these groups by gender as well because some groups would have been too small to analyse. However, in this study we only included DLOG data for the passing/not analyses where there does not seem to be a difference in outcomes by gender. This meant that we could analyse the data for male and female candidates separately for getting to assessment.
+When responding to the survey, candidates would have been at different stages in the pathway. Some candidates responded to the survey prior to an assessment and other responded having been assessed, some candidates would also have completed their training course at least 18 months before responding to they survey and the remainder woud have been responding to the survey within 18 months of their training course (see Table \@ref(tab:g5-candidate-survey-time) for a summary). 
 
-For the getting to assessment analyses, some candidates completed the survey retrospectively with regards to the criterion variable (i.e., they completed the survey at least 18 months after their training course). Others completed the survey prior to this, although some of them had been assessed and would therefore have answered some of the questions in a retrospective manner. The remaining candidates completed the survey in a truly prospective fashion (i.e., they had been trained less than 18 months before completing the survey and had not been assessed). In an ideal world, we would analyse the retrospective data to develop a model and then test it on the prospective data once a sufficient time period had passed (i.e., all of the candidates had been trained at least 18 months before analysing their data). See Table \@ref(tab:g5-candidate-survey-time) for a summary. Each of the analyses had different inclusion criteria and subsequently, used a different subset of candidates. Details of the candidates included in each analysis are presented below.
-
-> Have I explained the time point thing higher up?
+In this study we analysed the data for getting to assessment within 18 months of training from female and male candidates seperatley as the completion rates for each group are different^[In Study 2 we split candidates according to whether or not they had DLOG data, which meant that it was not possible to then split each of these groups by gender as well because some groups would have been too small to analyse.]. Each of the analyses had different inclusion criteria and subsequently, used a different subset of candidates. Details of the candidates included in each data set are presented in the sections below.
 
 
 ```{r g5-candidate-survey-time}
-bind_rows(
-  Group5_GTA %>%
-    filter(is.na(SelfEfficacyDiscrepancy1) == FALSE) %>% 
-    na.omit() %>% 
-    mutate(
-      Analysis = "GTA",
-      Sex = case_when(SexId == 2 ~ "Female",
-                      SexId == 1 ~ "Male"),
-      Time = case_when(
-        TrainToSurvey >= 1.5 ~ "Retrospective",
-        TrainToSurvey < 1.5 ~ "Prospective"
-        ),
-        Outcome = case_when(Assessed_18months == 0 ~ "Not assessed",
-                            Assessed_18months == 1 ~ "Assessed")
-    ) %>%
-    group_by(Analysis,
-             Sex,
-             Time,
-             Outcome) %>%
-    count(),
-  
-  Group5_FTP %>%
-    filter(is.na(SelfEfficacyDiscrepancy1) == FALSE) %>%
-    mutate(
-      Analysis = "FTP",
-      Sex = case_when(SexId == 2 ~ "Female",
-                      SexId == 1 ~ "Male"),
-      Time = case_when(
-        is.na(AssessChangeStandard) == TRUE ~ "Prospective",
-        is.na(AssessChangeStandard) == FALSE ~
-          "Retrospective"
-      ),
-        Outcome = case_when(FirstTimePass == 0 ~ "Did not pass",
-                            FirstTimePass == 1 ~ "Passed")
-    ) %>%
-    group_by(Analysis,
-             Sex,
-             Time,
-             Outcome) %>%
-    count()
-) %>%
-  pivot_wider(
-    id_cols = c(Analysis, Sex, Outcome),
-    names_from = Time,
-    values_from = n
-  ) %>% 
-  kable(caption = "Candidates.", booktab = TRUE, 
+g5_candidate_survey_time <- 
+  group_5_gta %>% 
+  left_join(select(group_5, 
+                   c(CandidateId, SurveyEndDate, firstMLAssessmentDate)),
+            by = "CandidateId") %>% 
+  filter(is.na(SelfEfficacyDiscrepancy1) == FALSE,
+         is.na(t12_mtn_percent_1) == FALSE) %>% 
+  mutate(Assessment = 
+           case_when(SurveyEndDate < firstMLAssessmentDate ~ "pre",
+                     SurveyEndDate >= firstMLAssessmentDate ~ "post",
+                     is.na(firstMLAssessmentDate) == TRUE ~ "pre"),
+         `18 months post-training` = 
+           case_when(TrainToSurvey >= 1.5 ~ "post",
+                     TrainToSurvey < 1.5 ~ "pre"),
+         gta_18m = `18 months post-training`,
+         Sex = case_when(SexId == 2 ~ "Female",
+                         SexId == 1 ~ "Male"))
+
+g5_candidate_survey_time %>% 
+  group_by(Sex, Assessment, `18 months post-training`) %>% 
+  count() %>% 
+  kable(caption = "Candidates pathway progress when completing the survey.", 
+        booktab = TRUE, 
         format = if (is_latex_output()) {"latex"} else {"html"}) %>%
-  collapse_rows(valign = "top", columns = c(1:2)) %>% 
+  collapse_rows(valign = "top", columns = c(1:3)) %>% 
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), 
-                  full_width = FALSE) %>% 
-    add_footnote(label = "Note: GTA = Getting to assessment within 18 months, FTP = First time pass",
-                 notation = "none")
+                  full_width = FALSE)
 ```
 
 
 ##### Getting to assessment within 18 months of training - Male candidates
 
-There were 65 responses from male candidates who completed the survey more than 18 months after their training course (i.e., retrospectively), 33 of whom had been assessed within 18 months of their training course and 32 who not been assessed at the time of completing the survey^[Candidates who had not been assessed within 18 months of their training course but had been assessed prior to completing the survey were excluded from the analysis as the wording of the questions shown to them meant they would not be comparable to the other candidates.]. Therefore, we were able to create a set of *training data* ($n$ = `r nrow(G5_male_GTA_18m_train)`), which we could use to select variables and a set of *test data* ($n$ = `r nrow(G5_male_GTA_18m_test)`, with an equal split of candidates who had and had not been assessed). 
+There were `r g5_candidate_survey_time %>% filter(Sex == "Male" & gta_18m == "post") %>% nrow()` responses from male candidates who completed the survey more than 18 months after their training course (i.e., retrospectively), `r g5_candidate_survey_time %>% filter(Sex == "Male" & gta_18m == "post" & Assessed_18months == 0 & Assessed == 1) %>% nrow()` of whom had been assessed more than 18 months post-training^[These candidates were not included in the analyses as the wording of the quesitons they answered meant that their responses were not comparable to those who had been assessed within 18 months and those who had not been assessed.], `r g5_candidate_survey_time %>% filter(Sex == "Male" & gta_18m == "post" & Assessed_18months == 1) %>% nrow()` of whom had been assessed within 18 months of their training course and `r g5_candidate_survey_time %>% filter(Sex == "Male" & gta_18m == "post" & Assessed_18months == 0 & Assessed == 0) %>% nrow()` who not been assessed at the time of completing the survey^[Candidates who had not been assessed within 18 months of their training course but had been assessed prior to completing the survey were excluded from the analysis as the wording of the questions shown to them meant they would not be comparable to the other candidates.]. Therefore, we were able to create a set of *training data* ($n$ = `r nrow(G5_male_GTA_18m_train)`), which we could use to select variables and a set of *test data* ($n$ = `r nrow(G5_male_GTA_18m_test)`, with an equal split of candidates who had and had not been assessed). 
 
-In addition to this, `r nrow(G5_male_GTA_18m_pred) - 1` male candidates completed the survey more than 12 months after their training but less than 18 months after their training (i.e., prospectively). Using the model developed with the training data, we made predictions for each of these candidates which we have been able to test as all of them are now more than 18 months post training. 
+In addition to this, `r nrow(G5_male_GTA_18m_pred)` male candidates completed the survey less than 18 months after their training but at the time of writing were at least 18 months post-training. These candidate formed the *validation data* set.
 
-> Is this truly prospective? What about the candidates who had been assessed when they completed the survey?
-> * how many in this have already been assessed? 
-> * get new data and do a genuinally prospective group
-> * call it a "validation group" not truely prospective 
 
 ##### Getting to assessment within 18 months of training - Female candidates
 
 
 ```{r gta_f_desc, include=FALSE}
 G5_female_GTA_18m_comb %>% 
-  left_join(select(Group5, c(CandidateId, TrainToSurvey)), 
+  left_join(select(group_5, c(CandidateId, TrainToSurvey)), 
             by = "CandidateId") %>% 
   group_by(Assessed_18months) %>% 
   summarise(age = mean(TrainAge),
@@ -1041,7 +976,7 @@ G5_female_GTA_18m_comb %>%
   round(2) -> G5_gta_f_age
 
 G5_female_GTA_18m_train %>% 
-  left_join(select(Group5, c(CandidateId, TrainToSurvey)), 
+  left_join(select(group_5, c(CandidateId, TrainToSurvey)), 
             by = "CandidateId") %>% 
   group_by(if_else(TrainToSurvey > 1.5, "retro", "pros"), 
            Assessed_18months) %>% 
@@ -1056,7 +991,7 @@ The data used for this analysis were collected from 27 candidates who had been a
 
 ```{r ftp_desc, include=FALSE}
 G5_FTP_consol %>% 
-  left_join(select(Group5, 
+  left_join(select(group_5, 
                    c(CandidateId, SurveyEndDate, firstMLAssessmentDate)), 
             by = "CandidateId") %>% 
   group_by(FirstTimePass) %>% 
@@ -1065,7 +1000,7 @@ G5_FTP_consol %>%
   round(2) -> G5_ftp_age
 
 G5_FTP_consol %>% 
-  left_join(select(Group5, 
+  left_join(select(group_5, 
                    c(CandidateId, SurveyEndDate, firstMLAssessmentDate)), 
             by = "CandidateId") %>% 
   group_by(if_else(firstMLAssessmentDate < SurveyEndDate, "retro", "pros"), FirstTimePass) %>%
@@ -1073,10 +1008,10 @@ G5_FTP_consol %>%
   count() -> G5_ftp_count
 ```
 
-The data used for this analysis were collected from `r nrow(G5_FTP_consol)` candidates, `r G5_ftp_count %>% group_by(time) %>% summarise(total = sum(n)) %>% filter(time == "retro") %>% select(total)` of whom had been assessed prior to completing the survey and `r G5_ftp_count %>% group_by(time) %>% summarise(total = sum(n)) %>% filter(time == "pros") %>% select(total)` of whom had not been assessed before completing the survey. As with the data in [female candidates getting to assessment](#females), we combined the retrospective and prospective data to increase the sample size^[We have run the analyses on just the retrospective data, which allowed us to include some variables about candidates' experiences of assessment, but none of these variables were selected in the best discriminatory subsets, nor were the classification rates significantly higher.]. Twenty three of the 46 candidates passed their assessment first time. Of the `r G5_ftp_count %>% group_by(FirstTimePass) %>% summarise(total = sum(n)) %>% filter(FirstTimePass == 0) %>% select(total)` who did not pass, `r G5_ftp_count %>% filter(time == "pros" & FirstTimePass == 0) %>% .$n` completed the survey prospectively. Two of the 23 candidates who did not pass withdrew from their first assessment, none failed, and the remainder were deferred. Seven of those who were deferred only needed to log additional days.
+The data used for this analysis were collected from `r nrow(G5_FTP_consol)` candidates, `r G5_ftp_count %>% group_by(time) %>% summarise(total = sum(n)) %>% filter(time == "retro") %>% select(total)` of whom had been assessed prior to completing the survey and `r G5_ftp_count %>% group_by(time) %>% summarise(total = sum(n)) %>% filter(time == "pros") %>% select(total)` of whom had not been assessed before completing the survey. As with the data in female candidates getting to assessment, we combined the retrospective and prospective data to increase the sample size^[We have run the analyses on just the retrospective data, which allowed us to include some variables about candidates' experiences of assessment, but none of these variables were selected in the best discriminatory subsets, nor were the classification rates significantly higher.]. Twenty three of the 46 candidates passed their assessment first time. Of the `r G5_ftp_count %>% group_by(FirstTimePass) %>% summarise(total = sum(n)) %>% filter(FirstTimePass == 0) %>% select(total)` who did not pass, `r G5_ftp_count %>% filter(time == "pros" & FirstTimePass == 0) %>% .$n` completed the survey prospectively. Two of the 23 candidates who did not pass withdrew from their first assessment, none failed, and the remainder were deferred. Seven of those who were deferred only needed to log additional days.
 
 
-```{r study3-participant-sankey, fig.cap="Study 3 participants. For simplicity, canddiates who have not been assessed have not been added to this figure as a final group, therefore it can be assumed that candidates not progressing from one node to another have not been assessed."}
+```{r study3-participant-sankey, fig.cap="Study 3 participants. For simplicity, candidates who have not been assessed have not been added to this figure as a final group, therefore it can be assumed that candidates not progressing from one node to another have not been assessed."}
 plot_ly(
     type = "sankey",
     orientation = "h",
@@ -1162,45 +1097,45 @@ plot_ly(
       # number of cases being transferred
       value =  c(
         # female and male
-        nrow(filter(na.omit(Group5_GTA), SexId == 2)),
-        nrow(filter(na.omit(Group5_GTA), SexId == 1)),
+        nrow(filter(na.omit(group_5_gta), SexId == 2)),
+        nrow(filter(na.omit(group_5_gta), SexId == 1)),
 
         # split by time since training
-        nrow(filter(na.omit(Group5_GTA), SexId == 2 & TrainToSurvey >= 1.5)),
-        nrow(filter(na.omit(Group5_GTA), SexId == 2 & between(TrainToSurvey, 1, 1.5))),
-        nrow(filter(na.omit(Group5_GTA), SexId == 2 & TrainToSurvey < 1)),
-        nrow(filter(na.omit(Group5_GTA), SexId == 1 & TrainToSurvey >= 1.5)),
-        nrow(filter(na.omit(Group5_GTA), SexId == 1 & between(TrainToSurvey, 1, 1.5))),
-        nrow(filter(na.omit(Group5_GTA), SexId == 1 & TrainToSurvey < 1)),
+        nrow(filter(na.omit(group_5_gta), SexId == 2 & TrainToSurvey >= 1.5)),
+        nrow(filter(na.omit(group_5_gta), SexId == 2 & between(TrainToSurvey, 1, 1.5))),
+        nrow(filter(na.omit(group_5_gta), SexId == 2 & TrainToSurvey < 1)),
+        nrow(filter(na.omit(group_5_gta), SexId == 1 & TrainToSurvey >= 1.5)),
+        nrow(filter(na.omit(group_5_gta), SexId == 1 & between(TrainToSurvey, 1, 1.5))),
+        nrow(filter(na.omit(group_5_gta), SexId == 1 & TrainToSurvey < 1)),
         
         # female analysis
-        nrow(filter(na.omit(Group5_GTA), SexId == 2 & TrainToSurvey >= 1.5)),
-        nrow(filter(na.omit(Group5_GTA), SexId == 2 & between(TrainToSurvey, 1, 1.5))),
+        nrow(filter(na.omit(group_5_gta), SexId == 2 & TrainToSurvey >= 1.5)),
+        nrow(filter(na.omit(group_5_gta), SexId == 2 & between(TrainToSurvey, 1, 1.5))),
         
         # male analysis groups
         10, # test
-        nrow(filter(na.omit(Group5_GTA), SexId == 1 & TrainToSurvey >= 1.5)) - 10, # train
-        nrow(filter(na.omit(Group5_GTA), SexId == 1 & between(TrainToSurvey, 1, 1.5))), # prospective
+        nrow(filter(na.omit(group_5_gta), SexId == 1 & TrainToSurvey >= 1.5)) - 10, # train
+        nrow(filter(na.omit(group_5_gta), SexId == 1 & between(TrainToSurvey, 1, 1.5))), # prospective
         
         # # not assessed
-        # nrow(filter(Group5, SexId == 2 & TrainToSurvey < 1 & Assessed == 0)), # 0-12m female
-        # nrow(filter(Group5, SexId == 1 & TrainToSurvey < 1 & Assessed == 0)), # 0-12m male
-        # nrow(filter(Group5, SexId == 2 & TrainToSurvey > 1 & Assessed == 0)), # combined
+        # nrow(filter(group_5, SexId == 2 & TrainToSurvey < 1 & Assessed == 0)), # 0-12m female
+        # nrow(filter(group_5, SexId == 1 & TrainToSurvey < 1 & Assessed == 0)), # 0-12m male
+        # nrow(filter(group_5, SexId == 2 & TrainToSurvey > 1 & Assessed == 0)), # combined
         # 5, # test ** this isn't quite right - some went on to be assessed**
-        # nrow(filter(Group5, SexId == 1 & TrainToSurvey >= 1.5 & Assessed == 0)), # train
-        # nrow(filter(Group5, SexId == 1 & between(TrainToSurvey, 1, 1.5) & Assessed == 0)), # prospective
+        # nrow(filter(group_5, SexId == 1 & TrainToSurvey >= 1.5 & Assessed == 0)), # train
+        # nrow(filter(group_5, SexId == 1 & between(TrainToSurvey, 1, 1.5) & Assessed == 0)), # prospective
         
         # assessed
-        nrow(filter(na.omit(Group5_GTA), SexId == 2 & TrainToSurvey < 1 & Assessed == 1)), # 0-12m female
-        nrow(filter(na.omit(Group5_GTA), SexId == 1 & TrainToSurvey < 1 & Assessed == 1)), # 0-12m male
-        nrow(filter(na.omit(Group5_GTA), SexId == 2 & TrainToSurvey >= 1 & Assessed == 1)), # combined
+        nrow(filter(na.omit(group_5_gta), SexId == 2 & TrainToSurvey < 1 & Assessed == 1)), # 0-12m female
+        nrow(filter(na.omit(group_5_gta), SexId == 1 & TrainToSurvey < 1 & Assessed == 1)), # 0-12m male
+        nrow(filter(na.omit(group_5_gta), SexId == 2 & TrainToSurvey >= 1 & Assessed == 1)), # combined
         5, # test ** this isn't quite right - some went on to be assessed**
-        nrow(filter(na.omit(Group5_GTA), SexId == 1 & TrainToSurvey >= 1.5 & Assessed == 1)), # train
-        nrow(filter(na.omit(Group5_GTA), SexId == 1 & between(TrainToSurvey, 1, 1.5) & Assessed == 1)), # prospective
+        nrow(filter(na.omit(group_5_gta), SexId == 1 & TrainToSurvey >= 1.5 & Assessed == 1)), # train
+        nrow(filter(na.omit(group_5_gta), SexId == 1 & between(TrainToSurvey, 1, 1.5) & Assessed == 1)), # prospective
         
         # outcome
-        nrow(filter(Group5, FirstTimePass == 1 & is.na(SelfEfficacyDiscrepancy1) == FALSE)), # passed
-        nrow(filter(Group5, FirstTimePass == 0 & is.na(SelfEfficacyDiscrepancy1) == FALSE)) # did not pass
+        nrow(filter(group_5, FirstTimePass == 1 & is.na(SelfEfficacyDiscrepancy1) == FALSE)), # passed
+        nrow(filter(group_5, FirstTimePass == 0 & is.na(SelfEfficacyDiscrepancy1) == FALSE)) # did not pass
 
       )
     )
@@ -1229,8 +1164,7 @@ if (knitr::is_html_output()) {
 
 #### Measures
 
-* The measures identified in Study 2 were used (see **LINK**)
-
+The survey tool developed in Study 2 was used to collect data. See Table \@ref(tab:eshot-vars) for a full list of variables included in the survey.
 
 #### Procedure
 
@@ -1239,103 +1173,124 @@ if (knitr::is_html_output()) {
 
 In this study we were interested in identifying the best combination of discriminatory variables and as such, we used a similar but different method to the one used in Study 2. The three steps were the same, but the way in which we created the data sets and some of the technical specifications for the parameters in the algorithms were different.
 
+
+##### Preprocessing
+
+For each classification problem, the ideal way to perform the analyses would be as follows:
+
+  1. Given $N$ cases, randomly select $x$, where $N \div 3 > x > N \div10$ cases for each category of the criterion variable to be held-out as a test data set $D_{test}$ and the remaining candidates become the training data $D_{train}$.
+  2. Prepare both the $D_{train}$ and $D_{test}$ data sets separately (e.g., standardising the data).
+  3. Perform the feature selection process using $D_{train}$.
+  4. Carry out the classification process using $D_{train}$ using k-fold cross validation.
+  5. Carry out the classification process on $D_{test}$ using $D_{train}$ to train the classification model.
+  
+Using the same data to train and test a model leads to the risk of overfitting and classification rates being atrificially inflated as all of the data has been "seen" during the feature selection stage. This phenomonon is know as "peeking" [@Kuncheva2018; @Reunanen2003a; @Smialowski2010] and can be mitigated by holding some data out of the feature selection stage (i.e., $D_{test}$).
+
+
 ##### Feature selection
 
-The most substantive change to the method used in Study 2, was the way that decentralisation for feature selection was carried out. For this study, features were vertically distributed [i.e., split by features and not by case; @Bolon-Canedo2015]. For each classification problem we created the following seven disjoint feature subsets (for a list of variables in each subset see Appendix **REF**):
+The most substantive change to the method used in Study 2, was the way that decentralisation for feature selection was carried out. For this study, features were vertically distributed [i.e., split by features and not by case; @Bolon-Canedo2015]. For each classification problem we created seven disjoint feature subsets (for a list of survey variables in each subset see Table \@ref(tab:eshot-vars)). In addition to this, we used the Fast Based Correlation Filter [FCBF; @Yu2003] instead of CFS. FCBF is another subset evaluator but is more conservative than CFS, therefore returns subsets with lower cardinality and redundancy. A final minor difference, is that we used the $k = 6$ for the Relief-f algorithm.
 
-* Psychosocial (n = 33)
-* Training (n = 35)
-* Consolidation (n = 57)
-* Assessment (for FTP only)
-* DLOG experience prior to training (n = 68; DLOG t)
-* DLOG experience 6 months post training (DLOG t6; for GTA only)
-* DLOG experience 12 months post training (DLOG t12; for GTA only)
-* DLOG experience 18 months post training (DLOG t18; for GTA only)
-* DLOG experience prior to assessment (DLOG a; for FTP only)
-* Previous Mountain Training courses (for FTP only)
-
-We then carried out the feature section process as described in Study 2 on each of the feature subsets above as well as the full set of features, resulting in at least two feature subsets, one for variables selected by at least two FS algorithms and one for variables selected by at least three FS algorithms, for each of the feature (sub-)sets. Where there were at least five variables selected by all four FS algorithms we also retained that feature subset. We then created three sets of omnibus feature subsets for each classification problem; an example of the omnibus features subsets is presented below for getting to assessment:
-
-1. Omnibus survey
-    a) Survey 2s = Psychosocial 2s + Training 2s + Consolidation 2s
-    b) Survey 3s = Psychosocial 3s + Training 3s + Consolidation 3s
-    c) Survey 4s = Psychosocial 4s + Training 4s + Consolidation 4s
-2. Omnibus DLOG
-    a) DLOG 2s = DLOG t 2s + DLOG t6 2s + DLOG t12 2s + DLOG t18 2s
-    a) DLOG 3s = DLOG t 3s + DLOG t6 3s + DLOG t12 3s + DLOG t18 3s
-    a) DLOG 4s = DLOG t 4s + DLOG t6 4s + DLOG t12 4s + DLOG t18 4s
-3. Omnibus survey and DLOG
-    a) Survey and DLOG 2s = Psychosocial 2s + Training 2s + Consolidation 2s + DLOG t 2s + DLOG t6 2s + DLOG t12 2s + DLOG t18 2s
-    a) Survey and DLOG 3s = Psychosocial 3s + Training 3s + Consolidation 3s + DLOG t 3s + DLOG t6 3s + DLOG t12 3s + DLOG t18 3s
-    a) Survey and DLOG 4s = Psychosocial 4s + Training 4s + Consolidation 4s + DLOG t 4s + DLOG t6 4s + DLOG t12 4s + DLOG t18 4s
-
-These analyses were carried out using LOO-CV.
-
-* Selected top 20 as long as merit > 0 for those that used a Ranker search and then selected all from FCBF
-* Leave one out cross validation (LOO-CV)
-* k = 6 for Relief-F and IBk
-* Not keeping a hold-out test data set can increase the estimate of classification accuracy [@Kuncheva2018]
-* Decentralised feature selection [@Bolon-Canedo2015a; @Bolon-Canedo2015]
-  * Vertically distributed [i.e., by features and not by case; @Bolon-Canedo2015].
-  * Partitioned into the following disjoint feature subsets (for a list of variables in each subset see Appendix **REF**):
-   
-  * Following omnibus feature subsets were then created:
-    * Survey data
-    * DLOG data
-    * Survey and DLOG data
-  * We also created a model by including all features in the first instance ("all in").
-* Created **??** models in total, from these we selected three as the "best" models. It is important to recognise that these three solutions are not the only useful ones, however, they were the models that bets classified the training data. It is also important to note that we considered the classification profile for each model, rather than just the mean score. It is not uncommon for one classifier (often J48) to perform much worse than the others, therefore if a model performed well with three classifiers and poorly with another that model was preferred to one that performed better on average (i.e., had a greater mean classification accuracy). For example, consider the classification profiles of the following models: Model A - NB = 85, SMO = 90, IBk = 85, J48 = 50 (mean = 77.5) and Model B - NB = 80, SMO = 80, IBk = 80, J48 = 80 (mean = 80). In this example we would prefer Model A to Model B.
-* Training data and then hold out test data
-  * Preferred way of analysing the data:
-    1. Randomly select x candidates for each category of the criterion variable to be held-out as a test data set $D_{test}$.
-    2. Prepare both the $D_{train}$ and $D_{test}$ data sets separately (e.g., standardising the data).
-    3. With the remaining candidates $D_{train}$, perform the feature selection process.
-    4. Carry out the classification process using $D_{train}$ using k-fold cross validation.
-    5. Carry out the classification process on $D_{test}$ using $D_{train}$ to train the classification model.
-  * As the data in $D_{test}$ has not been "seen" by the model during the feature selection stage, the classification rate does not suffer from the optimistic bias introduced through "peeking" [@Kuncheva2018; @Reunanen2003a; @Smialowski2010].
+We then carried out the feature section process as described in Study 2 on each of the feature subsets above as well as the full set of features, resulting in at least two feature subsets, one for variables selected by at least two FS algorithms (2s) and one for variables selected by at least three FS algorithms (3s), for each of the feature (sub-)sets. Where there were at least five variables selected by all four FS algorithms we also retained that feature subset (4s). We then created three sets of omnibus feature subsets for each classification problem where each of the 2s, 3s, and 4s were combined to form a previously unseen feature subset; an example of the omnibus features subsets for getting to assessment is presented in \@ref.
 
 
 ##### Initial classification
+
+We performed a classifcaiton experiment for each of the classification problems using WEKA's Experiment Environment [@Bouckaert2018; @Frank2016]. For each feature subset identified in the FS stage the training data were classified using LOO-CV and the same four classification algorithms as in Study 2 across 10 runs. This process returned a mean classification rate for each feature subset and classifier.
+
 
 ##### Final classification
 
 ##### Model selection
 
+The feature selection process yielded `r nrow(G5_male_GTA18m_train_PRA)` getting to assessment models for both male and female candidates and `r nrow(G5_zsex_ftp_train_PRA)` first time pass models. For each of the classification problems listed above, we selected the "best" models. It is important to recognise that these three solutions are not the only useful ones, however, they were the models that best classified the training data. It is also important to note that we considered the classification profile for each model, rather than just the mean score. It is not uncommon for one classifier (often J48) to perform much worse than the others, therefore if a model performed well with three classifiers and poorly with another that model was preferred to one that performed better on average (i.e., had a greater mean classification accuracy). For example, consider the classification profiles of the following models: Model A - NB = 85, SMO = 90, IBk = 85, J48 = 50 (mean = 77.5) and Model B - NB = 80, SMO = 80, IBk = 80, J48 = 80 (mean = 80). In this example we would prefer Model A to Model B.
+
+
 ##### Model testing
 
-### Results
+For the test data set, we used the trianing data to train the model to predict the class for the test data. The performance of each classifier within the ensemble was then evaluated by the classification rate (percentage accuracy) and inspection of the confusion matrix.
 
-> * Should I consider the consistency of prediction between algorithms and come up with a single prediction for each instance and then test the accuracy of that? How many cases are incorrectly classified by all four algorithms? How many are only misclassified by one algorithm? etc.
-> * Should I present the full tables for each analysis in this section (e.g., Table \@ref(tab:g5-PRA-all-models-classification-rates)? They could go into supplementary information/an appendix and I can just keep Table \@ref(tab:g5-PRA-best-models-classification-rates).
->    * Add the number of features for each model to each table.
+For the validation data set, we assigned a *voted predicted class* for each candidate based on the average predicted class across the classifier ensemble^[We also used the Multilayer Perceptron (MLP; @Bishop2006) classfier for these classification analyses to ensure that there were no ties amongst the predicted classes for a given object.] for each model developed with the training data. We used the classification rate based on the voted predicted class to evaluate the performance of the model.
+
+
+### Results
 
 #### Getting to assessment within 18 months of training
 
 ##### Male candidates
 
-The classificaiton rates for both the training and test data were very good (i.e., approx 90%), however the predictive classification rates were lower (approx 70%). This suggests that the model developed is not overfitted to the training data, as there is little difference in the training and test classification rates. there are (at least) two plausible reasons for the lower classification rate in the predictive data. Firstly, it is possible that candidates are creating narritives in their minds based on whether or not they have been assessed and that had they answered the survey before being assessed, then their answers may have been different. A second explination is that because candidates were not at the same point in time when they answered the survey, their answers were different to those they would have given six-months later. For example, a candidate may not have felt that they had made much progress towards becoming a Mountian Leader 6-12 months post-training and then may make progress in the 12-18 month period.
+The classification rates for both the training and test data were very good (i.e., approx 90%), however the predictive classification rates were lower (approx 70%). This suggests that the model developed is not over-fitted to the training data, as there is little difference in the training and test classification rates. 
+
+there are (at least) two plausible reasons for the lower classification rate in the predictive data. Firstly, it is possible that candidates are creating narratives in their minds based on whether or not they have been assessed and that had they answered the survey before being assessed, then their answers may have been different. A second explanation is that because candidates were not at the same point in time when they answered the survey, their answers were different to those they would have given six-months later. For example, a candidate may not have felt that they had made much progress towards becoming a Mountain Leader 6-12 months post-training and then may make progress in the 12-18 month period.
 
 
 ###### Model selection
 
-We tested `r nrow(G5_male_GTA18m_train_PRA)` models using the training data; the performance of each model can be seen in Table \@ref(tab:g5-male-gta18m-train-models). There were three models tied with the best perfomance, these models were made up of similar variables.
+```{r}
+g5_male_gta_18m_fs %>% 
+  filter(feature_subset %in% 
+           c("omnibus_survey_3s_3s", "omnibus_2s_3s", "all_in_3s")) %>% 
+  .$variables %>%
+  paste(collapse = ",") %>%
+  str_extract_all("[0-9]+") %>% 
+  table() %>% 
+  as.data.frame() %>% 
+  transmute(var = as.numeric(as.character(.)),
+            Freq = Freq) %>% 
+  arrange(var) -> g5_male_gta_18m_features
+```
 
-```{r g5-male-gta18m-train-models, eval = TRUE}
-G5_male_GTA18m_train_PRA %>% 
-  mutate(Rating = case_when(between(median, 0, 60) ~ "Poor",
-    between(median, 60, 70) ~ "Modest",
-    between(median, 70, 80) ~ "Good",
-    between(median, 80, 90) ~ "Very Good",
-    between(median, 90, 100) ~ "Excellent")) %>% 
-  select(-c(mean, median)) %>% 
-  kable(caption = "Group 5 male candidates getting to assessment within 18 months of training, training model performance", digits = 2, booktab = TRUE) %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), 
-                full_width = FALSE)
+We tested `r nrow(G5_male_GTA18m_train_PRA)` models using the training data; the performance of each model can be seen in Table \@ref(tab:g5-male-gta18m-train-models). There were three models tied with the best performance, containing `r nrow(g5_male_gta_18m_features)` unique features. No model contained all `r nrow(g5_male_gta_18m_features)` features, however, `r g5_male_gta_18m_features %>% filter(Freq == 5) %>% nrow()` features were included in all three models and `r g5_male_gta_18m_features %>% filter(Freq == 1) %>% nrow()` features were unique to just one of the three models. Figure \@ref(fig:male-GTA-18m-plot-combined) shows the normalised group means for the training data of the `r nrow(g5_male_gta_18m_features)` features selected across the models.
+
+
+```{r male-GTA-18m-plot-combined, fig.cap="Normalised training group means for male candidates getting to assessment within 18 months of their training course."}
+#bind_rows(G5_male_GTA_18m_pred, G5_male_GTA_18m_test, G5_male_GTA_18m_train) %>% 
+G5_male_GTA_18m_train %>% 
+  select(-c(CandidateId, SexId)) %>% 
+  select(g5_male_gta_18m_features$var, Assessed_18months) %>% 
+  lapply(normalize) %>% 
+  as.data.frame() %>% 
+  group_by(Assessed_18months) %>% 
+  summarise_all(mean) %>% 
+  reshape2::melt(id.vars = "Assessed_18months", 
+                 measure.vars = colnames(.)) %>% 
+  filter(variable != "Assessed_18months") %>% 
+  mutate(variable = as.character(variable)) -> df
+
+plot_ly(type = 'scatterpolargl',
+  mode = "lines+markers",
+  fill = 'toself') %>%
+  add_trace(r = c(subset(df, Assessed_18months == 0, select = c("variable", "value"))$value,
+          subset(df, Assessed_18months == 0, select = c("variable", "value"))$value[1]),
+    theta = c(subset(df, Assessed_18months == 0, select = c("variable", "value"))$variable, 
+              subset(df, Assessed_18months == 1, select = c("variable", "value"))$variable[1]),
+    name = 'Not assessed') %>%
+  add_trace(r = c(subset(df, Assessed_18months == 1, select = c("variable", "value"))$value, 
+          subset(df, Assessed_18months == 1, select = c("variable", "value"))$value[1]),
+    theta = c(subset(df, Assessed_18months == 1, select = c("variable", "value"))$variable, 
+              subset(df, Assessed_18months == 1, select = c("variable", "value"))$variable[1]),
+    name = 'Assessed') %>%
+  layout(polar = list(radialaxis = list(visible = T, range = c(0,1))),
+         legend = list(orientation = "h"),
+         margin = list( r = 75, t = 50),
+         font = list(size = 11)) -> p
+
+if (knitr::is_html_output()) {
+  p
+} else
+{
+  p %>%
+    orca(file = "plots/male-GTA-18m-plot-combined.png")
+  
+  include_graphics("plots/male-GTA-18m-plot-combined.png",
+                   auto_pdf = TRUE)
+}
+
 ```
 
 
-```{r male-GTA-18m-plot-omnibus-survey-3s-3s, fig.cap="male-GTA-18m-plot-omnibus-survey-3s-3s", cache=FALSE}
-gta_male_g5_18m_FS %>% 
+```{r male-GTA-18m-plot-omnibus-survey-3s-3s, fig.cap="male-GTA-18m-plot-omnibus-survey-3s-3s", eval=FALSE}
+g5_male_gta_18m_fs %>% 
   filter(feature_subset == "omnibus_survey_3s_3s") %>% 
   .$variables %>%
   paste(collapse = ",") %>%
@@ -1391,8 +1346,8 @@ if (knitr::is_html_output()) {
 ```
 
 
-```{r male-GTA-18m-plot-omnibus-2s-3s, fig.cap="male-GTA-18m-plot-omnibus-2s-3s", cache=FALSE}
-gta_male_g5_18m_FS %>% 
+```{r male-GTA-18m-plot-omnibus-2s-3s, fig.cap="male-GTA-18m-plot-omnibus-2s-3s", eval=FALSE}
+g5_male_gta_18m_fs %>% 
   filter(feature_subset == "omnibus_2s_3s") %>% 
   .$variables %>%
   paste(collapse = ",") %>%
@@ -1444,30 +1399,125 @@ if (knitr::is_html_output()) {
                    auto_pdf = TRUE)
 }
 
+```
+
+
+```{r male-GTA-18m-plot-all-in-3s, fig.cap="male-GTA-18m-plot-all-in-3s", eval=FALSE}
+g5_male_gta_18m_fs %>% 
+  filter(feature_subset == "all_in_3s") %>% 
+  .$variables %>%
+  paste(collapse = ",") %>%
+  str_extract_all("[0-9]+") %>% 
+  table() %>% 
+  as.data.frame() %>% 
+  transmute(var = as.numeric(as.character(.)),
+            Freq = Freq) %>% 
+  arrange(var) -> x
+
+G5_male_GTA_18m_train %>% 
+  select(-c(CandidateId, SexId)) %>% 
+  select(x$var, Assessed_18months) %>% 
+  lapply(normalize) %>% 
+  as.data.frame() %>% 
+  group_by(Assessed_18months) %>% 
+  summarise_all(mean) %>% 
+  reshape2::melt(id.vars = "Assessed_18months", 
+                 measure.vars = colnames(.)) %>% 
+  filter(variable != "Assessed_18months") %>% 
+  mutate(variable = as.character(variable)) -> df
+
+plot_ly(type = 'scatterpolargl',
+  mode = "lines+markers",
+  fill = 'toself') %>%
+  add_trace(r = c(subset(df, Assessed_18months == 0, select = c("variable", "value"))$value,
+          subset(df, Assessed_18months == 0, select = c("variable", "value"))$value[1]),
+    theta = c(subset(df, Assessed_18months == 0, select = c("variable", "value"))$variable, 
+              subset(df, Assessed_18months == 1, select = c("variable", "value"))$variable[1]),
+    name = 'Not assessed') %>%
+  add_trace(r = c(subset(df, Assessed_18months == 1, select = c("variable", "value"))$value, 
+          subset(df, Assessed_18months == 1, select = c("variable", "value"))$value[1]),
+    theta = c(subset(df, Assessed_18months == 1, select = c("variable", "value"))$variable, 
+              subset(df, Assessed_18months == 1, select = c("variable", "value"))$variable[1]),
+    name = 'Assessed') %>%
+  layout(polar = list(radialaxis = list(visible = T, range = c(0,1))),
+         legend = list(orientation = "h"),
+         margin = list( r = 75, t = 50),
+         font = list(size = 11)) -> p
+
+if (knitr::is_html_output()) {
+  p
+} else
+{
+  p %>%
+    orca(file = "plots/male-GTA-18m-plot-all-in-3s.png")
+  
+  include_graphics("plots/male-GTA-18m-plot-all-in-3s.png",
+                   auto_pdf = TRUE)
+}
 
 ```
 
 
 ###### Model testing
 
-##### Female candidates
+We tested the three models selected above on the previously unseen test data. Across all five classification algorithms, each model classified the test data with 90% accuracy. In each of the three models, case 8 was missclassified by NB, SMO, and IB6 and case 3 was misclassified by J48. The fact the models made the same errors is unsurprising given the number of shared attributes. The performance of these three models on the test data is evidence that the model is not overfitted to the training data, thus increasing our confidence that the variables selected are important discriminatory variables.
 
-```{r g5-female-gta18m-train-models, eval=TRUE}
-G5_female_GTA18m_PRA %>% 
-  mutate(Rating = case_when(between(median, 0, 60) ~ "Poor",
-    between(median, 60, 70) ~ "Modest",
-    between(median, 70, 80) ~ "Good",
-    between(median, 80, 90) ~ "Very Good",
-    between(median, 90, 100) ~ "Excellent")) %>% 
-  select(-c(mean, median)) %>% 
-  kable(caption = "Group 5 female candidates getting to assessment within 18 months of training, training model performance", digits = 2, booktab = TRUE) %>%
+
+###### Model validation
+
+In these data, the performance of the classification algorithms was consistent across both the classifiers and models, but was lower than in the test data (Table \@ref(tab:g5-male-gta18m-valid)). There are three main reasons this may be: firstly, in the training and test data candidates who had been assessed more than 18 months post-training were excluded from the analyses, these candidates would most likely be misclassified as assessed within 18 months of training **EXPLAIN**. Secondly, these data were collected from candidates who had completed their training less than 18 months prior to training
+
+
+```{r g5-male-gta18m-valid}
+G5_male_GTA18m_valid_PRA %>% 
+  filter(data == "pred") %>% 
+  select(-c(data, mean, median, n)) %>% 
+  kable(caption = "Group 5 male candidates getting to assessment within 18 months of training, prediction model performance (n = 164).", digits = 2, booktab = TRUE) %>%
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), 
                 full_width = FALSE)
 ```
 
 
+Table \@ref(tab:g5-male-GTA-18m-pred-perform) shows that the models are good at classifying candidates who have not been assessed (CR $\approx$ 75%) and those who have been assessed within 18 months (CR $\approx$ 78%), but is poor at classifying those who are assessed after more than 18 months (CR $\approx$ 30%). This is not surprising given that group was not included in the training data, thus is arguably a different classification problem. Analysing the data collected from candidates who had not been assessed when the completed the survey but were trained over 18 months ago, may identify a different model. Ideally data would be collected in a proper prospective fashion. 
+
+The results from this dataset do allow us to place more confidence in the models selected and many of the classification errors may not be important to Mountain Training as some of the candidates who are being misclassified are still going on to be assessed (most within 24 months of their training).
+
+
+```{r g5-male-GTA-18m-pred-perform}
+g5_male_GTA_18m_pred_perform %>% 
+  mutate(all_in_3s_voted = case_when(all_in_3s_pct < 50 ~ 0,
+                                     all_in_3s_pct > 50 ~ 1,
+                                     all_in_3s_pct == 50 ~ .5),
+         omni_2s_3s_voted = case_when(omni_2s_3s_pct < 50 ~ 0,
+                                     omni_2s_3s_pct > 50 ~ 1,
+                                     omni_2s_3s_pct == 50 ~ .5),
+         omni_survey_3s_3s_voted = case_when(omni_2s_3s_pct < 50 ~ 0,
+                                     omni_2s_3s_pct > 50 ~ 1,
+                                     omni_2s_3s_pct == 50 ~ .5)) %>% 
+  group_by(survey_time, assessed_18m, assessed) %>% 
+  summarise(all_in_3s = mean(all_in_3s_voted) * 100,
+            omni_2s_3s = mean(omni_2s_3s_voted) * 100,
+            omni_survey_3s_3s = mean(omni_survey_3s_3s_voted) * 100,
+            n = n()) %>% 
+    kable(caption = "Group 5 male candidates getting to assessment within 18 months of training, prediction model performance", digits = 2, booktab = TRUE) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), 
+                full_width = FALSE) %>% 
+  add_footnote("make sure I explain exactly what the percentages mean in this table. They are not just the classification rates. it is something about the number of classification algorithms which correctly predicted the class of each case.")
+```
+
+
+
+
+
+##### Female candidates
+
+\@ref(tab:g5-female-gta18m-train-models) shows the classification rates for all models
+
+
+
+
 ```{r female-GTA-18m-omnibus-survey-3s-3s-plot, fig.cap="female-GTA-18m-omnibus-survey-3s-3s-plot"}
-gta_female_g5_18m_FS %>% 
+g5_female_gta_18m_fs %>% 
   filter(feature_subset == "omnibus_survey_3s_3s") %>% 
   .$variables %>%
   paste(collapse = ",") %>%
@@ -1524,7 +1574,7 @@ if (knitr::is_html_output()) {
 
 
 ```{r female-GTA-18m-omnibus-3s-3s-plot, fig.cap="female-GTA-18m-omnibus-3s-3s-plot"}
-gta_female_g5_18m_FS %>% 
+g5_female_gta_18m_fs %>% 
   filter(feature_subset == "omnibus_3s_3s") %>% 
   .$variables %>%
   paste(collapse = ",") %>%
@@ -1584,22 +1634,13 @@ if (knitr::is_html_output()) {
 
 * Only top 10 features for previous courses & omnibus_DLOG_3s
 
-```{r g5-zsex-ftp-train-models, eval=TRUE}
-G5_zsex_ftp_train_PRA %>% 
-  mutate(Rating = case_when(between(median, 0, 60) ~ "Poor",
-    between(median, 60, 70) ~ "Modest",
-    between(median, 70, 80) ~ "Good",
-    between(median, 80, 90) ~ "Very Good",
-    between(median, 90, 100) ~ "Excellent")) %>% 
-  select(-c(mean, median)) %>% 
-  kable(caption = "Group 5 passing first time, training model performance", digits = 2, booktab = TRUE) %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), 
-                full_width = FALSE)
-```
+\@ref(tab:g5-zsex-ftp-train-models) shows the classification rates for all models
+
+
 
 
 ```{r zsex-ftp-omnibus-survey-2s-3s-plot, fig.cap="zsex-ftp-omnibus-survey-2s-3s-plot"}
-ftp_zsex_g5_FS %>% 
+g5_zsex_ftp_fs %>% 
   filter(feature_subset == "omnibus_survey_2s_3s") %>% 
   .$variables %>%
   paste(collapse = ",") %>%
@@ -1656,10 +1697,6 @@ if (knitr::is_html_output()) {
 
 
 
-
----
-
-
 ### Discussion
 
 The studies presented in this report aimed to identify important factors that discriminated candidates who (a) having been trained, went on to be assessed within 18 months of training from those who did not, and (b) having got to their first assessment, pass first time from those who do not. To achieve these aims we considered a wide range of potentially relevant variables. The results presented show that there is no one single factor that is important for discriminating candidates and in fact there are some important commonalities between groups, which are likely fundamental for the successful completion of the Mountain Leader qualification. Some of the discriminatory variables are common to both stages of completion, or to both female and male candidates getting to assessment.
@@ -1667,13 +1704,13 @@ The studies presented in this report aimed to identify important factors that di
 
 #### Male candidates - Getting to assessment
 
-The results presented in [Getting to assessment: Male candidates](#males) suggest that how becoming a Mountain Leader fits into male candidates' lives is important when considering the likelihood of them being assessed. If a candidate **feels that becoming a Mountain Leader is an important life goal, generally or relative to other life goals**, they may be more likely to commit time and resources towards it, thus may feel that they can prepare for an assessment in a shorter period of time, which for many, would include revisiting more technical areas of the syllabus like river crossings or practising skills they rarely use like emergency rope work. Candidates who felt that they had more **available time** to become a Mountain Leader, had done more to **effectively prepare for a Mountain Leader assessment**, had made more **progress towards becoming a Mountain Leader**, and were **more confident that they could become a Mountain Leader than to achieve other life goals** were more likely to have been assessed 18 months after their training course.
+The results presented in Getting to assessment: Male candidates suggest that how becoming a Mountain Leader fits into male candidates' lives is important when considering the likelihood of them being assessed. If a candidate **feels that becoming a Mountain Leader is an important life goal, generally or relative to other life goals**, they may be more likely to commit time and resources towards it, thus may feel that they can prepare for an assessment in a shorter period of time, which for many, would include revisiting more technical areas of the syllabus like river crossings or practising skills they rarely use like emergency rope work. Candidates who felt that they had more **available time** to become a Mountain Leader, had done more to **effectively prepare for a Mountain Leader assessment**, had made more **progress towards becoming a Mountain Leader**, and were **more confident that they could become a Mountain Leader than to achieve other life goals** were more likely to have been assessed 18 months after their training course.
 
 Some candidates are less certain in their **understanding of the purpose of the Mountain Leader qualification prior to their training course** and may be attending in order to find out more about the qualification, whereas those who are more certain of the purpose are more likely to be doing it in order to progress to an assessment. The **strength of candidates' intentions to be assessed at the end of their training course** being an important discriminatory variable is in line with the *Theory of Planned Behaviour* [@Ajzen1991]. The Theory of Planned Behaviour suggests that intentions are the strongest predictors of behaviour and that the strength of these intentions also predicts the behaviour [@Armitage2001]. 
 
-The strength of a candidate's intention to be assessed at the end of the training course may be more important than their intention at the start because the candidates who were less sure of the purpose of the Mountain Leader qualification would have had less information to base their intention on. This position is supported by the fact the correlation between being assessed 18 months post-training and the intention to be assessed at the start of the training course (`r (cor.test(G5_male_GTA_18m_train$TrainStartAssessIntention, G5_male_GTA_18m_train$Assessed_18months))$estimate`) is lower than the correlation between being assessed 18 months post-training and the intention to be assessed at the end of the training course (`r (cor.test(G5_male_GTA_18m_train$TrainEndAssessIntention, G5_male_GTA_18m_train$Assessed_18months))$estimate`). [The results in Expectations and intentions](#exp-int) support this, including using prospective data and retrospective data from female candidates, which suggests the strength of intention is important for all candidates, despite not being one of the most important discriminatory variables for female candidates.
+The strength of a candidate's intention to be assessed at the end of the training course may be more important than their intention at the start because the candidates who were less sure of the purpose of the Mountain Leader qualification would have had less information to base their intention on. This position is supported by the fact the correlation between being assessed 18 months post-training and the intention to be assessed at the start of the training course (`r (cor.test(G5_male_GTA_18m_train$TrainStartAssessIntention, G5_male_GTA_18m_train$Assessed_18months))$estimate`) is lower than the correlation between being assessed 18 months post-training and the intention to be assessed at the end of the training course (`r (cor.test(G5_male_GTA_18m_train$TrainEndAssessIntention, G5_male_GTA_18m_train$Assessed_18months))$estimate`). The results in Expectations and intentions support this, including using prospective data and retrospective data from female candidates, which suggests the strength of intention is important for all candidates, despite not being one of the most important discriminatory variables for female candidates.
 
-Candidates who **expect it to take them longer to get from training to assessment** are less likely to be assessed within a given period^[Of the `r Group5 %>% filter(Assessed_18months == 0 & TrainToSurvey >1.5) %>% .$TrainEndExpTimeToAssess %>% length()` candidates not assessed within 18 months of their training, only `r Group5 %>% filter(Assessed_18months == 0 & TrainToSurvey >1.5 & TrainEndExpTimeToAssess > 18) %>% .$TrainEndExpTimeToAssess %>% length()` expected it to take them more than 18 months.]. Candidates may also expect it to take them longer as they either have less available time, live further from the mountains, or a combination of the two, making it more difficult to fit into their lives. If candidates who expect to take longer do take longer, then there will be more opportunities for things to get in the way of them pursuing that goal and becoming barriers to completion.
+Candidates who **expect it to take them longer to get from training to assessment** are less likely to be assessed within a given period^[Of the `r group_5 %>% filter(Assessed_18months == 0 & TrainToSurvey >1.5) %>% .$TrainEndExpTimeToAssess %>% length()` candidates not assessed within 18 months of their training, only `r group_5 %>% filter(Assessed_18months == 0 & TrainToSurvey >1.5 & TrainEndExpTimeToAssess > 18) %>% .$TrainEndExpTimeToAssess %>% length()` expected it to take them more than 18 months.]. Candidates may also expect it to take them longer as they either have less available time, live further from the mountains, or a combination of the two, making it more difficult to fit into their lives. If candidates who expect to take longer do take longer, then there will be more opportunities for things to get in the way of them pursuing that goal and becoming barriers to completion.
 
 Further, experiencing **social change** after a training course may mean that candidates have more or less available time, or have changes in their priorities. The question used in the survey did not ask if candidates had more or less resources (e.g., available time) because of this change, however given that more social change a candidate experienced, the less likely they were to be assessed within 18 months, it would be reasonable to assume that these social changes are more likely to leave candidates with less, rather than more, resources to become Mountain Leaders. 
 
@@ -1690,7 +1727,7 @@ Candidates who **feel less able to look after themselves and others than they wo
 
 #### Female candidates - Getting to assessment
 
-As with the results for [Male candidates](#males), **how important becoming a Mountain Leader is to a candidate, relative to other life goals**, is an important discriminatory variable for female candidates. We would expect this variable to have the same implications as those already discussed for male candidates. Again, the more **progress that candidates have made towards becoming a Mountain Leader**, the more likely they are to feel that they have **prepared effectively for a Mountain Leader assessment** and in doing so, they will have gained experience that boosts their confidence in their abilities to perform task related to the assessment. It is likely that **professional change** will have similar effects for female candidates as social change does for male candidates.
+As with the results for male candidates, **how important becoming a Mountain Leader is to a candidate, relative to other life goals**, is an important discriminatory variable for female candidates. We would expect this variable to have the same implications as those already discussed for male candidates. Again, the more **progress that candidates have made towards becoming a Mountain Leader**, the more likely they are to feel that they have **prepared effectively for a Mountain Leader assessment** and in doing so, they will have gained experience that boosts their confidence in their abilities to perform task related to the assessment. It is likely that **professional change** will have similar effects for female candidates as social change does for male candidates.
 
 We asked candidates to give two reasons that they had registered for the Mountain Leader qualification. For their first reason, most candidates said that they had registered in order to become a Mountain Leader (n.b., this is an extrinsic participatory motive). The candidates who gave an _**extrinsic participatory motive**_ **for their second motive** (e.g., "Qualify as a Mountain Leader) ”) rather than a more intrinsic one (e.g., to spend more time in the mountains) were more likely to have been assessed 18 months after their training course. This finding suggests that having more than one extrinsic participatory motive is important for candidates getting to assessment.
 
@@ -1698,9 +1735,9 @@ We asked candidates to give two reasons that they had registered for the Mountai
 
 If candidates feel that becoming a Mountain Leader is important to them, they may also feel that it is important that they are good enough to pass when they get there. This suggestion helps to explain why candidates who were assessed felt that **ideally, they would have a higher number of QMDs at assessment**. Another explanation could be that candidates who have not received goal setting support have fewer clear goals and do not feel that they can use the time as efficiently, therefore feel that they would ideally have more QMDs before being assessed.
 
-The results presented in [Female candidates: Getting to assessment](#females) and [Mountain Leader related self-efficacy](#ML-self-efficacy) show that female candidates who are assessed within 18 months of their training have higher levels of **self-efficacy pre-assessment** than those who are not and that these higher levels of self-efficacy are associated with experience gained after the training course. These items are about areas of the syllabus relating to hazards and emergency procedures, where mistakes may have serious and immediate consequences for other people. It may be especially important for course staff to help female candidates set goals that help them develop their confidence to perform these tasks.
+The results presented in Female candidates: Getting to assessment and Mountain Leader related self-efficacy show that female candidates who are assessed within 18 months of their training have higher levels of **self-efficacy pre-assessment** than those who are not and that these higher levels of self-efficacy are associated with experience gained after the training course. These items are about areas of the syllabus relating to hazards and emergency procedures, where mistakes may have serious and immediate consequences for other people. It may be especially important for course staff to help female candidates set goals that help them develop their confidence to perform these tasks.
 
-Discrepancies between the ideal and post-training levels of self-efficacy were not selected as important discriminatory variables, whilst three of the **pre-assessment self-efficacy** items were. This would suggest that it is not the discrepancy that is important, but the pre-assessment levels of self-efficacy, which will be influenced by candidates' experiences and how much preparation they feel that they have done. This hypothesis is supported in [Sex differences](#sex-diffs) where there is evidence of a positive relationship between experience and confidence, which is stronger for female candidates than it is for male candidates.
+Discrepancies between the ideal and post-training levels of self-efficacy were not selected as important discriminatory variables, whilst three of the **pre-assessment self-efficacy** items were. This would suggest that it is not the discrepancy that is important, but the pre-assessment levels of self-efficacy, which will be influenced by candidates' experiences and how much preparation they feel that they have done. This hypothesis is supported in Sex differences where there is evidence of a positive relationship between experience and confidence, which is stronger for female candidates than it is for male candidates.
 
 **It is both interesting and important to note, that 10 of the 11 the features in this discriminatory subset relate to the consolidation period. Considering this combination of variables, the timing of them, and the relationship between the number of QMDs and pre-assessment self-efficacy, the importance of female candidates gaining additional and relevant experience after their training course becomes paramount.**
 
@@ -1732,13 +1769,16 @@ Several limitations can be identified in this project. Firstly, most of the data
 
 Secondly, there is some evidence of sampling bias in the data used to identify the important discriminatory factors for both getting to assessment and passing. The proportion of female and male candidates who did get to assessment within 18 months of their training course is not the same in the retrospective data (females = 23.21% and males = 41.35%) as it is in the population of candidates trained in the same period (females = 19.02% and males = 30.22%). In addition to this, the proportion of males who did not pass their first assessment is not the same in the retrospective data (13.5%) as it is in the prospective data (19.6%) or in the population^[Candidates who were first trained after 2016.] (19.8%); there is no evidence of the same problem in the data collected from female candidates. The simplest explanation for this is that candidates who are not assessed and male candidates who do not pass their first assessment are less likely to _**retrospectively**_ respond to the survey. 
 
-Whilst there may be a subset of candidates that are not represented in the data collected as part of this project, we believe that the findings presented in this report can be used to make a positive impact on the completion rate of the Mountain Leader qualification. This belief is based not only on the analyses of retrospective and prospective data presented here, but their congruence with the results from the [initial qualitative study](#Study1) and existing literature.
+Whilst there may be a subset of candidates that are not represented in the data collected as part of this project, we believe that the findings presented in this report can be used to make a positive impact on the completion rate of the Mountain Leader qualification. This belief is based not only on the analyses of retrospective and prospective data presented here, but their congruence with the results from the initial qualitative study and existing literature.
 
 Reanalysis of these data in the future should mitigate this sampling bias so that the response rate in the prospective data is similar to that in the population and reduce the impact of recall bias. However, a truly prospective study that collected data from candidates at registration, training, and during their consolidation would likely overcome the limitations described above.
 
 * Indicators not measures
 * Retrospective
 * Dichotomising continuous data?
+
+
+
 
 ## Discussion
 
@@ -1762,4 +1802,146 @@ Reanalysis of these data in the future should mitigate this sampling bias so tha
 
 
 <div id = "refs"></div>
+\endgroup
+
+
+\newpage
+## Study 2 supplementary information
+
+### Variables
+
+* Add column for which groups were asked each variable (including Group 5)
+
+```{r eshot-vars}
+eshot_vars %>% 
+  select(var_description, measure, source, n_items_full, n_items_short) %>% 
+  mutate(source = if_else(is.na(source) == FALSE, 
+                          paste0("@", source), source)) %>% 
+    kable(caption = "Survey variables", digits = 0, booktab = TRUE) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), 
+                full_width = FALSE)
+```
+
+### Study 2 classificaiton rates
+
+```{r study-2-classification-rates, results="asis"}
+bind_rows(
+  read_xlsx("../3 eshot/PRA_Results/GTA_Classification_rates.xlsx", 
+            sheet = "Sheet2")[1:16,] %>% 
+    mutate(Analysis = "Getting to assessment within 18 months of training",
+           Group = case_when(str_detect(Model, "G1") ~ "1",
+                             str_detect(Model, "G2") ~ "2",
+                             str_detect(Model, "G3") ~ "3",
+                             str_detect(Model, "G4") ~ "4"),
+           Data = case_when(str_detect(Model, "DLOG") ~ "With DLOG",
+                            str_detect(Model, "PaperLog") ~ "No DLOG"),
+           Subset = case_when(str_detect(Model, "_4s") ~ "4s",
+                              str_detect(Model, "_3s") ~ "3s",
+                              str_detect(Model, "_2s") ~ "2s",
+                              str_detect(Model, "_F3") ~ "3s RFE",
+                              str_detect(Model, "_F2") ~ "2s RFE")) %>% 
+    filter(str_detect(Model, "_CV") == FALSE) %>% 
+    select(-Model, -NN6, -NN10) %>% 
+    select(Analysis, Group, Data, Subset, everything()), 
+  read_xlsx("../3 eshot/PRA_Results/FTP_classification_rates.xlsx", 
+            sheet = "Sheet1") %>% 
+    mutate(Analysis = "Passing first time",
+           Group = case_when(str_detect(Model, "G1") ~ "1",
+                             str_detect(Model, "G2") ~ "2",
+                             str_detect(Model, "G3") ~ "3",
+                             str_detect(Model, "G4") ~ "4"),
+           Data = case_when(str_detect(Model, "DLOG") ~ "With DLOG",
+                            str_detect(Model, "PaperLog") ~ "No DLOG"),
+           Subset = case_when(str_detect(Model, "_4s") ~ "4s",
+                              str_detect(Model, "_3s") ~ "3s",
+                              str_detect(Model, "_2s") ~ "2s",
+                              str_detect(Model, "_F3") ~ "3s RFE",
+                              str_detect(Model, "_F2") ~ "2s RFE")) %>% 
+    filter(str_detect(Model, "_CV") == FALSE) %>% 
+    select(-Model, -NN6) %>% 
+    select(Analysis, Group, Data, Subset, everything())) %>% 
+  #apa_table(caption = "Classificaion rates for the feature subset with the highest classification rates for each data set (percentage accuracy).", note = "J48 = J48 Decision Tree, NN1 = Instance Based Learning (k=1), NB = Naïve Bayes, SMO = Sequential Minimal Optimization", col_spanners = list(`Classifier` = c(5,8))) %>% 
+  kable(caption = "Classification rates for the feature subset with the highest classification rates for each data set (percentage accuracy).", booktab = TRUE, format = if (is_latex_output()) {"latex"} else {"html"}) %>% 
+  add_header_above(header = c(" " = 4, "Classifier" = 4)) %>% 
+  column_spec(1, "5cm", italic = TRUE) %>% 
+  collapse_rows(valign = "top", columns = c(1:2)) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = FALSE) %>%
+  add_footnote(label = "Note: J48 = J48 Decision Tree, NN1 = Instance Based Learning (k=1), NB = Naïve Bayes, \nSMO = Sequential Minimal Optimization", notation = "none")
+
+```
+
+
+## Study 3 supplementary information
+
+
+### Example ominbus feature subsets
+
+1. Omnibus survey
+    a) Survey 2s = Psychosocial 2s + Training 2s + Consolidation 2s
+    b) Survey 3s = Psychosocial 3s + Training 3s + Consolidation 3s
+    c) Survey 4s = Psychosocial 4s + Training 4s + Consolidation 4s
+2. Omnibus DLOG
+    a) DLOG 2s = DLOG t 2s + DLOG t6 2s + DLOG t12 2s + DLOG t18 2s
+    a) DLOG 3s = DLOG t 3s + DLOG t6 3s + DLOG t12 3s + DLOG t18 3s
+    a) DLOG 4s = DLOG t 4s + DLOG t6 4s + DLOG t12 4s + DLOG t18 4s
+3. Omnibus survey and DLOG
+    a) Survey and DLOG 2s = Psychosocial 2s + Training 2s + Consolidation 2s + DLOG t 2s + DLOG t6 2s + DLOG t12 2s + DLOG t18 2s
+    a) Survey and DLOG 3s = Psychosocial 3s + Training 3s + Consolidation 3s + DLOG t 3s + DLOG t6 3s + DLOG t12 3s + DLOG t18 3s
+    a) Survey and DLOG 4s = Psychosocial 4s + Training 4s + Consolidation 4s + DLOG t 4s + DLOG t6 4s + DLOG t12 4s + DLOG t18 4s
+    
+    
+### Male getting to assessment training model performance 
+
+```{r g5-male-gta18m-train-models, eval = TRUE}
+G5_male_GTA18m_train_PRA %>% 
+  mutate(Rating = case_when(between(median, 0, 60) ~ "Poor",
+    between(median, 60, 70) ~ "Modest",
+    between(median, 70, 80) ~ "Good",
+    between(median, 80, 90) ~ "Very Good",
+    between(median, 90, 100) ~ "Excellent")) %>% 
+  select(-c(mean, median)) %>% 
+  kable(caption = "Group 5 male candidates getting to assessment within 18 months of training, training model performance", digits = 2, booktab = TRUE) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), 
+                full_width = FALSE)
+```
+
+
+### Female getting to assessment training model performance 
+
+```{r g5-female-gta18m-train-models, eval=TRUE}
+G5_female_GTA18m_PRA %>% 
+  mutate(Rating = case_when(between(median, 0, 60) ~ "Poor",
+    between(median, 60, 70) ~ "Modest",
+    between(median, 70, 80) ~ "Good",
+    between(median, 80, 90) ~ "Very Good",
+    between(median, 90, 100) ~ "Excellent")) %>% 
+  select(-c(mean, median)) %>% 
+  kable(caption = "Group 5 female candidates getting to assessment within 18 months of training, training model performance", digits = 2, booktab = TRUE) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), 
+                full_width = FALSE)
+```
+
+
+### First time pass model performance
+
+```{r g5-zsex-ftp-train-models, eval=TRUE}
+G5_zsex_ftp_train_PRA %>% 
+  mutate(Rating = case_when(between(median, 0, 60) ~ "Poor",
+    between(median, 60, 70) ~ "Modest",
+    between(median, 70, 80) ~ "Good",
+    between(median, 80, 90) ~ "Very Good",
+    between(median, 90, 100) ~ "Excellent")) %>% 
+  select(-c(mean, median)) %>% 
+  kable(caption = "Group 5 passing first time, training model performance. Data standardised within sex", digits = 2, booktab = TRUE) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), 
+                full_width = FALSE)
+```
+
+\begingroup
+\setlength{\parindent}{-0.5in}
+\setlength{\leftskip}{0.5in}
+\setstretch{1.0}
+
+
+<div id = "study3_supp_info"></div>
 \endgroup
