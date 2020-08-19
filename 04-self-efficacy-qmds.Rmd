@@ -1,3 +1,633 @@
 # Self-Efficacy and Quality Mountain Days
 
-We have finished a nice book.
+```{r 04-setup, include=FALSE, cache=FALSE}
+set.seed(343)
+library(semPlot)
+library(papaja)
+library(knitr)
+library(tidyverse)#tidyverse for basic data management + plotting
+library(psych)#psych for dataset + basic psychometrics
+library(lavaan)#lavaan for CFA/SEM
+library(semTools)#semTools for additional CFA/SEM functionality
+library(randomizr) #for randomly assigning participants to block
+library(parallel)
+library(interactions)
+library(kableExtra)
+library(readxl)
+library(lm.beta)
+library(car)
+library(apaTables)
+library(ggthemes)
+library(apaTables)
+
+### Data ###
+Group1to4 <- readRDS("chapter_3_data/Group1to4.rds")
+group_5 <- readRDS("chapter_3_data/Group5.rds")
+eshot_vars <- 
+  read_xlsx("../3 eshot/Design/eshot_variables.xlsx", 
+            sheet = "Sheet1", na = "NA") %>%
+  mutate(full_model = full_model %>% str_remove_all("\r"),
+    short_model = short_model %>% str_remove_all("\r"))
+
+load("analyses/chapter_4_analyses.RData")
+
+### FUNCTIONS ###
+
+capitalize_str <- function(charcter_string){
+  #function to capitalise first letter of a string
+  #adapted from https://rstudio-pubs-static.s3.amazonaws.com/408658_512da947714740b99253228f084a08a9.html
+  CapStr <- function(y) {
+    c <- strsplit(y, " ")[[1]]
+    paste(toupper(substring(y, 1,1)), substring(y, 2),
+          sep="", collapse=" ")
+  }
+  sapply(charcter_string, CapStr)
+}
+
+if (is_latex_output()) {font = "serif"} else {font = "sans"}
+```
+
+
+## Introduction {#chapter-4-introduction}
+
+An individual's level of self-efficacy reflects their level of confidence that they can perform a specific task successfully at a given moment in time [@Bandura1977]. According to self-efficacy theory, if one possesses the necessary skills and is sufficiently motivated, their level of self-efficacy will be the primary determinant of performance, effort, and persistence---especially in the face of adversity [@Bandura1977; @Bandura1982; @Bandura1997]. Self-efficacy theory posits that there are four main sources of efficacy information, in order of decreasing influence on efficacy-beliefs: (1) previous performance accomplishments, (2) vicarious experience/modelling, (3) social/verbal persuasion, and (4) physiological/emotional states [@Bandura1982]. In a meta-analysis of within-person self-efficacy, @Sitzmann2013 found than previous performance had a moderate to strong effect on efficacy-beliefs ($\rho = .18-.52.$). As self-efficacy theory has been introduced previously (see \@ref(gen-intro-self-efficacy) [General Introduction](#gen-intro-self-efficacy)), we will not repeat details here.
+
+The results of Chapter 2 suggested that it was important that both female and male candidates were confident in their skills in order for them to become Mountain Leaders, but that female candidates needed to be more confident than male candidates did before being assessed. The results of Chapter 3 suggested that candidates' self-efficacy to perform specific skills related to the Mountain Leader qualification were important variables for discriminating both female and male candidates who did and did not get to an assessment within 18 months of their training course, although more self-efficacy variables were important for discriminating female candidates than were important for discriminating male candidates. In addition, the findings from Chapter 3 also highlight the importance of experience. Mountain Training require candidates to have a prerequisite level of specific experience before being assessed (40 Quality Mountain Days), and in Chapter 3, some experience related variables (e.g., QMDs 18 months post-training) were important for discriminating candidates who were assessed 18 months post-training from those who were not. As with the self-efficacy variables, more experience related variables were important for discriminating female candidates who were assessed from those who were not than they were for male candidates.
+
+At this juncture it is important that we provided a note on terminology used in this chapter. Historically, and somewhat incorrectly, the terms *sex* and *gender* have been used somewhat interchangeably. Current guidelines from the American Psychological Association [APA; -@APA2020] define gender as, "the attitudes, feelings, and behaviors that a given culture associates with a person’s biological sex" [@APA2012, p 12]; sex as, "biological sex assignment;" and *gender identity* as "a component of gender that describes a person’s psychological sense of their gender" [@APA2020, Section 5.5]. 
+
+Considering the definitions of sex and gender presented above, it would be more appropriate to use terms such as "man" and "woman" than "female" and "male" when discussing gender differences. However, in the studies reported in this chapter, participants' gender was retrieved from Mountain Training's Candidate Management System (CMS), where it is stored as female, gender neutral, and male. To avoid making presumptions about participants gender identities we have used the terms female and male throughout this chapter. No data were collected from gender neutral candidates, which may be unsurprising given that `r printnum(100*58/203551, zero = FALSE)`% of all Mountain Training Candidates report being gender neutral [@MountainTrainingUK2019a]. Further, following the same principal, when discussing previous research, we have used the terminology that the original authors have used.
+
+Whilst there are no previous studies on gender differences in self-efficacy within the Mountain Leader community, research in education has examined the effects of gender on self-efficacy for over 30 years and has reported that females have lower levels of self-efficacy than males [e.g., @Murphy1989; @Klassen2010]. The field of computer education in particular has considered the relationship between experience, gender, and self-efficacy. For example, @Cassidy2002 report several studies showing that that report female participants have lower levels of computer related self-efficacy than male participants, only when task-difficulty is high. They suggest that it is, "the complexity of the task which determines any gender difference in computer self-efficacy. The more complex the task is, the higher is the perceived masculinity factor and hence men show higher self-efficacy for such tasks" [@Cassidy2002, p 136]. However, when examining the articles cited by @Cassidy2002, it would appear that an important variable---experience---has potentially been overlooked when coming to the conclusion that female and male participants differ in levels of self-efficacy due to perceived task masculinity. 
+
+One example of this is a study by @Torkzadeh1994 into the effects of training and gender on four factors of computer self-efficacy: beginning skills, mainframe skills, advanced skills, and file management. @Torkzadeh1994 only found evidence for gender differences pre-training for one factor; females reported lower self-efficacy scores on the file management factor pre-training. Both female and male participants reported increased levels of self-efficacy post-training for all four factors and there was no longer a significant difference in their scores for any factor. It is interesting that the difference in file management self-efficacy between female and male participants was no longer significant post-training, suggesting that there may be an interaction between gender and training time point on file management self-efficacy, where the effect of training was more positive for female participants (although the authors did not test for the presence of interactions directly). In addition, results reported by @Cassidy2002 suggest that male participants have higher level of self-efficacy pre- and post-training, but do not appear to control for previous experience in their analyses, despite reporting that male candidates "were more experienced."
+
+When considering the results of the previous two chapters through the lens of self-efficacy theory, it is apparent that the relationship between confidence and experience is important when considering what is important for becoming a Mountain Leader and that this relationship may not be the same for female and male candidates. Based on the results of the previous chapters and the computer education studies presented above, it seems reasonable to hypothesise that (a) candidate experience will positively predict their level of self-efficacy, and (b) that this relationship will be influenced by gender. More specifically, this positive relationship should be stronger for female candidates than males.
+
+Therefore, with this interaction perspective in mind, the aim of the present chapter was to investigate the relationship between experience, and gender differences on Mountain Leader related self-efficacy. To do so, we used the data collected for the work reported in Chapter 3 and Appendix B. The remainder of this chapter is structured as follows. Firstly, we present Study 5, which reports on the development and initial validation of a measure of self-efficacy for skills related to becoming a Mountain Leader. Following that, in Study 6, we used the measure created in Study 5 to examine the relationship between self-efficacy, experience, and gender. Participants in Appendix B completed their first Mountain Leader training course between 2008 and 2016, whereas participants in Chapter 3 completed their first Mountain Leader training course in either 2017 or 2018. The availability of digital logbook (DLOG) data is greater the more recently a candidate was trained. Therefore, we used the data from participants in Appendix B for Study 5 and data from participants in Chapter 3 for Study 6. Finally, we discuss these two studies and consider future directions for this research.
+
+
+
+## Study 5: The Mountain Leader Self-Efficacy Scale. {#study-5}
+
+Self-efficacy is domain specific. Therefore, it is important that any measure of self-efficacy is also domain specific [@Bandura2006]. There is no existing measure of Mountain Leader self-efficacy, however, in Chapter 3 we developed 11 self-efficacy items for skills that candidates would be required to perform at assessment based on the Mountain Leader candidate handbook and syllabus [@MountainTrainingUK2015a], and a separate skills checklist [@MountainTrainingUK2015]. Therefore, the aim of Study 5 was to develop a self-efficacy measure using these 11 items.
+
+
+### Methods {#study5-methods}
+
+#### Participants. {#study-5-participants}
+
+```{r chap4-study5-participants, include = FALSE}
+Group1to4 %>% 
+  filter(!is.na(v92)) %>% #have answered pre-assessment self-efficacy questions
+    summarise(n = n(),
+            female = printnum(100*sum(SexId-1)/n()),
+            m_age = printnum(mean(v142, na.rm = TRUE)),
+            sd_age= printnum(sd(v142, na.rm = TRUE)),
+            assessed = printnum(100*mean(case_when(firstMLAssessmentDate < EndDate ~ 1,
+                                               firstMLAssessmentDate > EndDate ~ 0,
+                                               is.na(firstMLAssessmentDate) ~ 0))),
+            .groups = "keep") -> efficacy_s1_participants
+
+efficacy_s1_participants %>% 
+  kable(caption = "Study 5 participants", booktabs = TRUE)
+```
+
+
+Participants for Study 5 were `r efficacy_s1_participants$n` candidates who had attended a Mountain Leader training course between 2008 and 2016 and completed the survey used for the Chapter 3 pilot work (`r efficacy_s1_participants$female`% female, $M_{age}$ `r efficacy_s1_participants$m_age` years, $SD =$ `r efficacy_s1_participants$sd_age`, `r efficacy_s1_participants$assessed`% had been assessed when completing the survey). 
+
+
+#### Measures. {#study-5-measures}
+
+The initial Mountain Leader Self-efficacy Scale (MLSS) comprised 11 items developed by the first author using a inductive content analysis [@Cho2014] of the candidate handbook and syllabus [@MountainTrainingUK2015a] and  skills checklist [@MountainTrainingUK2015]. These items were then checked with the second and third authors, with any disagreements being discussed until a consensus was reached. Finally, Mountain Training viewed the items and agreed that they provided good coverage of the skills that would be covered on an assessment and were worded in a way which would be understood by their candidates. The final scale was made up of 11 items (e.g., “lead a group effectively in the mountains”) rated on a scale of *could not do at all* (0) to *highly certain could do* (100) with a mid-point anchor (*moderately could do*; 50). For those candidates who had been assessed, we asked them to think about how confident they were when they arrived for assessment. We asked candidates who had not been assessed how confident they were when completing the survey.
+
+
+#### Analyses. {#study-5-analyses}
+
+We used an exploratory approach to confirmatory factor analysis with a robust maximum-likelihood estimator using the `R` package `lavaan` [@R-lavaan]. A model was considered a good fit to the data if the Yuan-Bentler [Y-B; @Yuan1997] $\chi^2$ test was not-significant. However, given that this is a test of exact fit, many researchers suggest that it is overly conservative and is often significant when performing CFAs on large samples. Thus, @Joreskog1989 suggests inspecting the $\chi^2/df$ ratio to assess model fit, with values < 2 indicating good model fit. In addition to the $\chi^2/df$ ratio, we also assessed several approximate fit indices and considered the model an approximately good fit if it satisfied the following criteria: the comparative fit index [CFI; @Bentler1990] was greater than or equal to .95, the root-mean-square-residual [RMSEA; @Steiger1990] was less than or equal to .06, and the standardised root-mean-square-residual (SRMR) was less than or equal to .08 [@Hu1999]. We assessed internal consistency  using composite reliability ($\omega$), values >.70 are considered acceptable [@Fornell1981].
+
+In addition to examining the factor structure, we sought to test the factor solution for measurement invariance between female and male candidates. Testing for measure invariance allows one to examine whether scores of a construct have the same meaning in different conditions [@Meade2004]. In this chapter, we tested if the MLSS scores had the same meaning for female and male candidates. More specifically, we sought to test for *configural invariance* (is the factor structure the same across groups?), *weak invariance* (are the factor loadings the same across groups?), and *strong invariance* (are the item intercepts the same across groups?). To do so, we specified three models with additional constraints in each model, which increases the model degrees of freedom. 
+
+To test for configural invariance, the same CFA model is tested in each group, if this model is inconsistent with the data then the measure is considered non-invariant at all levels. The hypothesis of weak invariance in this chapter is that the MLSS unstandardised factor loadings are the same for female and male candidates and the hypothesis of strong invariance is that the MLSS unstandardised factor loadings and item intercepts are the same for female and male candidates [cf. @Kline2016]. These three models are considered to be *nested models* as they have the same model structure but test increasingly strict hypotheses [@Kline2016]. Therefore, changes in fit can be attributed to the constraints associated with each level of invariance. Current guidelines suggest that researchers should use multiple fit statistics to assess model fit [@Kline2016] and that $\chi^2$ and at least two other fit indices should be reported when assessing the fit of invariance models [@Putnick2016]. In this study we used CFI, RMSEA, and SRMR. Simulation results from @Chen2007 suggest that $\Delta_{CFI} > .005$ and $\Delta_{RMSEA} > .010$ between more and less constrained models are adequate for detecting non-invariance.
+
+
+### Results {#study-5-results}
+
+```{r}
+single_fac_fit <- lavaan::fitMeasures(pilot_one_fac_cfa)
+```
+
+
+Results of a single factor CFA revealed a poor fit for a single factor model of all 11 items was not consistent with the data (Y-B$\chi^2 =$ (`r single_fac_fit["df.scaled"]`) `r printnum(single_fac_fit["chisq.scaled"])`, p `r printnum(single_fac_fit["pvalue.scaled"], zero = FALSE)`, CFI = `r printnum(single_fac_fit["cfi.robust"])`, RMSEA [90% CI] = `r printnum(single_fac_fit["rmsea.robust"])` [`r printnum(single_fac_fit["rmsea.ci.upper.robust"])`,`r printnum(single_fac_fit["rmsea.ci.lower.robust"])`], SRMR = `r printnum(single_fac_fit["srmr_bentler"])`). We subsequently made modifications to the model in an iterative fashion based on examination of standardised loadings, modification indices and theoretical considerations [@Biddle2001]. The first modification made to the model was creating two separate factors. We created two factors as the modification indices suggested that there was covariance between two of the items which was not adequately explained by the model. These two items were about *emergency skills* (i.e., those only required in the event of an emergency), whilst the remainder of the items reflected *routine skills* (i.e., those required on a routine basis)). Given the difference in theoretical focus across these two factors we deemed this distinction appropriate, and hence created a new two-item factor with the aim of better modelling this covariance.^[Whist a single factor CFA model must have at least three indicators for the model to be identified, when the number of factors is greater than one, each factor must have at least two indicators when there are no correlated error terms [@Kline2016].] 
+
+The remaining modifications were the removal of items based on their modification indices (n = 5), which suggested that there was covariance unaccounted for in the model, but there was no clear theoretical justification for creating any further factors, hence the items were removed. This process led to the retention of a six-item, two-factor model, which was a good fit to the data and displayed good internal consistency (see Table \@ref(tab:efficacy-cfa-loadings)). To test the discriminant validity of the two factors, we performed a @Satorra2001 scaled difference $\chi^2$ test (S-B$\chi^2_{diff}$) on the two-factor model and a respecified one factor model. The results of this test supported the discriminant validity of the two-factor model (S-B$\chi^2_{diff}$ (1) = `r printnum(diff(pilot_discrim$Chisq))`, p < .001)).
+
+```{r, eval=FALSE}
+data.frame(fitMeasures(pilot_one_fac_cfa, fit.measures = fit_measures),
+           fitMeasures(pilot_one_fac_cfa_v2, fit.measures = fit_measures),
+           fitMeasures(pilot_one_fac_cfa_v3, fit.measures = fit_measures),
+           fitMeasures(pilot_one_fac_cfa_v4, fit.measures = fit_measures),
+           fitMeasures(pilot_one_fac_cfa_v5, fit.measures = fit_measures),
+           fitMeasures(pilot_one_fac_cfa_v6, fit.measures = fit_measures),
+           fitMeasures(pilot_one_fac_cfa_v7, fit.measures = fit_measures),
+           fitMeasures(pilot_one_fac_cfa_v8, fit.measures = fit_measures)) %>% 
+  t() %>% as.data.frame(row.names = paste0("v", 1:8))
+```
+
+Because we wished to create a measure that could be used to assess self-efficacy of female and male candidates, in order to make any comparisons between these two groups it was important that at least the hypotheses of configural and weak invariance were satisfied. The results of the measurement invariance analyses carried out on the six-item two-factor model supported the hypotheses of configural, weak invariance, and strong invariance (see Table \@ref(tab:efficacy-mi)). These findings suggest that the scores for the two MLSS factors have the same meaning for female and male candidates.
+
+
+```{r efficacy-cfa-loadings}
+## loadings
+pilot_loadings <- 
+  inspect(pilot_one_fac_cfa_v8, what = "std")$lambda %>% 
+  as.data.frame() %>% 
+  replace(. == 0, NA) %>% 
+  rownames_to_column() %>% 
+  transmute(item = rowname,
+            pilot = printnum(coalesce(tech, emer), gt1 = FALSE))
+
+main_loadings <- 
+  inspect(main_cfa1, what = "std")$lambda %>% 
+  as.data.frame() %>% 
+  replace(. == 0, NA) %>% 
+  rownames_to_column() %>% 
+  transmute(item = rowname,
+            main = printnum(coalesce(tech, emer), gt1 = FALSE))
+
+
+## factor correlation
+fac.cor <- 
+  data.frame(inspect(pilot_one_fac_cfa_v8, what = "std")$psi[2,1],
+             inspect(main_cfa1, what = "std")$psi[2,1]) %>% 
+  mutate(item = "Routine-Emergency",
+         across(.cols = where(is.numeric), .fns = ~ printnum(.x, gt1 = FALSE)))
+
+colnames(fac.cor) <- c("pilot", "main", "item")
+
+
+## comp reliability
+compRel <- function(model, factor){
+  sl <- standardizedSolution(model)
+  sl1 <- sl$est.std[sl$lhs == factor & sl$op == "=~"]
+  re <- 1 -sl1^2
+  return(sum(sl1)^2 / (sum(sl1)^2 + sum(re)))
+}
+
+comp.rel <- 
+  data.frame(c(compRel(pilot_one_fac_cfa_v8, "tech"), compRel(pilot_one_fac_cfa_v8, "emer")),
+             c(compRel(main_cfa1, "tech"), compRel(main_cfa1, "emer"))) %>% 
+  mutate(item = c("Routine", "Emergency"),
+         across(.cols = is.numeric, .fns = ~ printnum(.x, gt1 = FALSE)))
+
+colnames(comp.rel) <- c("pilot", "main", "item")
+
+
+## fit indices
+fit_measures <- c("chisq.scaled", "df.scaled", "pvalue.scaled", "cfi.robust", "rmsea.robust", "rmsea.ci.lower.robust", "rmsea.ci.upper.robust", "srmr")
+fit_measures2<- c("pvalue.scaled", "cfi.robust", "delta.cfi.robust", "rmsea.robust", "delta.rmsea.robust", "rmsea.ci.lower.robust", "rmsea.ci.upper.robust", "delta.rmsea.robust", "srmr", "delta.srmr")
+fit_measures3 <- c("chisq.scaled", "df.scaled","pvalue.scaled", "Chisq.diff", "Df.diff", "Pr..Chisq.", "cfi.robust", "delta.cfi.robust", "rmsea.robust", "delta.rmsea.robust", "delta.rmsea.robust", "srmr", "delta.srmr")
+
+
+fit_indices <- 
+  data.frame(fitMeasures(pilot_one_fac_cfa_v8, fit.measures = fit_measures),
+             fitMeasures(main_cfa1, fit.measures = fit_measures)) %>% 
+  rownames_to_column() %>% 
+  transmute(item = case_when(rowname == "chisq.scaled" ~ "Y-B $\\chi\\textsuperscript{2}$",
+                             rowname == "df.scaled" ~ "df",
+                             rowname == "pvalue.scaled" ~ "p",
+                             rowname == "cfi.robust" ~ "CFI",
+                             rowname == "rmsea.robust" ~ "RMSEA [90\\% CI]",
+                             rowname == "rmsea.ci.lower.robust" ~ "RMSEA LB",
+                             rowname == "rmsea.ci.upper.robust" ~ "RMSEA UB",
+                             rowname == "srmr" ~ "SRMR"),
+            pilot = as.numeric(fitMeasures.pilot_one_fac_cfa_v8..fit.measures...fit_measures.),
+            pilot = case_when(item == "Y-B $\\chi\\textsuperscript{2}$" ~ printnum(pilot),
+                              item == "df" ~ printnum(pilot, digits = 0),
+                                item == "p" ~ 
+                                  printnum(pilot, zero = FALSE),
+                                !item %in% c("Y-B $\\chi\\textsuperscript{2}$", "df",
+                                                "p") ~
+                                  printnum(pilot)),
+            pilot = if_else(item == "RMSEA [90\\% CI]", 
+                              paste0(pilot[item == "RMSEA [90\\% CI]"], 
+                                    " [", pilot[item == "RMSEA LB"], ",",
+                                    pilot[item == "RMSEA UB"], "]"),
+                              pilot),
+            main = as.numeric(fitMeasures.main_cfa1..fit.measures...fit_measures.),
+                        main = case_when(item == "Y-B $\\chi\\textsuperscript{2}$" ~ printnum(pilot),
+                              item == "df" ~ printnum(pilot, digits = 0),
+                                item == "p" ~ 
+                                  printnum(main, zero = FALSE),
+                                !item %in% c("Y-B $\\chi\\textsuperscript{2}$", "df",
+                                                "p") ~
+                                  printnum(main)),
+            main = if_else(item == "RMSEA [90\\% CI]", 
+                              paste0(main[item == "RMSEA [90\\% CI]"], 
+                                    " [", main[item == "RMSEA LB"], ",",
+                                    main[item == "RMSEA UB"], "]"),
+                              main),
+) %>% 
+  filter(!item %in% c("RMSEA LB", "RMSEA UB"))
+
+## table
+full_join(pilot_loadings, main_loadings, by = "item") %>% 
+  left_join(eshot_vars %>%
+  dplyr::select(var_label, var_description) %>% 
+  filter(str_detect(var_label, "PreAssessment")),
+  by = c("item" = "var_label")) %>% 
+  mutate(item = paste0(capitalize_str(str_remove_all(var_description, "Pre-assessment efficacy to ")),"."),
+         var_description = NULL) %>% 
+  bind_rows(comp.rel) %>% 
+  bind_rows(fac.cor) %>% 
+  bind_rows(fit_indices) %>% 
+  kable(caption = "Factor loadings and model fit indices for the two-factor MLSS in Study 5 and 6.", 
+        booktabs = TRUE, align = "l", escape = FALSE,
+        col.names = c(" ", "Study 5", "Study 6")) %>% 
+  kable_styling(font_size = 10, latex_options = c("scale_down", "hold_position")) %>% 
+  footnote(general = c("Y-B = Yuan-Bentler. CFI = comparative fit index. RMSEA = root-mean-square error of approximation.", "SRMR = standardised root-mean-square residual.")) %>% 
+  column_spec(1, "11cm") %>% 
+  column_spec(2, "2.5cm") %>% 
+  group_rows(start_row = 1, end_row = 4, group_label = "Routine skills") %>% 
+  group_rows(start_row = 5, end_row = 6, group_label = "Emergency skills") %>% 
+  group_rows(start_row = 7, end_row = 8, 
+             group_label = "Composite reliability ($\\\\omega$)", 
+             escape = FALSE) %>% 
+  group_rows(start_row = 9, end_row = 9, group_label = "Inter-factor correlation") %>% 
+  group_rows(start_row = 10, end_row = 15, group_label = "Two-factor model fit indices")
+
+```
+
+
+```{r efficacy-mi}
+mi_colnames <- 
+  if(is_latex_output())
+  {c("Model", "Y-B$\\chi$\\textsuperscript{2}", "df", "p", "$\\Delta\\Chi\\textsuperscript{2}$", "$\\Delta$df", "p", "CFI", "$\\Delta$CFI",
+     "RMSEA [90\\% CI]","$\\Delta$RMSEA", "SRMR", "$\\Delta$SRMR")} else {
+        c("Model", "Y-B chi^2", "df", "p","Delta Chi^2", "delta df", "p", "CFI", "delta CFI",
+          "RMSEA [90% CI]", "delta RMSEA", "SRMR", "delta SRMR")}
+
+### pilot gender ###
+x <- anova(pilot_m1_config, pilot_m1_weak, pilot_m1_strong)
+efficacy_study5_mi <- 
+  bind_cols(data.frame(x) %>% 
+              rownames_to_column() %>% 
+              dplyr::select(rowname, Chisq.diff, Df.diff, Pr..Chisq.) %>% 
+              mutate(Chisq.diff = printnum(Chisq.diff),
+                     Pr..Chisq. = printnum(Pr..Chisq., zero = FALSE, gt1 = FALSE)),
+            
+            bind_rows(c(1, fitMeasures(pilot_m1_config, fit.measures = fit_measures)),
+                      c(2, fitMeasures(pilot_m1_weak, fit.measures = fit_measures)),
+                      c(3, fitMeasures(pilot_m1_strong, fit.measures = fit_measures))) %>%
+              rename(model = ...1) %>%
+              #select(-c(`1`, `2`, `3`)) %>%
+              mutate(model = case_when(model == 1 ~ "Configural",
+                                       model == 2 ~ "Weak",
+                                       model == 3 ~ "Strong"),
+                     chisq.scaled = printnum(chisq.scaled),
+                     pvalue.scaled = printnum(pvalue.scaled, zero = FALSE, gt1 = FALSE),
+                     delta.cfi.robust = cfi.robust - lag(cfi.robust),
+                     delta.rmsea.robust = rmsea.robust - lag(rmsea.robust),
+                     delta.srmr = srmr - lag(srmr),
+                     rmsea.robust = paste0(printnum(rmsea.robust, digits = 3, gt1 = FALSE), " [",
+                                           printnum(rmsea.ci.lower.robust, digits = 3, gt1 = FALSE), ",",
+                                           printnum(rmsea.ci.upper.robust, digits = 3, gt1 = FALSE), "]"),
+                     across(.cols = fit_measures2, .fns = ~ printnum(.x, digits = 3, gt1 = FALSE)))) %>%
+  dplyr::select(model, fit_measures3)
+
+### pilot assessed ###
+x <- anova(pilot_assessed_m1_config, pilot_assessed_m1_weak, pilot_assessed_m1_strong)
+efficacy_study5_mi_assessed <- 
+  bind_cols(data.frame(x) %>% 
+              rownames_to_column() %>% 
+              dplyr::select(rowname, Chisq.diff, Df.diff, Pr..Chisq.) %>% 
+              mutate(Chisq.diff = printnum(Chisq.diff),
+                     Pr..Chisq. = printnum(Pr..Chisq., zero = FALSE, gt1 = FALSE)),
+            
+            bind_rows(c(1, fitMeasures(pilot_assessed_m1_config, fit.measures = fit_measures)),
+                      c(2, fitMeasures(pilot_assessed_m1_weak, fit.measures = fit_measures)),
+                      c(3, fitMeasures(pilot_assessed_m1_strong, fit.measures = fit_measures))) %>%
+              rename(model = ...1) %>%
+              mutate(model = case_when(model == 1 ~ "Configural",
+                                       model == 2 ~ "Weak",
+                                       model == 3 ~ "Strong"),
+                     chisq.scaled = printnum(chisq.scaled),
+                     pvalue.scaled = printnum(pvalue.scaled, zero = FALSE, gt1 = FALSE),
+                     delta.cfi.robust = cfi.robust - lag(cfi.robust),
+                     delta.rmsea.robust = rmsea.robust - lag(rmsea.robust),
+                     delta.srmr = srmr - lag(srmr),
+                     rmsea.robust = paste0(printnum(rmsea.robust, digits = 3, gt1 = FALSE), " [",
+                                           printnum(rmsea.ci.lower.robust, digits = 3, gt1 = FALSE), ",",
+                                           printnum(rmsea.ci.upper.robust, digits = 3, gt1 = FALSE), "]"),
+                     across(.cols = fit_measures2, .fns = ~ printnum(.x, digits = 3, gt1 = FALSE)))) %>%
+  dplyr::select(model, fit_measures3)
+
+### main two-factor gender ###
+x <- anova(main_m1_config, main_m1_weak, main_m1_strong)
+
+efficacy_study6_mi <- 
+bind_cols(data.frame(x) %>% 
+            rownames_to_column() %>% 
+            dplyr::select(rowname, Chisq.diff, Df.diff, Pr..Chisq.)%>% 
+            mutate(Chisq.diff = printnum(Chisq.diff),
+                   Pr..Chisq. = printnum(Pr..Chisq., zero = FALSE, gt1 = FALSE)),
+bind_rows(c(1, fitMeasures(main_m1_config, fit.measures = fit_measures)),
+          c(2, fitMeasures(main_m1_weak, fit.measures = fit_measures)),
+          c(3, fitMeasures(main_m1_strong, fit.measures = fit_measures))) %>% 
+  rename(model = ...1) %>% 
+  mutate(model = case_when(model == 1 ~ "Configural",
+                           model == 2 ~ "Weak",
+                           model == 3 ~ "Strong"),
+         chisq.scaled = printnum(chisq.scaled),
+         pvalue.scaled = printnum(pvalue.scaled, zero = FALSE, gt1 = FALSE),
+         delta.cfi.robust = cfi.robust - lag(cfi.robust),
+         delta.rmsea.robust = rmsea.robust - lag(rmsea.robust),
+         delta.srmr = srmr - lag(srmr),
+         rmsea.robust = paste0(printnum(rmsea.robust, digits = 3, gt1 = FALSE), " [",
+                       printnum(rmsea.ci.lower.robust, digits = 3, gt1 = FALSE), ",",
+                           printnum(rmsea.ci.upper.robust, digits = 3, gt1 = FALSE), "]"),
+         across(.cols = fit_measures2, .fns = ~ printnum(.x, digits = 3, gt1 = FALSE)))) %>%
+  dplyr::select(model, fit_measures3)
+
+### main two-factor assessed ###
+x <- anova(main_assessed_m1_config, main_assessed_m1_weak, main_assessed_m1_strong)
+
+efficacy_study6_mi_assessed <- 
+bind_cols(data.frame(x) %>% 
+            rownames_to_column() %>% 
+            dplyr::select(rowname, Chisq.diff, Df.diff, Pr..Chisq.)%>% 
+            mutate(Chisq.diff = printnum(Chisq.diff),
+                   Pr..Chisq. = printnum(Pr..Chisq., zero = FALSE, gt1 = FALSE)),
+bind_rows(c(1, fitMeasures(main_assessed_m1_config, fit.measures = fit_measures)),
+          c(2, fitMeasures(main_assessed_m1_weak, fit.measures = fit_measures)),
+          c(3, fitMeasures(main_assessed_m1_strong, fit.measures = fit_measures))) %>% 
+  rename(model = ...1) %>% 
+  mutate(model = case_when(model == 1 ~ "Configural",
+                           model == 2 ~ "Weak",
+                           model == 3 ~ "Strong"),
+         chisq.scaled = printnum(chisq.scaled),
+         pvalue.scaled = printnum(pvalue.scaled, zero = FALSE, gt1 = FALSE),
+         delta.cfi.robust = cfi.robust - lag(cfi.robust),
+         delta.rmsea.robust = rmsea.robust - lag(rmsea.robust),
+         delta.srmr = srmr - lag(srmr),
+         rmsea.robust = paste0(printnum(rmsea.robust, digits = 3, gt1 = FALSE), " [",
+                       printnum(rmsea.ci.lower.robust, digits = 3, gt1 = FALSE), ",",
+                           printnum(rmsea.ci.upper.robust, digits = 3, gt1 = FALSE), "]"),
+         across(.cols = fit_measures2, .fns = ~ printnum(.x, digits = 3, gt1 = FALSE)))) %>%
+  dplyr::select(model, fit_measures3)
+
+### table ###
+bind_rows(efficacy_study5_mi, efficacy_study6_mi) %>%
+  kable(caption = "MLSS measurement invariance results for Study 5 and 6.",
+        booktabs = TRUE, align = "r",
+        col.names = mi_colnames, 
+        escape = FALSE) %>% 
+  kable_styling() %>% 
+  group_rows("Study 5", 1, 3) %>% 
+  group_rows("Study 6", 4, 6) %>% 
+  landscape() %>% 
+  footnote(general = c("All fit indices estimated using robust SEs.", "The $\\\\Delta\\\\chi\\\\textsuperscript{2}$ is a robust difference test that is a function of two standard (not robust) statistics."), escape = FALSE)
+```
+
+
+### Discussion {#study5-discussion}
+
+The aim of Study 5 was to develop a measure of self-efficacy for skills related to becoming a Mountain Leader---the MLSS---using data that were previously collected as part of Chapter 3. Fit indices and standardised factor loadings suggested that the six-item two-factor model fit the data well. In addition, the hypotheses of configural, weak, and strong invariance were supported, which suggests that the MLSS factor factors are not different for female and male candidates. Having established a factor structure of the MLSS using an exploratory approach to CFA, in Study 6 we sought to test the proposed factor structure using a strictly confirmatory approach to CFA.
+
+
+## Study 6 {#study-6}
+
+The aim of Study 6 was twofold: (a) to confirm the factor structure of the MLSS and (b) to test the hypotheses presented in the introduction to this chapter.
+
+### Methods {#study-6-methods}
+
+#### Participants. {#study-6-participants}
+
+```{r chap4-study6-participants, include=FALSE}
+group_5 %>% 
+  filter(CandidateId %in% study_6_regression_df$CandidateId) %>%  # remove made up DLOGs
+  summarise(n = n(),
+            female = printnum(100*sum(SexId == "female")/n()),
+            m_age = paste(printnum(mean(TrainAge, na.rm = TRUE))),
+            sd_age = printnum(sd(TrainAge, na.rm = TRUE)), 
+            assessed = printnum(100*mean(case_when(firstMLAssessmentDate < SurveyEndDate ~ 1,
+                                               firstMLAssessmentDate > SurveyEndDate ~ 0,
+                                               is.na(firstMLAssessmentDate) ~ 0))),
+            .groups = "keep") -> efficacy_s2_participants
+efficacy_s2_participants %>% 
+  kable(caption = "Study 3 participants", booktabs = TRUE)
+```
+
+
+Participants for Study 6 were a new sample of `r efficacy_s2_participants$n` candidates who had attended a Mountain Leader training course in 2017 or 2018 and completed the survey used for Chapter 3 (`r efficacy_s2_participants$female`% female, $M_{age}$ `r efficacy_s2_participants$m_age` years, $SD =$ `r efficacy_s2_participants$sd_age`, `r efficacy_s2_participants$assessed`% had been assessed when completing the survey).
+
+
+#### Measures. {#study-6-measures}
+
+```{r, include=FALSE}
+main_cfa1_fit <- fitmeasures(main_cfa1)
+summary(main_cfa1, standardized = TRUE, fit.measures = TRUE)
+```
+
+
+We used the six-item MLSS from Study 5 to measure *routine skills self-efficacy* and *emergency skills self-efficacy*. In addition, we operationalised experience as either the sum of the number of QMDs that a candidate had when answering the survey, for candidates who had not been assessed when completing the survey, or the number of QMDs at assessment for those who had been assessed. We chose the number of QMDs as the measure of experience as that is the type of experience Mountain Training requires candidates to accrue in order to become a Mountain Leader.
+
+
+#### Analyses. {#study-6-analyses}
+
+To test the fit and invariance of the two-factor model retained from Study 5, we carried out a CFA and measurement invariance analyses as specified for Study 5. Following this, we used moderated hierarchical regression analyses to test the interactive effects of gender and experience on self-efficacy. We examined each factor of self-efficacy separately. To obtain scores for the two self-efficacy variables, we retained the factor scores from the two-factor CFA; factor scores are a better estimate of the true value of the latent construct than a sum-scores, as factor scores account for measurement error [cf. @Grice2001].
+
+For each factor, using the factor scores as the dependent variable, we fitted three regression models to the data. The first model (Step 1) had gender as the sole predictor of the dependent variable. In the second model (Step 2), we included the main effects of both gender and experience as predictors of the dependent variable. Finally, for the third model (Step 3), we included both the main effects and interactive effect of gender and experience as predictor variables. Alpha was set at .05 and we standardised all continuous variables before entering them into the regression models to provide a common metric, thus aiding the interpretation of the interaction term [@Aiken1991]. 
+
+
+### Results {#study-6-results}
+
+#### MLSS Model Fit and Invariance.
+
+The two-factor model was an approximately good fit to the data (see Table \@ref(tab:efficacy-cfa-loadings)) and the results of a S-B$\chi^2_{diff}$ test supported the discriminant validity of the two-factor model when compared to a single factor model (S-B$\chi^2_{diff}$ (1) = `r printnum(diff(main_discrim$Chisq))`, p < .001). The results of the measurement invariance analysis provided good support for the hypotheses of configural and weak invariance, however, there was evidence to reject the hypothesis of strong invariance. The $\Delta\chi^2$, $\Delta CFI$, and $\Delta RMSEA$ were all just outside the criteria specified above for detecting invariance. Rejecting the hypothesis of strong invariance suggest that there is a *differential additive response style* (i.e., female and male candidates do not use the response scale in the same way) and that differences in group means should be interpreted with caution as there may be a systematic cause for the difference in scores that is not explained by the MLSS factors [@Kline2016].
+
+
+```{r, eval=FALSE}
+# t.test(exp ~ SexId, data = study_6_regression_df)
+
+set.seed(12345) # same permutations
+main_weak_dif <- 
+  semTools::permuteMeasEq(nPermute = 1000, modelType = "mgcfa", 
+                          con = main.fit.metric, 
+                          uncon = main.fit.config,
+                          AFIs = c("chisq", "rmsea", "cfi"),
+                          param = "loadings")
+set.seed(12345) # same permutations
+main_strong_dif <- 
+  semTools::permuteMeasEq(nPermute = 1000, modelType = "mgcfa", 
+                          con = main.fit.scalar, 
+                          uncon = main.fit.metric,
+                          AFIs = c("chisq", "rmsea", "cfi"),
+                          param = "intercepts")
+```
+
+
+
+#### Self-efficacy, Experience, and Gender.
+
+Before interpreting the results of the regression analyses, we used the variance inflation factor (VIF) to assess the multicollinearity of the predictor variables. Values close to 1 are preferred and values less than 5 are acceptable [@Tabachnick2007a]; the maximum VIF in these data was `r printnum(max(vif(z_routine_main_m3), vif(z_emergency_main_m3)))`. Descriptive statistics for study variables are presented in Table \@ref(tab:var-cor).
+
+
+```{r var-cor}
+efficacy_s2_vars <- 
+  group_5_tech_scores %>% 
+  inner_join(group_5, by = "CandidateId") %>% 
+  filter(CandidateId %in% study_6_regression_df$CandidateId) %>% 
+  mutate(time = 
+           as.factor(case_when(firstMLAssessmentDate < SurveyEndDate ~ "retro",
+                               !firstMLAssessmentDate < SurveyEndDate ~ "pros",
+                               is.na(firstMLAssessmentDate) ~ "pros")),
+         exp = case_when(
+           time == "retro" & !is.na(a_num_days_walk_7) ~ 
+             a_num_days_walk_7 + a_num_days_climb_26,
+           TrainToSurvey > 1 ~ t18_num_days_7 + t18_num_days_26,
+           between(TrainToSurvey, .5, 1) ~ t12_num_days_7 + t12_num_days_26,
+           between(TrainToSurvey, 0, .5) ~ t6_num_days_7 + t6_num_days_26),
+  ) %>% 
+  transmute(Gender = as.numeric(SexId)-1,
+            Experience = exp,
+            "Routine self-efficacy" = routine,
+            "Emergency self-efficacy" = emergency,
+            # "Sum routine self-efficacy" = PreAssessmentSelfEfficacy1 +
+            #   PreAssessmentSelfEfficacy4 + PreAssessmentSelfEfficacy5 + 
+            #   PreAssessmentSelfEfficacy7 + PreAssessmentSelfEfficacy8 +
+            #   PreAssessmentSelfEfficacy11,
+            # "Sum emergency self-efficacy" = 
+            #   PreAssessmentSelfEfficacy6 + PreAssessmentSelfEfficacy9
+            ) %>% na.omit()
+
+cap <- 
+  paste0("Descriptive statistics and correlations between study variables (N = ",
+         nrow(efficacy_s2_vars),".)")
+
+apa.cor.table(efficacy_s2_vars)$table.body %>% 
+  as_tibble() %>%
+  filter(!M == " ") %>% 
+  mutate(Variable = str_replace_all(Variable, "Gender", "Gender\\\\textsuperscript{a}")) %>% 
+  kable(caption = cap,
+        booktabs = TRUE, align = "lrrlllll",
+        escape = FALSE) %>% 
+  kable_styling(full_width = FALSE,
+                latex_options = c("HOLD_position")) %>% 
+  footnote(general = 
+             c("* indicated p < .05. ** indicates p < .01."),
+           alphabet = "Males coded as 0 and females coded as 1.")
+```
+
+
+
+##### Routine Skills.
+
+```{r}
+x1 <- apa.reg.table(z_routine_main_m1, z_routine_main_m2, z_routine_main_m3)
+x2 <- apa.reg.table(z_emergency_main_m1, z_emergency_main_m2, z_emergency_main_m3)
+routine_sim_slopes <- 
+  sim_slopes(z_routine_main_m3, pred = exp, modx = "SexId", 
+             data = study_6_regression_df, robust = TRUE, johnson_neyman = FALSE)
+
+efficacy_study_6_regression_results_routine_cap <- 
+  paste0("Interactive effects of gender and experience on self-efficacy to perform routine Mountain Leader skills N = ", x1$table_block_results[[1]][1]$model_summary_extended$nobs
+, ". Ribbons represent the 95% CI.")
+
+```
+
+
+Gender predicted self-efficacy at Step 1 (`r apa_print.lm(z_routine_main_m1)$full_result$SexIdfemale`), with female candidates having lower levels of self-efficacy to perform routine skills than males. Experience predicted self-efficacy at Step 2 over and above gender (`r apa_print.lm(z_routine_main_m2)$full_result$exp`, $\Delta R^2=$ `r printnum(summary(z_routine_main_m2)$r.squared - summary(z_routine_main_m1)$r.squared, gt1 = FALSE)`), with greater experience being associated with greater levels of efficacy. Of more interest, the interaction was significant (`r apa_print.lm(z_routine_main_m3)$full_result$SexIdfemale_exp`, $\Delta R^2=$ `r printnum(summary(z_routine_main_m3)$r.squared - summary(z_routine_main_m2)$r.squared, gt1 = FALSE)`). In line with our hypotheses, simple slope analyses suggested that the positive relationship between experience and self-efficacy was stronger for female candidates (b = `r printnum(routine_sim_slopes$slopes$Est.[1])`, p `r printnum(routine_sim_slopes$slopes$p[1], zero = FALSE)`) than for male candidate (b = `r printnum(routine_sim_slopes$slopes$Est.[2])`, p `r printnum(routine_sim_slopes$slopes$p[2], zero = FALSE)`). Figure \@ref(fig:efficacy-exp-plot-routine) shows the nature of the interaction.
+
+
+```{r efficacy-exp-plot-routine, fig.cap=efficacy_study_6_regression_results_routine_cap}
+interact_plot(model = z_routine_main_m3, pred = exp, modx = "SexId",
+              plot.points = TRUE, data = study_6_regression_df, centered = "all", 
+              point.size = .5, point.alpha = .25, 
+              legend.main = "Gender", modx.labels = c("Male", "Female"),
+              x.label = "Standardised experience", 
+              y.label = "Standardised self-efficacy to perform routine skills",
+              interval = TRUE, robust = TRUE,
+              ) + coord_cartesian(ylim = c(-40,10), xlim = c(-1.25,5)) +
+  theme_few(base_family = font, base_size = 10)
+```
+
+
+##### Emergency Skills.
+
+Gender predicted self-efficacy at Step 1 (`r apa_print.lm(z_emergency_main_m1)$full_result$SexIdfemale`), with female candidates again having lower levels of self-efficacy to perform emergency skills than males. As with the previous analysis, experience predicted self-efficacy at Step 2 over and above gender (`r apa_print.lm(z_emergency_main_m2)$full_result$exp`, $\Delta R^2=$ `r printnum(summary(z_emergency_main_m2)$r.squared - summary(z_emergency_main_m1)$r.squared, gt1 = FALSE)`). However, the interaction term was not significant in Step 3 (`r apa_print.lm(z_emergency_main_m3)$full_result$SexIdfemale_exp`, $\Delta R^2=$ `r printnum(summary(z_emergency_main_m3)$r.squared - summary(z_emergency_main_m2)$r.squared, gt1 = FALSE)`).
+
+
+```{r efficacy-study-6-regression-results}
+
+bind_rows(x1$table_body, x2$table_body) %>% 
+  mutate(Predictor = str_replace_all(Predictor, "SexIdfemale", "Gender:Female"),
+         Predictor = str_replace_all(Predictor, "exp", "Experience"),
+         Predictor = str_replace_all(Predictor, "Gender:Female:Experience", 
+                                     "Gender:Female X Experience")) %>% 
+  mutate(Difference = str_replace_all(Difference, "Delta", "$\\\\Delta$"),
+         Fit = str_replace_all(Fit, "95%", "95\\\\%"),
+         Difference = str_replace_all(Difference, "95%", "95\\\\%"),
+         Fit = str_replace_all(Fit, "R2", "R\\\\textsuperscript{2}"),
+         Difference = str_replace_all(Difference, "R2", "R\\\\textsuperscript{2}"),
+         Fit = lead(Fit, n =2),
+         Difference = lead(Difference, n = 2)) %>%
+  filter(Predictor != "" | Fit != "") %>% 
+  kable(caption ="Regression analyses examining interactions between gender and experience on self-efficacy to perform routine and emergency Mountain Leader skills.",
+        booktabs = TRUE,
+        #format = if (is_latex_output()) {"latex"} else {"html"},
+        col.names = c("Predictor", "b", "b 95\\% CI", "sr2", "sr2 95\\% CI", "Fit", "Difference"),
+        escape = FALSE) %>%
+  kable_styling(full_width = FALSE, font_size = 10) %>% 
+  footnote(general = c("A significant b-weight indicates the semi-partial correlation is also significant.", "b represents unstandardised regression weights.", "sr2 represents the semi-partial correlation squared.", "Square brackets are used to enclose the lower and upper limits of a confidence interval.", "* indicates p < .05. ** indicates p < .01."), escape = FALSE) %>% 
+  group_rows("Routine", start_row = 1, end_row = 9, hline_after = TRUE) %>% 
+  group_rows("Emergency", start_row = 10, end_row = 18, 
+             hline_before = TRUE, hline_after = TRUE) %>% 
+  group_rows("Step 1", start_row = 1, end_row = 2, italic = TRUE, indent = FALSE) %>% 
+  group_rows("Step 2", start_row = 3, end_row = 5, italic = TRUE, indent = FALSE) %>%
+  group_rows("Step 3", start_row = 6, end_row = 9, italic = TRUE, indent = FALSE) %>% 
+  group_rows("Step 1", start_row = 10, end_row = 11, italic = TRUE, indent = FALSE) %>% 
+  group_rows("Step 2", start_row = 12, end_row = 14, italic = TRUE, indent = FALSE) %>%
+  group_rows("Step 3", start_row = 15, end_row = 18, italic = TRUE, indent = FALSE) %>%
+  landscape()
+```
+
+
+### Discussion {#study-6-discussion}
+
+Study 6 had two aims, firstly, to confirm the factor structure of the MLSS and secondly, to test the two hypotheses presented in the introduction to this chapter. Study 6 confirmed the factor structure of the MLSS and its weak invariance for female and male candidates. In addition, findings provided evidence that: female candidates are less confident than their male counterparts; increased levels of experience predict increased levels of self-efficacy, supporting hypothesis one; and that the relationship between experience and self-efficacy to perform routine skills is more positive for female candidates than it is for male candidates, providing partial support for hypothesis two.
+
+Experience may have a greater positive effect on efficacy to perform routine skills for female candidates than male candidates due to female candidates with less experience having lower levels of self-efficacy than their male counterparts. Indeed, the results of Study 1 suggest that, in some instances, female candidates felt that in order to feel confident enough to be assessed they needed to do more to prepare for an assessment (see Section \@ref(study1-ind-diff-conf)). When considering the results of Study 6, specifically female candidates with little experience being less confident in their routine skills than male candidates of equal experience, one may interpret the findings of Study 1 differently. That is rather than female and male candidates having different thresholds of confidence that they must meet before being assessed, they in fact have different initial levels of confidence and require experience to gain enough confidence to feel ready to be assessed.
+
+The most parsimonious explanation for why there was no interactive effect evident for emergency skills is because of the few opportunities Mountain Leader candidates get to practice their emergency skills when gaining QMDs, at least in comparison to the opportunities to practice routine skills. Accidents in the mountains are relatively rare; between 2009 and 2016 it is estimated that ~`r printnum(8*500000, digits = 0)` people visited Snowdon^[Snowdon is the highest mountain in England and Wales and one of the busiest in the world.] yet only `r printnum(368+713, digits = 0)` people required assistance from mountain rescue [i.e., `r printnum((368+713)/(8*500000), zero = FALSE)`% of visitors; @SNPA2017]. It is possible that the scarcity of experience in emergency situations means that it is equally valuable for female and male candidates. Future studies of the effects of experience on self-efficacy may consider the scarcity of specific types of experience on their relative contributions to self-efficacy.
+
+Higher levels of experience predicted higher levels of self-efficacy, however the proportion of variance in the MLSS factors explained by experience (i.e., the number of QMDs accrued) was small. There are several explanations for the modest size of this relationship. One such explanation is that whilst QMDs are important, they are not the only source of self-efficacy. This suggestion is concordant with self-efficacy theory, which suggests previous experience is only one source of efficacy beliefs. In addition, it is likely that other forms of experience are important in establishing efficacy beliefs (e.g., scrambling experience). Another factor that is likely to influence the variance explained is the variability in accuracy of candidates' logbooks. As noted in Chapter 3, not all candidates will use their logbooks in the same way, thus adding noise to the data. In addition to the different use of logbooks, although the number of QMDs is an important real-world measure of experience, it does remain a somewhat crude measure of experience. More specifically, simply reporting the number of QMDs does not consider other factors that would, according to self-efficacy theory, be important in shaping efficacy-beliefs (e.g., was the experience perceived as a success or a failure? What were the candidates’ attributions of the experience? Was the experience challenging or easy?).
+
+Given the crudeness of this measure, one may consider the recovery of any effect from the noise to be surprising. Therefore, the fact that additional variance was explained by the interaction between gender and experience on routine self-efficacy is noteworthy. To overcome the limitations identified in this study, a future prospective longitudinal study that measures self-efficacy using the MLSS and collects more accurate data about candidates' experiences would likely provide a better understanding of the relationships examined in Study 6. We hypothesise that in such a study, experiences that were: perceived as successful, attributed internally (e.g., having tried), and appropriately challenging would have the greatest positive influence on self-efficacy beliefs. In contrast, experiences that were perceived as a failure would decrease self-efficacy beliefs, especially when coupled with an internal attribution.
+
+At this juncture we should note that these results should be interpreted with some caution as in Study 6 the hypothesis of strong invariance was rejected. We recognise that the changes in fit indices when testing the hypothesis of strong invariance are (marginally) greater than those specified above for detecting non-invariance. However, given that several researchers caution against the use of exact cut-off values or "golden rules" [e.g., @Kline2016; @Markland2007] and one hypotheses of this study was that there would be an external variable---experience---that had a different effect on self-efficacy for female and male candidates we suggest that this violation of the hypothesis of strong invariance may be due to a difference in the mean experience of female and male candidates (`r apa_print.htest(t.test(exp ~ SexId, data = study_6_regression_df))$full_result`). In addition, strict measurement invariance (as examined in this study), could be considered overly restrictive [cf. @Muthen2012] and an *approximate measurement invariance* approach could be tested in the future to better understand the exact nature of the non-invariance of item intercepts. Approximate measurement invariance is carried out using Bayesian structural equation modelling and involved specifying small "wiggle room" prior variances for parameters that are fixed to zero in normal structural equation models (including CFAs), therefore are better able to deal with unimportant levels of model miss-fit [cf. @Muthen2012; @VandeSchoot2013]. 
+
+Another explanation for the hypothesis of strong invariance being met in Study 5 but not in Study 6 could be the difference in the proportion of candidates in each study that had been assessed when answering the surveys (`r efficacy_s1_participants$assessed`% and `r efficacy_s2_participants$assessed`% respectively). In addition to the prerequisite of having 40 QMDs logged prior to assessment, candidates must also hold a valid first aid certificate. Whist not having data to support this hypothesis, we would suggest that more participants in Study 5 had received first aid training than in Study 6 and that first aid training is likely to influence an individual's efficacy to perform the skills in the emergency skills factor (i.e., provide immediate medical care in the mountains and respond appropriately to an emergency [e.g., broken leg]). 
+
+Study 6 provides evidence that: female candidates are less confident than their male counterparts, increased levels of experience predict increased levels of self-efficacy, and that the relationship between experience and self-efficacy to perform routine skills is more positive for female candidates than it is for male candidates.
+
+
+## Applied Implications
+
+There are several implications of this that are relevant to Mountain Training and Mountain Leader candidates. The MLSS comprises to distinct factors and items from both factors were selected as important discriminatory variables in Chapter 3. Therefore, it is likely to be important that candidates consider both sets of skills when preparing for an assessment. The results of Study 6 suggest that experience predicts self-efficacy for both sets of skills, therefore candidates should gain experience whilst preparing for an assessment. However, as a measure of experience QMDs explain a relatively modest proportion of the variance in self-efficacy scores. It is likely that this in part due to inaccuracies in DLOGs, but it is also likely that other forms of experience are important influences on candidates' self-efficacy. Therefore, Mountain Training may wish to expand the prerequisites for experience to include sources of efficacy that are likely to be important. Finally, when considered together, the results of Studies 3, 4, and 6 suggest that it is particularly important that female candidates seek mastery opportunities should they wish to become Mountain Leaders, as it is important that the are confident in a number of skills before being assessed, gaining experience is especially important for female candidates self-efficacy, and the findings of Study 4 indicate that it is important that candidates have sufficient relevant experience in order to pass their first assessment.
+
+
+## Future Directions {#chapter-4-future-directions}
+
+To our knowledge, previous research has not considered the interactive effects of experience and gender on self-efficacy, but in some areas has suggested that differences in self-efficacy is a result of "perceived masculinity" [@Cassidy2002, p 135]. The equivocal results in Study 6 of the interactive effects of experience and gender on self-efficacy suggest that there may be other important factors to consider (e.g., differential availability/scarcity of types of experience). Given these results and the "real world" cross-sectional nature of the data in this chapter, future research should further investigate the interactive effects of experience and gender on self-efficacy both in a prospective longitudinal fashion and in an experimental fashion. Such studies should also consider the other variables identified as relevant (e.g., attributions) and may also consider relevant personality variables (e.g., emotional stability).
+
+The MLSS was a good fit to the data in both Study 5 and Study 6 and can be used as a relatively short measure of two types of self-efficacy related to becoming a Mountain Leader. However, there are some items that could be improved. For example, one routine skill item reads, "look after myself and others in steep ground/crossing  river." This item could be split into four separate items: one about candidates looking after themselves in steep ground, one about candidates looking after themselves when crossing a river, one about candidates looking after others in steep ground, and one about candidates looking after others when crossing a river. Whilst increasing the number of items, improving the items may create a better measure of self-efficacy related to becoming a Mountain Leader, which could prove useful if Mountain Training wanted to better understand the relationship between experience and self-efficacy to perform specific skills. In addition, carrying out approximate measurement invariance studies may shed light on differences in use of the MLSS response scale by female and male candidates.
+
+
+## Summary and Concluding Discussion {#chapter-4-general-discussion}
+
+In this chapter, we sought to create a measure of self-efficacy for skills related to becoming a Mountain Leader---the MLSS---and to examine the additive and interactive effects of experience and gender on self-efficacy as measured by the MLSS. The MLSS developed in Study 5 and tested in Study 6 provided an appropriate fit to the data in both studies and the hypothesis of weak invariance between female and male candidates was supported, whilst the stricter hypothesis of strong invariance was only supported in Study 5. That notwithstanding, the model fit was good in both studies---which had different proportions of candidates who had been assessed---providing initial evidence for the validity of the measure for candidates who have and have not been assessed. The measurement invariance findings suggest that whilst the two self-efficacy factors have the same structure in both female and male candidates, their scores on the items are non-invariant. This finding and the results from the moderated regression analyses suggests that female candidates are less confident in their skills than male candidates are.
+
+In summary, candidates with more experience are more confident in their skills to perform tasks related to becoming a Mountain Leader and it is particularly important that female candidates gain relevant experience in order to be confident in their routine skills.
+
+
