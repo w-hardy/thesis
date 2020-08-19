@@ -1,0 +1,806 @@
+# Developing the Survey Tool {#survey-tool-dev}
+
+```{r 08-setup, include=FALSE}
+library(plyr)
+library(tidyverse)
+library(lubridate)
+library(readxl)
+library(knitr)
+library(kableExtra)
+library(ggthemes)
+library(plotly)
+library(mousetrap)
+library(randomizr)
+library(data.table)
+library(lavaan)
+library(survival)
+library(survminer)
+library(papaja)
+library(tidytidbits)
+library(papaja)
+
+knitr::opts_chunk$set(echo = FALSE, cache = FALSE, warning = FALSE, message = FALSE)
+doc.type <- knitr::opts_knit$get('rmarkdown.pandoc.to')
+
+########################################
+############## FUNCTIONS ###############
+########################################
+prepare_lavaan <- 
+  function(data_path, pattern = NULL, case = "snake"){
+    # function to read and prepare data for CFA
+    require(tidyverse)
+    require(janitor)
+    
+    if (is.null(pattern)) {
+      read_csv(data_path) %>% 
+        na.omit() %>% 
+        clean_names(case = case) %>% 
+        scale() %>% 
+        as.data.frame
+    } 
+    else 
+      if (!is.null(pattern)) {
+        read_csv(data_path) %>% 
+          na.omit() %>% 
+          clean_names(case = case) %>% 
+          select(starts_with(pattern)) %>%
+          scale() %>% 
+          as.data.frame()
+    }
+  }
+
+
+latent_cor <-
+  function(data = eval(parse(text = measure_code)), full_model = full_model, short_model = short_model) {
+    
+    require(lavaan)
+    
+    full_fit <-
+      cfa(full_model, data = data, std.lv = FALSE)
+    
+    if (str_detect(short_model, "=~") == TRUE) {
+      short_fit <-
+        cfa(short_model, data = data, std.lv = FALSE)
+      
+      cor_tab <-
+        cor.test(predict(full_fit), predict(short_fit))
+    }
+    else stop("no short latent variable found")
+    
+    return(cor_tab)
+  }
+
+
+latent_cor_comp_rel <- 
+    function(data = eval(parse(text = measure_code)), model) {
+    
+      if (str_detect(model, "\\+") == TRUE) {
+        require(lavaan)
+        
+        fit <-
+          cfa(model = model, data = data, std.lv = FALSE)
+        
+        comp_rel <-
+          sum(fit@Model@GLIST$lambda)^2 /
+          (sum(fit@Model@GLIST$lambda)^2 +
+             sum(1-(fit@Model@GLIST$lambda^2)))
+      } else
+        comp_rel <- NA
+    return(comp_rel)
+    }
+
+
+ggplot_missing <- function(x){
+  # https://njtierney.github.io/r/missing%20data/rbloggers/2015/12/01/ggplot-missing-data/
+  x %>% 
+    is.na %>%
+    reshape2::melt() %>%
+    ggplot(data = .,
+           aes(x = Var2,
+               y = Var1)) +
+    geom_raster(aes(fill = value)) +
+    scale_fill_discrete(name = "",
+                    labels = c("Present", "Missing")) +
+    theme_few() + 
+    theme(text = element_text(size = 8),
+          axis.text.x = element_text(angle = 90, vjust = 0.5),
+          axis.ticks.x = element_blank(),
+          legend.position = "top",) +
+    scale_x_discrete(guide = guide_axis(check.overlap = TRUE)) +
+    labs(x = "Variables in Dataset",
+         y = "Rows / observations")
+}
+
+########################################
+################# DATA #################
+########################################
+feature_retention <- 
+  read_xlsx("../3 eshot/PRA_Results/FeatureRetention.xlsx", 
+            sheet = "Sheet1")[1:150,]
+
+Group1to4 <- readRDS("chapter_3_data/Group1to4.rds")
+
+#### Other ####
+eshot_vars <- 
+  read_xlsx("../3 eshot/Design/eshot_variables.xlsx", 
+            sheet = "Sheet1", na = "NA") %>%
+  mutate(full_model = full_model %>% str_remove_all("\r"),
+    short_model = short_model %>% str_remove_all("\r"))
+
+survey_vars <- 
+  read_xlsx("../3 eshot/Design/eshot_variables.xlsx", 
+            sheet = "survey_variables", na = "NA") 
+
+PASSQ <- 
+  prepare_lavaan(
+    data_path = "../3 eshot/Design/Validation data/Social Support/PASSQ_ARSQ.csv",
+                 pattern = "pass")
+
+ARSQ <- 
+  prepare_lavaan(
+               data_path = "../3 eshot/Design/Validation data/Social Support/PASSQ_ARSQ.csv",
+               pattern = "received")
+
+MCBS <-  prepare_lavaan(
+               data_path = "../3 eshot/Design/Validation data/MCBS/Coach_Study2_1.csv")
+
+colnames(MCBS) <- 
+  c("Clust", "ob1", "ob2", "ob3", "ob4", "eq1", "eq2", "eq3", "eq4","gs1",
+    "gs2", "gs3", "gs4", "gs5", "df1", "df2", "df3", "df4", "mf1", "mf2",
+    "mf3", "mf4", "Obeservation", "Effective Questioning", "Goal Setting",
+    "Developmental Feedback", "Motivational Feedback")
+
+TROSCI <- 
+  read_csv("../3 eshot/Design/Validation data/TROSCI/Maulin and Sholto.csv") %>% 
+  psych::reverse.code(items = ., keys = c(-1,-1,-1,1,-1,1,1,1,1,1,1,-1,1,-1,1), 
+                      mini = 1, maxi = 9) %>% 
+  data.frame() %>% 
+  scale()
+
+colnames(TROSCI) <- 
+  c("trosci_1", "trosci_2", "trosci_3", "trosci_4", "trosci_5", "trosci_6",
+    "trosci_7", "trosci_8", "trosci_9", "trosci_10", "trosci_11", "trosci_12", 
+    "trosci_13", "trosci_14", "trosci_15")
+
+FMPS <- 
+  read_csv("../3 eshot/Design/Validation data/FMPS/FMPS.csv", 
+           col_names = paste0("fmps_", 1:35)) %>% 
+  scale()
+
+BRS <- 
+  read_csv("../../3 Robustness/Study 3/Data/SPSP.csv") %>% 
+  select(starts_with("BRS")) %>% 
+  scale()
+
+colnames(BRS) <- c(paste0("brs_", 1:6), "BRS")
+
+ICSS <- read_csv("../3 eshot/Design/Validation data/conflict/matt_conflict_data.csv", na = "999") %>% 
+  na.omit()
+
+ICSS[,3:16] <- sapply(ICSS[,3:16], scale)
+
+
+study1_data_sets <- list(PASSQ, ARSQ, MCBS, TROSCI, FMPS, BRS, ICSS)
+
+
+numbers2words <- function(x){
+#https://github.com/ateucher/useful_code/blob/master/R/numbers2words.r
+  ## Function by John Fox found here: 
+  ## http://tolstoy.newcastle.edu.au/R/help/05/04/2715.html
+  ## Tweaks by AJH to add commas and "and"
+  helper <- function(x){
+    
+    digits <- rev(strsplit(as.character(x), "")[[1]])
+    nDigits <- length(digits)
+    if (nDigits == 1) as.vector(ones[digits])
+    else if (nDigits == 2)
+      if (x <= 19) as.vector(teens[digits[1]])
+    else trim(paste(tens[digits[2]],
+                    Recall(as.numeric(digits[1]))))
+    else if (nDigits == 3) trim(paste(ones[digits[3]], "hundred and", 
+                                      Recall(makeNumber(digits[2:1]))))
+    else {
+      nSuffix <- ((nDigits + 2) %/% 3) - 1
+      if (nSuffix > length(suffixes)) stop(paste(x, "is too large!"))
+      trim(paste(Recall(makeNumber(digits[
+        nDigits:(3*nSuffix + 1)])),
+        suffixes[nSuffix],"," ,
+        Recall(makeNumber(digits[(3*nSuffix):1]))))
+    }
+  }
+  trim <- function(text){
+    #Tidy leading/trailing whitespace, space before comma
+    text=gsub("^\ ", "", gsub("\ *$", "", gsub("\ ,",",",text)))
+    #Clear any trailing " and"
+    text=gsub(" and$","",text)
+    #Clear any trailing comma
+    gsub("\ *,$","",text)
+  }  
+  makeNumber <- function(...) as.numeric(paste(..., collapse=""))     
+  #Disable scientific notation
+  opts <- options(scipen=100) 
+  on.exit(options(opts)) 
+  ones <- c("", "one", "two", "three", "four", "five", "six", "seven",
+            "eight", "nine") 
+  names(ones) <- 0:9 
+  teens <- c("ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen",
+             "sixteen", " seventeen", "eighteen", "nineteen")
+  names(teens) <- 0:9 
+  tens <- c("twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty",
+            "ninety") 
+  names(tens) <- 2:9 
+  x <- round(x)
+  suffixes <- c("thousand", "million", "billion", "trillion")     
+  if (length(x) > 1) return(trim(sapply(x, helper)))
+  helper(x)
+}
+
+if (is_latex_output()) {font = "serif" } else {font = "sans"}
+
+
+
+```
+
+
+## Introduction {#survey-tool-dev-intro}
+
+The results of [Chapter 2](#ml-qualitative) suggested that becoming a Mountain Leader would be influenced by a variety of constructs across several different domains. The aim of [Chapter 3](#ml-pra) was to collect data from candidates for these constructs to further investigate which factors were the most important for discriminating those who become Mountain Leaders following a training course from those who do not. Given that we wanted to collect data from candidates for `r nrow(survey_vars)` variables, using full-length measures of the relevant constructs would be unreasonable for participants, given that it is not uncommon for measures to use more than five items to measure a single variable. Indeed, we believe that if we did measure each construct of interest with a full-length measure, it would create a survey so long that few candidates would complete it and those that did would likely not be representative of the population. 
+
+Therefore, the first aim of the work reported in this appendix was to identify a suitable measure for each construct identified in [Chapter 2](#ml-qualitative), which could then be used to identify the most important variables for discriminating candidates who do complete the Mountain Leader qualification from those who do not, both in terms of getting to an assessment and passing their first assessment. The second aim of the work reported in this appendix was to reduce the number of constructs that would be included in the survey tool. As such we were particularly interested in identifying short-form measures as using such measures was most likely to allow us to create a suitably short survey to collect data with.
+
+The development of short-form measures to reduce the burden on participants has been of interest to researchers for over 100 years [@Smith2000]. However, the development of short-form measures has attracted some criticism [e.g., @Levy1968; @Smith2000; @Wechsler1967]. One of the main criticisms of short-form measures has been that "rigorous, valid, comprehensive assessment is crucial for the evaluation and treatment of many psychological problems" [@Smith2000, p 102] and that the time saving afforded by a short-form measure does not warrant the loss of validity associated with measuring a construct with fewer items. When creating, or identifying, a short-form measure one should not assume that the evidence for the validity and reliability of the original measure applies to the short-from, therefore it is important to provide evidence for the reliability and validity of the short-form [@Smith2000]. This evidence should include, but is not limited to, reliability of the short-from, shared variance between the full- and short-form measure, content validity/coverage of the construct, and also that the reduction in items offers a meaningful reduction in the time taken for the measure to be completed [@Horvath2018; @Smith2000].
+
+
+## Method {#survey-tool-dev-method}
+
+### Measures. {#survey-tool-dev-measures}
+
+Although using full measures was not a realistic aim in the project, we still felt that the reliability and validity of the indicators that we intended to use would use was paramount. Researchers have suggested a variety of ways in which short-form measures can be developed whilst remaining both reliable and valid. Considering the guidance provided by @Smith2000 and @Horvath2018 along with the aim of this research, we identified items which would be used to collect data from candidates using the process detailed below. The aim of the project was to identify the most important discriminatory variables for identifying candidates who do or do not complete the Mountain Leader qualification using Machine Learning techniques rather than testing the relationships between variables using regression-based techniques or structural equation modelling. Therefore, instead of using full-length measures to collect data for each construct, we used one or two item *indicators* for each construct.
+
+Our preference was to identify existing suitable short-form measure [e.g., the Ten Item Personality Inventory; @Gosling2003]. When this was not possible, but there was an existing measure that we were able to access secondary data for, we used the following steps. Firstly, we checked that existing measure did measure the construct of interest and that there was sufficient evidence for its reliability and validity. Secondly, we identified which items we wanted to retain based on both content validity and factor loadings. It was important that the items retained still provided adequate coverage of the construct. In some instances, this meant retaining an item which had a (relatively) low factor loading, but measured a unique aspect of that construct, as opposed to simply retaining items with high factor loadings (regardless of content validity). This approach necessarily  lowered the reliability coefficient for the short-form measure; however, it is important to note that internal consistency is only one aspect of validity.
+
+Once we had identified the items we wished to retain, we fitted a single factor latent variable model for both the full- and short-form measure to the secondary data, using `lavaan` [@R-lavaan], to estimate factor scores for each participant. These factor scores were then used to calculate a Pearson's correlation coefficient  between predicted factor sores for full- and short-form measure as an estimate of shared variance. This method is better than correlating the item sum-scores, as latent variables account for measurement error, thus, reducing the likelihood of receiving an optimistically biased estimate due to error correlation. Shared variance with the full measure was our main concern for this aspect of the study, as if the correlations are high enough then the two measures can be thought of as approximately equal [@Smith2000]. Finally, we calculated the composite reliability for the new short-form measure [$\omega$; @Fornell1981]. If secondary data were not available but we identified a suitable measure, we chose the best item(s) based on face validity of the items and factor loadings reported in the original paper validating the full measure. Finally, if none of the options above were possible, we developed item(s) within the research team in collaboration with Mountain Training.
+
+Below is a brief description of the measures used for each construct. Where available, results of the latent variable correlations are presented in Table \@ref(tab:short-measure-correlations). A full list of the items selected for each construct can be found in Table \@ref(tab:eshot-vars).
+
+
+##### Personality measures.
+
+###### Big Five. 
+
+To measure the "Big-Five" personality traits (openness, conscientiousness, extraversion, agreeableness and emotional stability), we used the Ten Item Personality Inventory [TIPI; @Gosling2003]. The TIPI comprises ten pairs of items (e.g., "Critical, quarrelsome"), one positively worded and one negatively worded for each trait. Each item has the same stem, "I see myself as..." Participants were then asked to score each item on a seven-point Likert scale from *Disagree strongly* (1) to *Agree strongly* (7) and sum scores were calculated for each of the five traits.
+
+
+###### Resilience and Robustness.
+
+We used the Brief Resilience Scale [BRS; @Smith2008] to measure resilience and robustness. There is evidence that the BRS can be used to measure these two factors separately [@Hardy2019c]. We used two items to measure each factor, participants were asked to score each item on a seven-point Likert scale from *Disagree strongly* (1) to *Agree strongly* (7) and sum scores were calculated for each of the five traits. We used data from @Hardy2019c to identify the best indicators of resilience.
+
+
+###### Perfectionism.
+
+We used items from three subscales of the Frost Multidimensional Perfectionism Scale [FMPS; @Frost1990] to measure two broad dimensions of perfectionism. We used items from the personal standards subscale to measure perfectionistic striving and items from the concerns over mistakes and doubts about actions subscales to measure perfectionistic concerns. We used two items to measure perfectionistic striving and five items to measure perfectionistic concerns; participants were asked to score each item on a seven-point Likert scale from *Disagree strongly* (1) to *Agree strongly* (7) and sum scores were calculated both factors. We used data from @Roberts2013 to identify the best indicators for each construct. Repeating the analyses from @Roberts2013, we found that medium and large effects were still significant, however small effects were not.
+
+
+###### Robustness of confidence. 
+
+We used three items from the Trait Robustness of Self-Confidence Inventory [TROSCI; @Beattie2011] to measure robustness of confidence. Participants used a nine-point numerical rating scale to score each item from *Strongly disagree* (1) to *Strongly agree* (9) with a mid-point anchor, *Neutral* (5). We used data from @Beattie2011 to identify the best indicators of robustness of confidence.
+
+
+##### Socio-demographic.
+
+Some socio-demographic data are available on the CMS; however, some are not (e.g., income level, education level). To measure these, we used standard socio-demographic questions (e.g., "What is the highest level of school you had completed or the highest degree you had received when you registered?").
+
+
+##### Self-efficacy Scale.
+
+Perceived self-efficacy is domain specific and individuals will have varying levels of self-efficacy beliefs across different domains of their lives, therefore it is important that any measure of perceived self-efficacy is domain specific [@Bandura1997; @Bandura2006]. 
+
+Mountain Training provide clear documentation about what will be required of candidates during their assessment which includes a candidate handbook and syllabus [@MountainTrainingUK2015a], and a separate skills checklist [@MountainTrainingUK2015]. WH conducted an inductive content analysis [@Cho2014] of these documents to identify a list of skills, which a candidate should be able to perform on a Mountain Leader assessment. This list of skills was then discussed with Mountain Training's executive officers (N = 5) who agreed that it provided good coverage of the skills that would be covered on an assessment. 
+
+Using the list of skills, we created a self-efficacy scale following Bandura's [-@Bandura2006] guidelines. The resultant scale was then piloted with Mountain Training staff (N = 10) who provided feedback on the items, which was used to refine the scale. The final scale comprised eleven items (e.g., "lead a group effectively in the mountains") rated on a scale of *could not do at all* (0) to  *highly certain could do* (100) with a mid-point anchor (*moderately could do*; 50). The items could then be presented to participants three times, each with a different introduction as we wanted to measure efficacy at two points along the pathway and candidates' ideal efficacy levels:
+
+1) Please rate how confident you were that you could do them immediately after your training course.
+2) Please rate your degree of confidence, as of now/at your (first) assessment.^[Different wording was presented to candidates based on whether or not they had been assessed.]
+3) Now we know about your levels of confidence to perform these tasks as of now/at your (first) assessment, we would like to understand how confident you feel that your ideal self would be/have been at your (first) assessment. The Ideal Self: “Your ideal self is the kind of person you’d really like to be. It is defined by the characteristics you would ideally like to have. It’s not necessary that you have these characteristics now, only that you believe you want to have them."
+
+
+##### Personal Projects.
+
+We used a modified version of Little's Personal Project Analysis [PPA; @Little1983], similar to that used by @Beattie2015. We adapted the instructions so that they read:
+
+> We are interested in studying the kinds of personal projects that candidates have at different stages of their life and how they relate to candidates’ motivation to become an ML. All of us have a number of personal projects at any given time that we think about, plan for, and sometimes (though not always) complete. 
+>
+> Please take a moment to think about the projects or goals that you were working on before your assessment, these may include things that you have already told us about.
+
+Participants were then given examples of goals (e.g., "Completing another outdoor qualification," "Spending more time with my family") and asked to "write down the two goals that you were most likely to work towards in the six-months before your assessment, *not-including* becoming an ML." On the following page, for each of their stated goals and for the goal of "becoming an ML," they were then asked to rate the: importance of the goal, *not at all important to me* (0) to *extremely important to me* (100); progress towards the goal in the last six months/six months before their assessment, *no progress* (0) to *most progress* (100); and their perceived self-efficacy of attaining the goal, *I definitely do/did not have the skills and resources to be successful at achieving this goal* (0) to *I definitely have/had the skills and resources to be successful at achieving this goal* (100). Using the scores provided, the following can then be calculated: relative importance, relative progress, and relative efficacy score using Equation \@ref(eq:ppa-relative).^[To avoid returning an undefined value one is added to both the numerator and denominator.]
+
+\begin{equation}
+Relative = \frac{Mountain\,Leader + 1 }{(Goal\,1 + Goal\,2) \div 2 + 1}
+(\#eq:ppa-relative)
+\end{equation}
+
+
+##### Motives.
+
+In Chapter 2 it appeared that two different levels of motive were important to the completion of the Mountain Leader qualification: participatory (the goal content) and regulatory (the "why"). To measure the participatory motives, we employed a similar methodology to Sheldon and Elliot's [-@Sheldon1999] adaptation of Little's [-@Little1983] Personal Project Analysis. First, we asked participants to list two goals that they hoped to achieve by registering for the Mountain Leader qualification. These reasons were then coded qualitatively by WH on a scale of *definitely intrinsic* (1) to *definitely extrinsic* (5) and a mean score was calculated. When coding the data, WH was blinded to all outcome variables. Examples of data coded at each each value are: (1) "To have fun," (2) "Being better equipped to enjoy the mountains safely for myself," (3) "Assessing my own ability," (4) "Confidence in leading groups in the mountains," (5) "Gain the ML qualification."
+
+To measure regulatory motives, participants rated each participatory motive they had given in terms of their behavioural regulation. Each item had the same stem, “I pursue this goal because…” The intrinsic item was “of the fun and enjoyment it provides me,” the integrated reason was “it is a part of who I am or aspire to be,” the identified reason was “I really believe it’s an important goal to have,” the introjected reason was “I would feel ashamed, guilty, or anxious if I didn’t,” the external reason was "someone else wants me to or because the situation demands it." Participants scored each of these reasons on a visual analogue scale with five equally spaced anchors from *strongly agree* (0) to *strongly disagree* (100), a mean score for each of the regulatory motives was then calculated.
+
+
+##### Course Staff Coaching Behaviours.
+
+The Military Coaching Behaviour Scale [MCBS; @Wagstaff2018] is a 22-item scale that assesses five coaching behaviours: observing and performance analysis, effective questioning, goal setting, developmental feedback, and motivational feedback. We used two items for each factor, scored on a Likert scale from *Not at all* (1) to *All of the time* (7) and sum scores were calculated each factor. We used unpublished data to identify the best indicators of each coaching behaviour.
+
+
+
+##### Need Supportive Environment.
+
+The Perceived Environmental Supportiveness Scale [PESS; @Markland2010] measures autonomy support, structure, and involvement, each with five items. We used one item for each factor, scored on a numerical rating scale from *Not true for me* (0) to *Very true for me* (6). We were unable to obtain data collected using this measure, therefore we chose one item for each factor based on face validity.
+
+
+##### Perceived Conflict on Courses.
+
+We used items from the Intra-group Conflict Scale for Sport [ICSS; @Boulter] to measure perceived intragroup conflict on courses. In the ICS-S, five items measure relationship conflict, four measure process conflict, and four measure task conflict. We did not measure task conflict in this study as there was no evidence in the qualitative study that it was relevant to completion of the Mountain Leader qualification. We used one relationship conflict item and one process conflict item. Each item was scored on a Likert scale from *None/Never* (1) to *A lot/Always* (9). We asked each of the items in the context of conflict between candidates and between candidates and staff, four items in total. We used data from @Boulter to identify the best indicators of relationship and process conflict.
+
+
+##### Social Support. {#survey-tool-measures-social-support}
+
+We considered four dimensions of social support (i.e., esteem, emotional, informational, and tangible support) in two contexts, perceived available support and received support. We used two items from each dimension of The Perceived Available Support in Sport Questionnaire [PASSQ; @Freeman2011] to measure perceived available support and two items from The Athletes' Received Support Questionnaire [ARSQ; @Freeman2014] to measure received support. All items were scored using a Likert scale, with the options *Not at all* (1) to *Extremely so* (5) for the PASSQ items and *Not at all* (1) to *Seven or more times* (5) for the ARSQ items. We used data collected as part of development of the ARSQ [@Freeman2014] to identify the best indicators of perceived and received support.
+
+
+##### Preparation for Assessment. {#survey-tool-measures-preparation}
+
+Preparation for an assessment may encompass a variety of different things for different candidates and we were interested in how much candidates felt that they had done to prepare for an assessment. We asked participants to complete the sentence, "I have done ____ to prepare effectively for an ML assessment" using a visual analogue scale, anchored at *nothing* (0) and *all that I could* (100). Given the complex nature of this question, we used a decomposition approach [cf. the World Health Organization Health and Work Performance Questionnaire @Kessler2003; @Means1991] to improve accuracy in responses by first asking participants to list some of the things that they had done in the last six-months/six-months prior to their assessment to prepare. The aim of this approach is to bring relevant activities to mind, so that when participants complete the question of relevance, they are able to do so more accurately [cf. @Kessler2003].
+
+
+##### Life events. {#survey-tool-measures-life-events}
+
+Based on the results of Chapter 2, we wanted to measure change in three domains of candidates lives: social, professional, and health. The Recent Life Change Questionnaire [RLCQ; @Miller1997] has items covering these domains. At this point, we were not concerned about the exact events that may, or may not, have occurred. Therefore, we presented items from the RLCQ as examples for each domain. Participants were asked to rate the extent to which they had experienced change in that domain of their life since their training course using a visual analogue scale from *No change* (0) to *Major change* (100). Another consideration when choosing this method was the sensitive nature of some life events. Allowing participants to indicate a magnitude of perceived change rather than explicitly responding to a sensitive item (e.g., "Miscarriage or abortion," "Being held in jail") was deemed more appropriate for this study.
+
+
+##### Aspirations, Intentions, and Expectations.
+
+To understand what candidates hoped to achieve, their intentions towards assessment, and how long after their training course candidates thought that they would be assessed, if they intended to do so, we created items in conjunction with Mountain Training as no measures existed. 
+
+
+```{r short-measure-correlations, warning=FALSE, eval=TRUE}
+eshot_vars %>% 
+  #filter(short_available == FALSE) %>% # variables that need a short-form measure creating
+  filter(!is.na(full_model) & is_duplicate == FALSE) %>% 
+  rowwise() %>% 
+  transmute(measure = measure_code,
+            #Reference = paste0("@", source),
+            reference = 
+              if_else(
+                is.na(source) == FALSE, 
+                if (is_latex_output()) 
+                {str_squish(
+                  paste0(
+                    "\\citet{",
+                    str_trim(
+                      str_replace_all(
+                        string = source, pattern = ";", ",")), "}"))} 
+                else {
+                  paste0(
+                    "@",
+                    str_replace_all(
+                      string = source,
+                      pattern = "; ", "; \\@"))},
+                # paste0("@", source),
+                source),
+            variable = tools::toTitleCase(subscale_code),
+            variable = str_replace_all(variable, "_", " "),
+            n = nrow(eval(parse(text = measure_code))),
+            p = round(latent_cor(data = eval(parse(text = measure_code)), 
+                                 short_model = short_model, 
+                                 full_model = full_model)$p.val, digits = 2),
+            r = printnum(latent_cor(data = eval(parse(text = measure_code)), 
+                                 short_model = short_model, 
+                                 full_model = full_model)$estimate),
+            r = str_replace_all(as.character(r), "0.", "."),
+            r = case_when(p < .01 ~ paste0(r, "*")),
+            p = if_else(p < .01, "<.01", as.character(p)),
+            ci = 
+              paste0(
+                round(
+                  latent_cor(
+                    data = eval(parse(text = measure_code)), 
+                    short_model = short_model, 
+                    full_model = full_model)$conf.int[1], digits = 2), ",",
+                round(latent_cor(data = eval(parse(text = measure_code)),
+                                 short_model = short_model, 
+                                 full_model = full_model)$conf.int[2], 
+                      digits = 2)),
+            ci = str_replace_all(as.character(ci), "0.", "."),
+            omega_full = 
+              printnum(latent_cor_comp_rel(data = eval(parse(text = measure_code)),
+                                  model = full_model)),
+            omega_full = str_replace_all(as.character(omega_full), "0.", "."),
+            omega_short = 
+              printnum(latent_cor_comp_rel(data = eval(parse(text = measure_code)),
+                                        model = short_model)),
+            omega_short = str_replace_all(as.character(omega_short), "0.", "."),
+            omega_short = replace_na(omega_short, "-")
+  ) %>% 
+  select(-c(reference, p)) %>%
+  kable(caption = "Latent variable correlations between full- and short-form measures.",
+    col.names =
+      if(is_latex_output())
+        {c("Measure", "Variable", "n", "$r$", "95\\% CI",
+                  "$\\omega_{full}$", "$\\omega_{short}$")}
+    else  {c("Measure", "Variable", "n", "$r$", "95\\% CI",
+                  "$\\omega_{full}$", "$\\omega_{short}$")},
+    booktabs = TRUE, escape = FALSE, align = "llrcccc") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), 
+                full_width = FALSE) %>%
+  collapse_rows(c(1:3), valign = "top") %>% 
+  footnote(symbol = "$p<.01$", 
+           general = "$\\\\omega$ can only be calculated when there is more than one item.",
+           escape = FALSE)
+
+```
+
+
+
+
+
+### Participants and Procedure. {#survey-tool-dev-participants}
+
+We created four surveys, each of which contained a subset of the variables that we wanted to collect data for. Each variable was included in at least two of the surveys and each pairwise combination of variables was included in at least one survey. This was done to both collect as much data as possible and to ensure that two-way interactions between variables could be explored. Figure \@ref(fig:survey-tool-overlap) shows a simplified visual representation of the distribution of constructs between the four surveys. 
+
+
+```{r survey-tool-overlap, fig.cap="Simplified representation of variable overlap between Groups 1 to 4."}
+# include_graphics("plots/SurveyToolOverlap.png", dpi = 250)
+
+# Group1to4 %>% 
+#   select(-c(starts_with("X"), starts_with("v"), Group, Nudged, 
+#             starts_with("Recipient"), ends_with("id"), ends_with("name"),
+#             FirstTimePass, starts_with("Assessed"), StartDate, EndDate,
+#             Status, TYrsAgo, starts_with("Q"), IPAddress, starts_with("Paper"),
+#             Progress, starts_with("Survey"), Duration__in_seconds_, Finished,
+#             RecordedDate, UserLanguage, starts_with("firstMLT"), consent, TtoN,
+#             PC, DAA, PM2, PM, starts_with("firstMLA"), Postcode, County, 
+#             CountryId, starts_with("Logbook"))) %>% 
+#   ggplot_missing()
+
+group_1 <- c("Survey 1", TRUE, TRUE, TRUE, FALSE)
+group_2 <- c("Survey 2", TRUE, TRUE, FALSE, TRUE)
+group_3 <- c("Survey 3", TRUE, FALSE, TRUE, TRUE)
+group_4 <- c("Survey 4", FALSE, TRUE, TRUE, TRUE)
+
+names(group_1) <- c("Survey", "v1-v47", "v48-v95", "v96-v141", "v142-v146")
+names(group_2) <- c("Survey", "v1-v47", "v48-v95", "v96-v141", "v142-v146")
+names(group_3) <- c("Survey", "v1-v47", "v48-v95", "v96-v141", "v142-v146")
+names(group_4) <- c("Survey", "v1-v47", "v48-v95", "v96-v141", "v142-v146")
+
+df <- bind_rows(group_1, group_2, group_3, group_4)
+
+df %>% 
+  pivot_longer(cols = `v1-v47`:`v142-v146`) %>% 
+  mutate(name = 
+           factor(name, ordered = TRUE, 
+                  levels = c("v1-v47", "v48-v95", "v96-v141", "v142-v146"))) %>% 
+  ggplot(aes(x = name, y = Survey, fill = value)) +
+  geom_tile(interpolate = FALSE) +
+  xlab("Variable") +
+  theme_few(base_family = font) +
+  theme(legend.position = "top") +
+  guides(fill = guide_legend(title = "Included in survey"))
+
+
+```
+
+
+In November 2018, we contacted all candidates trained between 2008 and 2016 ($n =$ `r 948 + 950 + 949 + 947`). None of these candidates were included in the main analyses for Chapter 3, nor were they included in the item selection work reported above in the Appendix. Each candidate had been randomly assigned to one of four groups (stratified by year of training) using the `randomizr` package [@R-randomizr] and candidates from each of these groups were invited to complete one of the surveys described above using the Qualtrics survey platform [@Qualtrics]. We collected responses from `r nrow(Group1to4)` participants (`r printnum(100*nrow(Group1to4)/(948 + 950 + 949 + 947))` % response rate), see Table \@ref(tab:survey-dev-participants) for summary statistics of participant demographics within each group.
+
+
+```{r survey-dev-participants, results = "asis"}
+Group1to4 %>% 
+  mutate(Sex = case_when(SexId == 1 ~ "Male",
+                         SexId == 2 ~ "Female"),
+         Group = str_replace_all(Group, "Group", "")) %>% 
+  group_by(Group) %>% 
+  summarise(n = n(),
+            `Female (\\%)` = mean(if_else(SexId == 2, 1 ,0) * 100),
+            `$M_{Age}$` = mean(v142, na.rm = TRUE),
+            `$M_{years\\,since\\,training}$ ± 1 SD` = 
+              paste(printnum(mean(interval(firstMLTrainingDate, EndDate)/years(1), 
+                                  na.rm = TRUE)),
+                    "±",
+                    printnum(sd(interval(firstMLTrainingDate, EndDate)/years(1), 
+                                na.rm = TRUE)))) %>% 
+  kable(caption = "Survey participants per group", 
+        digits = 2, booktab = TRUE, align = "c", escape = FALSE) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), 
+                full_width = FALSE)
+```
+
+
+Once data collection was complete, each of the four groups was then split in two, one group for those candidates who had DLOG data and one group who did not have DLOG data. This was done as the pattern recognition procedure cannot handle missing data and we would then have had to omit all DLOG data, which would have left us unable to identify interactions between the survey and experience data. Once the groups had been split into these two groups, we created two data sets within each one for those who did not and then for each classification problem. This process resulted in the following data sets for each survey group (Figure \@ref(fig:study2-participant-sankey) provides a visual representation of the groups described below):
+
+  1) Getting to assessment within 18 months of training - no DLOG data.
+  2) Getting to assessment within 18 months of training - with DLOG data.
+  3) Passing the first assessment - no DLOG data.
+  4) Passing the first assessment - with DLOG data.
+
+
+```{r study2-participant-sankey, fig.cap="Study 2 participants split into 16 data sets for analysis. Note: DLOG = Digital logbook, GTA = Getting to assessment within 18 months of training, FTP = Passing the first assessment."}
+plot_ly(
+  type = "sankey",
+  orientation = "h",
+  
+  node = list(
+    label = c("Completed survey", "DLOG available", "No DLOG", 
+              "GTA Group 1", "GTA Group 2", "GTA Group 3", "GTA Group 4", # GTA DLOG groups
+              "GTA Group 1", "GTA Group 2", "GTA Group 3", "GTA Group 4", # GTA No DLOG groups
+              "Not assessed",
+              "FTP Group 1", "FTP Group 2", "FTP Group 3", "FTP Group 4", # FTP DLOG groups
+              "FTP Group 1", "FTP Group 2", "FTP Group 3", "FTP Group 4", # FTP No DLOG groups
+              "Passed", "Did not pass"),
+    color = c("blue", "blue", "blue", 
+              rep(c("gold", "darkcyan", "blueviolet", "deeppink"), 2),
+              "blue",
+              rep(c("gold", "darkcyan", "blueviolet", "deeppink"), 2),
+              "green", "red"),
+    pad = 15,
+    thickness = 20,
+    line = list(
+      color = "black",
+      width = 0.5
+    )
+  ),
+  
+  link = list(
+    # node that data originates from
+    source = c(
+      # DLOG or non-DLOG
+      0,0,
+      # Split into 4 DLOG and 4 non-dlog groups
+      rep(1, 4),
+      rep(2, 4),
+      # Not assessed candidates
+      # 3:10, 
+      # Assessed groups
+      3:10
+    ), 
+    
+    # node that data is going to
+    target = c(
+      # DLOG or non-DLOG
+      1,2,
+      # Split into 4 DLOG and 4 non-dlog groups
+      3:6,
+      7:10,
+      # Not assessed candidates
+      # rep(11, 8),
+      # Assessed groups
+      12:19), 
+    
+    # number of cases being transferred
+    value =  c(
+      # DLOG or non-DLOG
+      nrow(filter(Group1to4, LogbookType1 != 2)),
+      nrow(filter(Group1to4, LogbookType1 == 2)),
+      # Split into 4 groups for DLOG then non DLOG
+      nrow(filter(Group1to4, LogbookType1 != 2 &
+                    Group == "Group1")),
+      nrow(filter(Group1to4, LogbookType1 != 2 &
+                    Group == "Group2")),
+      nrow(filter(Group1to4, LogbookType1 != 2 &
+                    Group == "Group3")),
+      nrow(filter(Group1to4, LogbookType1 != 2 &
+                    Group == "Group4")),
+      nrow(filter(Group1to4, LogbookType1 == 2 &
+                    Group == "Group1")),
+      nrow(filter(Group1to4, LogbookType1 == 2 &
+                    Group == "Group2")),
+      nrow(filter(Group1to4, LogbookType1 == 2 &
+                    Group == "Group3")),
+      nrow(filter(Group1to4, LogbookType1 == 2 &
+                    Group == "Group4")),
+      # Not-assessed
+      # nrow(filter(Group1to4, LogbookType1 != 2 &
+      #               Group == "Group1" &
+      #               is.na(FirstTimePass) == TRUE)),
+      # nrow(filter(Group1to4, LogbookType1 != 2 &
+      #               Group == "Group2" &
+      #               is.na(FirstTimePass) == TRUE)),
+      # nrow(filter(Group1to4, LogbookType1 != 2 &
+      #               Group == "Group3" &
+      #               is.na(FirstTimePass) == TRUE)),
+      # nrow(filter(Group1to4, LogbookType1 != 2 &
+      #               Group == "Group4" &
+      #               is.na(FirstTimePass) == TRUE)),
+      # nrow(filter(Group1to4, LogbookType1 == 2 &
+      #               Group == "Group1" &
+      #               is.na(FirstTimePass) == TRUE)),
+      # nrow(filter(Group1to4, LogbookType1 == 2 &
+      #               Group == "Group2" &
+      #               is.na(FirstTimePass) == TRUE)),
+      # nrow(filter(Group1to4, LogbookType1 == 2 &
+      #               Group == "Group3" &
+      #               is.na(FirstTimePass) == TRUE)),
+      # nrow(filter(Group1to4, LogbookType1 == 2 &
+      #               Group == "Group4" &
+      #               is.na(FirstTimePass) == TRUE)),
+      # Assessed
+      nrow(filter(Group1to4, LogbookType1 != 2 &
+                    Group == "Group1" &
+                    is.na(FirstTimePass) == FALSE)),
+      nrow(filter(Group1to4, LogbookType1 != 2 &
+                    Group == "Group2" &
+                    is.na(FirstTimePass) == FALSE)),
+      nrow(filter(Group1to4, LogbookType1 != 2 &
+                    Group == "Group3" &
+                    is.na(FirstTimePass) == FALSE)),
+      nrow(filter(Group1to4, LogbookType1 != 2 &
+                    Group == "Group4" &
+                    is.na(FirstTimePass) == FALSE)),
+      nrow(filter(Group1to4, LogbookType1 == 2 &
+                    Group == "Group1" &
+                    is.na(FirstTimePass) == FALSE)),
+      nrow(filter(Group1to4, LogbookType1 == 2 &
+                    Group == "Group2" &
+                    is.na(FirstTimePass) == FALSE)),
+      nrow(filter(Group1to4, LogbookType1 == 2 &
+                    Group == "Group3" &
+                    is.na(FirstTimePass) == FALSE)),
+      nrow(filter(Group1to4, LogbookType1 == 2 &
+                    Group == "Group4" &
+                    is.na(FirstTimePass) == FALSE))
+      
+    )  
+  )
+) %>% 
+  layout(
+    font = list(
+      size = 12, family = font
+    )
+  ) -> p
+
+p %>%
+  orca(file = "plots/study2-participant-sankey.pdf", width = "15cm")
+
+
+if (knitr::is_html_output()) {
+  p
+} else
+{
+  include_graphics("plots/study2-participant-sankey.png",
+                   auto_pdf = TRUE, dpi = 200)
+}
+
+```
+
+
+In our data (and the population), most candidates have not been assessed 18 months after their training course. To ensure an orthogonal design (i.e., outcome groups of equal size) we selected a random sample of candidates who had not been assessed 18 months after their training course of equal size to the group of candidates who had been assessed.
+
+>(Could/should I do something to check the representativeness of the samples (e.g., using sex, age, board)? Equivalence testing?)
+
+
+### Analytical Method.
+
+We used the same pattern recognition procedure as described for the [main study](#pra-analytical-method) with the following modification. The data were standardised within sex, using the `mousetrap` package [@R-mousetrap], to control for sex differences. This was done as not all groups would have had enough data from both sexes to analyse separately having already split the data by DLOG availability. We considered exploring the data having standardised them by training provider, however, when grouped by training provider, there were not enough cases in each group to standardise the data in a meaningful way. Individual items *and* construct sum-scores were included in the analyses to identify if it was specific elements of a construct that was important, or if it was the construct as a whole.
+
+
+### Item Retention.
+
+Having identified a number of feature subsets that could be used to classify candidates in each group, we identified the items which we wanted to retain for the final survey. As not all items were asked to the same number of groups, we scored each item by the number of times that it was selected divided by the number of times it was asked. This was done so that the item retention process was not biased by the number of times that an item was asked. Items were retained if they were selected for the best models in at least half of the datasets they were asked to.
+
+
+## Results {#survey-tool-dev-results}
+
+### Item Reduction.
+
+Using the process described above for identifying suitable short-form measures, `r sum(eshot_vars$n_items_full, na.rm = TRUE) - sum(eshot_vars$n_items_short, na.rm = TRUE) %>% round()` items were removed from full-measures, leaving an item pool of `r sum(eshot_vars$n_items_short, na.rm = TRUE) %>% round()` items. Assuming seven seconds per item [@Qualtrics], this equates to a survey that would require candidates to spend approximately `r printnum((sum(eshot_vars$n_items_short, na.rm = TRUE)*7)/60)` minutes answering questions (`r round(((sum(eshot_vars$n_items_full, na.rm = TRUE) - sum(eshot_vars$n_items_short, na.rm = TRUE))*7)/60)` minutes shorter than using full-measures); participants would also be required to read the information sheet, transition between pages, etc. The items for `r nrow(filter(eshot_vars, short_available == TRUE))` variables had evidence of validity from other studies, `r nrow(eshot_vars %>% filter(!is.na(full_model) & is_duplicate == FALSE)) + nrow(filter(eshot_vars, is_duplicate == TRUE))` had evidence for validity from analyses carried out in this study on secondary data, `r sum(str_detect(tolower(eshot_vars$var_label), "efficacy")) - 3 + sum(str_detect(tolower(eshot_vars$var_label), "discrep"))` were self-efficacy items created specifically for this project, `r numbers2words(sum(str_detect(tolower(eshot_vars$item_wording), "cms"), na.rm = TRUE))` non-DLOG variables were collected from CMS, and `r sum(eshot_vars$is_total == TRUE, na.rm = TRUE)` variables were sum scores.
+
+We retained `r nrow(feature_retention) - sum(feature_retention$RetainedEither)` variables based on the criteria above. Some of these variables were sum totals of constructs including variables not selected, therefore we chose to retain a further `r sum(!is.na(feature_retention$EitherAdditional))` items. This process resulted in `r sum(feature_retention$EitherAdditional, na.rm = TRUE) + sum(feature_retention$nItemsEither, na.rm = TRUE) %>% round(.,1)` items being retained for the final survey, which we estimated would take `r printnum((sum(feature_retention$EitherAdditional, na.rm = TRUE) + sum(feature_retention$nItemsEither, na.rm = TRUE) %>% round(.,1)*7)/60, digits = 0)` minutes to complete (see [supplementary information](#survey-items) for a list of the variables retained for the final survey).
+
+
+### Classification Rates {#survey-tool-dev-classificaiton-rates}
+
+In 15 of the 16 datasets we were able identify a feature subset which could be used to correctly classify candidates with at least *good* accuracy (i.e., at least one classifier for that data set had a classification rate over 70%). For the other data set we were able to identify a feature subset which could be used to classify candidates with *moderate* accuracy (i.e., at least one classifier for that data set had a classification rate over 60%). Whilst these classification rates are not as high as one may like, we believe that they are acceptable because no survey contained all all of the variables that we considered to be potentially important. Table \@ref(tab:survey-dev-classification-rates) shows the classification rates for the best models within each data set.
+
+
+```{r survey-dev-classification-rates, results="asis"}
+bind_rows(
+  read_xlsx("../3 eshot/PRA_Results/GTA_Classification_rates.xlsx", 
+            sheet = "Sheet2")[1:16,] %>% 
+    mutate(Analysis = "Getting to assessment within 18 months of training",
+           Group = case_when(str_detect(Model, "G1") ~ "1",
+                             str_detect(Model, "G2") ~ "2",
+                             str_detect(Model, "G3") ~ "3",
+                             str_detect(Model, "G4") ~ "4"),
+           DLOG = case_when(str_detect(Model, "DLOG") ~ "TRUE",
+                            str_detect(Model, "PaperLog") ~ "FALSE"),
+           Subset = case_when(str_detect(Model, "_4s") ~ "4s",
+                              str_detect(Model, "_3s") ~ "3s",
+                              str_detect(Model, "_2s") ~ "2s",
+                              str_detect(Model, "_F3") ~ "3s RFE",
+                              str_detect(Model, "_F2") ~ "2s RFE")) %>% 
+    filter(str_detect(Model, "_CV") == FALSE) %>% 
+    select(-Model, -NN6, -NN10) %>% 
+    select(Analysis, Group, DLOG, Subset, everything()), 
+  read_xlsx("../3 eshot/PRA_Results/FTP_classification_rates.xlsx", 
+            sheet = "Sheet1") %>% 
+    mutate(Analysis = "Passing first time",
+           Group = case_when(str_detect(Model, "G1") ~ "1",
+                             str_detect(Model, "G2") ~ "2",
+                             str_detect(Model, "G3") ~ "3",
+                             str_detect(Model, "G4") ~ "4"),
+           DLOG = case_when(str_detect(Model, "DLOG") ~ "TRUE",
+                            str_detect(Model, "PaperLog") ~ "FALSE"),
+           Subset = case_when(str_detect(Model, "_4s") ~ "4s",
+                              str_detect(Model, "_3s") ~ "3s",
+                              str_detect(Model, "_2s") ~ "2s",
+                              str_detect(Model, "_F3") ~ "3s RFE",
+                              str_detect(Model, "_F2") ~ "2s RFE")) %>% 
+    filter(str_detect(Model, "_CV") == FALSE) %>% 
+    select(-Model, -NN6) %>% 
+    select(Analysis, Group, DLOG, Subset, everything())) %>% 
+  kable(caption = "Classification rates for the feature subset with the highest classification rates for each data set (percentage accuracy).", 
+        booktab = TRUE, escape = TRUE,
+        format = if (is_latex_output()) {"latex"} else {"html"}) %>% 
+  add_header_above(header = c(" " = 4, "Classifier percentage accuracy" = 4)) %>% 
+  column_spec(1, "5cm", italic = TRUE) %>% 
+  column_spec(2:3, "1cm") %>% 
+  column_spec(4, "1.4cm") %>% 
+  column_spec(5:8, "1cm") %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), 
+                full_width = FALSE) %>%
+  collapse_rows(valign = "top", columns = c(1:2))
+
+```
+
+
+## Discussion {#survey-tool-dev-discussion}
+
+This study sought to create a survey tool which could be administered to candidates who had completed a Mountain Leader training course in order to help us identify the most important discriminatory variables for candidates who: (a) did or did not get to an assessment within 18 months of their training course and (b) did or did not pass their first assessment. Whilst no single candidate provided data for all the variables, we were able to discriminate candidates with a degree of accuracy substantially greater than chance in each group. This finding shows that firstly, the measures used in the survey work and secondly, that we collected data about variables which explain some of the variance in the criterion variables. It is important to note that just because a construct has not been selected, it is not necessarily unimportant. Variables not selected as discriminatory variables may in fact be important commonalities between the groups. The next study collected data from candidates who attended a Mountain Leader training course between 2016 and 2018 on all the variables retained following this study.
+
+Including DLOG data in the models did not appear to improve the classification rates in any substantive way. This finding suggests that the variance explained by those data is better explained by survey variables. A likely explanation is that candidates use the DLOGs in different ways. Some candidates will log every experience that they have, some will log only the best of their experiences, some will log only their relevant experience, and some will log only the experience they need to meet the prerequisites for the course (potentially from an extremely large pool of experience). The use of DLOG in these different ways creates "messy" data, with no easy way to distinguish a candidate who only has 40 QMDs and a candidate who has far more than that but only logs 40 as they do not feel it would benefit them to log more.
+
+
+## Study 2 Supplementary Information
+
+```{r eshot-vars, eval=TRUE}
+survey_vars %>% 
+  mutate(var_description = case_when(included_group_5 == TRUE ~ paste0("*", var_description),
+                                     included_group_5 == FALSE ~ var_description)) %>% 
+  select(var_description, measure_code, item_wording, n_items_full, n_items_short) %>% 
+  # mutate(source = 
+  #          if_else(
+  #            is.na(source) == FALSE, 
+  #            if (is_latex_output()) 
+  #            {str_squish(
+  #              paste0(
+  #                "\\citet{",
+  #                str_trim(
+  #                  str_replace_all(
+  #                    string = source, pattern = ";", ",")), "}"))} 
+  #            else {
+  #              paste0(
+  #                "@",
+  #                str_replace_all(
+  #                  string = source,
+  #                  pattern = "; ", "; \\@"))},
+  #            # paste0("@", source),
+  #            source)
+  # ) %>% 
+  kable(caption = "Survey variables.", 
+        col.names = c("Variable", "Measure", "Item wording", "Full", "Short"),
+        digits = 0, booktab = TRUE, longtable = TRUE, 
+        escape = TRUE,
+        format = if (is_latex_output()) {"latex"} else {"html"}) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), 
+                full_width = FALSE, latex_options = "repeat_header",
+                font_size = 10) %>% 
+  footnote(symbol = "Included in final survey tool.") %>% 
+  landscape() %>% 
+  add_header_above(header = c(" " = 3, "Number of items" = 2)) %>% 
+  column_spec(column = 1, width = "4cm") %>% 
+  column_spec(column = 2, width = "1.5cm") %>% 
+  column_spec(column = 3, width = "15cm") %>% 
+  column_spec(column = 4:5, width = ".75cm")
+
+```
+
