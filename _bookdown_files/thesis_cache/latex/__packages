@@ -24,4 +24,16 @@ ggpubr
 survminer
 papaja
 tidytidbits
+ggExtra
 janitor
+coda
+Matrix
+BayesFactor
+psych
+semTools
+semPlot
+interactions
+lm.beta
+carData
+car
+apaTables
