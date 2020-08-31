@@ -10,10 +10,11 @@ G5_male_GTA18m_train_PRA %>%
                             between(median, 90, 100) ~ "Excellent"),
          Dataset = str_replace_all(Dataset, "_", " ")) %>% 
   select(-c(mean, median)) %>% 
-  kable(caption = "Group 5 male candidates getting to assessment within 18 months of training, initial classification, training model performance.", digits = 2, booktab = TRUE, longtable = TRUE) %>%
+  kable(caption = "Group 5 male candidates getting to assessment within 18 months of training, initial classification, training model performance.", digits = 2, booktab = TRUE, longtable = TRUE, linesep = "") %>%
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), 
                 full_width = FALSE, 
-                latex_options = c("HOLD_position", "repeat_header"), font_size = 10)
+                latex_options = c("HOLD_position", "repeat_header", "striped"), 
+                font_size = 10)
 ```
 
 
@@ -27,10 +28,10 @@ G5_female_GTA18m_PRA %>%
                             between(median, 90, 100) ~ "Excellent"),
          Dataset = str_replace_all(Dataset, "_", " ")) %>% 
   select(-c(mean, median)) %>%
-  kable(caption = "Group 5 female candidates getting to assessment within 18 months of training, initial classification, training model performance.", digits = 2, booktab = TRUE, longtable = TRUE) %>%
+  kable(caption = "Group 5 female candidates getting to assessment within 18 months of training, initial classification, training model performance.", digits = 2, booktab = TRUE, longtable = TRUE, linesep = "") %>%
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), 
                 full_width = FALSE, 
-                latex_options = c("HOLD_position", "repeat_header"),
+                latex_options = c("HOLD_position", "repeat_header", "striped"),
                 font_size = 10)
 ```
 
@@ -44,10 +45,10 @@ G5_zsex_ftp_train_PRA %>%
     between(median, 90, 100) ~ "Excellent"),
     Dataset = str_replace_all(Dataset, "_", " ")) %>% 
   select(-c(mean, median)) %>% 
-  kable(caption = "Group 5 passing first time, initial classification, training model performance. Data standardised within sex.", digits = 2, booktab = TRUE) %>%
+  kable(caption = "Group 5 passing first time, initial classification, training model performance. Data standardised within sex.", digits = 2, booktab = TRUE, linesep = "") %>%
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), 
                 full_width = FALSE, 
-                latex_options = c("basic", "HOLD_position"),
+                latex_options = c("basic", "HOLD_position", "striped"),
                 font_size = 10)
 ```
 

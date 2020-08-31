@@ -253,7 +253,7 @@ The development of short-form measures to reduce the burden on participants has 
 
 ## Method {#survey-tool-dev-method}
 
-### Measures. {#survey-tool-dev-measures}
+### Measures {#survey-tool-dev-measures}
 
 Although using full measures was not a realistic aim in the project, we still felt that the reliability and validity of the indicators that we intended to use would use was paramount. Researchers have suggested a variety of ways in which short-form measures can be developed whilst remaining both reliable and valid. Considering the guidance provided by @Smith2000 and @Horvath2018 along with the aim of this research, we identified items which would be used to collect data from candidates using the process detailed below. The aim of the project was to identify the most important discriminatory variables for identifying candidates who do or do not complete the Mountain Leader qualification using Machine Learning techniques rather than testing the relationships between variables using regression-based techniques or structural equation modelling. Therefore, instead of using full-length measures to collect data for each construct, we used one or two item *indicators* for each construct.
 
@@ -444,7 +444,7 @@ eshot_vars %>%
 
 
 
-### Participants and Procedure. {#survey-tool-dev-participants}
+### Participants and Procedure {#survey-tool-dev-participants}
 
 We created four surveys, each of which contained a subset of the variables that we wanted to collect data for. Each variable was included in at least two of the surveys and each pairwise combination of variables was included in at least one survey. This was done to both collect as much data as possible and to ensure that two-way interactions between variables could be explored. Figure \@ref(fig:survey-tool-overlap) shows a simplified visual representation of the distribution of constructs between the four surveys. 
 
@@ -678,19 +678,19 @@ In our data (and the population), most candidates have not been assessed 18 mont
 >(Could/should I do something to check the representativeness of the samples (e.g., using sex, age, board)? Equivalence testing?)
 
 
-### Analytical Method.
+### Analytical Method
 
 We used the same pattern recognition procedure as described for the [main study](#pra-analytical-method) with the following modification. The data were standardised within sex, using the `mousetrap` package [@R-mousetrap], to control for sex differences. This was done as not all groups would have had enough data from both sexes to analyse separately having already split the data by DLOG availability. We considered exploring the data having standardised them by training provider, however, when grouped by training provider, there were not enough cases in each group to standardise the data in a meaningful way. Individual items *and* construct sum-scores were included in the analyses to identify if it was specific elements of a construct that was important, or if it was the construct as a whole.
 
 
-### Item Retention.
+### Item Retention
 
 Having identified a number of feature subsets that could be used to classify candidates in each group, we identified the items which we wanted to retain for the final survey. As not all items were asked to the same number of groups, we scored each item by the number of times that it was selected divided by the number of times it was asked. This was done so that the item retention process was not biased by the number of times that an item was asked. Items were retained if they were selected for the best models in at least half of the datasets they were asked to.
 
 
 ## Results {#survey-tool-dev-results}
 
-### Item Reduction.
+### Item Reduction
 
 Using the process described above for identifying suitable short-form measures, `r sum(eshot_vars$n_items_full, na.rm = TRUE) - sum(eshot_vars$n_items_short, na.rm = TRUE) %>% round()` items were removed from full-measures, leaving an item pool of `r sum(eshot_vars$n_items_short, na.rm = TRUE) %>% round()` items. Assuming seven seconds per item [@Qualtrics], this equates to a survey that would require candidates to spend approximately `r printnum((sum(eshot_vars$n_items_short, na.rm = TRUE)*7)/60)` minutes answering questions (`r round(((sum(eshot_vars$n_items_full, na.rm = TRUE) - sum(eshot_vars$n_items_short, na.rm = TRUE))*7)/60)` minutes shorter than using full-measures); participants would also be required to read the information sheet, transition between pages, etc. The items for `r nrow(filter(eshot_vars, short_available == TRUE))` variables had evidence of validity from other studies, `r nrow(eshot_vars %>% filter(!is.na(full_model) & is_duplicate == FALSE)) + nrow(filter(eshot_vars, is_duplicate == TRUE))` had evidence for validity from analyses carried out in this study on secondary data, `r sum(str_detect(tolower(eshot_vars$var_label), "efficacy")) - 3 + sum(str_detect(tolower(eshot_vars$var_label), "discrep"))` were self-efficacy items created specifically for this project, `r numbers2words(sum(str_detect(tolower(eshot_vars$item_wording), "cms"), na.rm = TRUE))` non-DLOG variables were collected from CMS, and `r sum(eshot_vars$is_total == TRUE, na.rm = TRUE)` variables were sum scores.
 
@@ -792,7 +792,8 @@ survey_vars %>%
         escape = TRUE,
         format = if (is_latex_output()) {"latex"} else {"html"}) %>%
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"), 
-                full_width = FALSE, latex_options = "repeat_header",
+                full_width = FALSE, 
+                latex_options = c("repeat_header"),
                 font_size = 10) %>% 
   footnote(symbol = "Included in final survey tool.") %>% 
   landscape() %>% 
