@@ -1,0 +1,10 @@
+TITLE: Your title goes here
+DATA: FILE = "pilot_efficacy_b.dat";
+VARIABLE: 
+NAMES = SexId PreAssessmentSelfEfficacy1 PreAssessmentSelfEfficacy2
+     PreAssessmentSelfEfficacy3 PreAssessmentSelfEfficacy4
+     PreAssessmentSelfEfficacy5 PreAssessmentSelfEfficacy6
+     PreAssessmentSelfEfficacy7 PreAssessmentSelfEfficacy8
+     PreAssessmentSelfEfficacy9 PreAssessmentSelfEfficacy10
+     PreAssessmentSelfEfficacy11; 
+MISSING=.;

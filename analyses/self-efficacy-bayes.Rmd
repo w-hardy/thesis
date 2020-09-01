@@ -1,0 +1,74 @@
+---
+title: "Self-effiacy scale development: Bayesian analysis"
+output: html_notebook
+---
+```{r setup}
+set.seed(2020)
+library(tidyverse)#tidyverse for basic data management + plotting
+library(psych)#psych for dataset + basic psychometrics
+library(lavaan)#lavaan for CFA/SEM
+library(semTools)#semTools for additional CFA/SEM functionality
+library(randomizr) #for randomly assigning participants to block
+library(parallel)
+library(blavaan)
+library(MplusAutomation)
+future::plan("multiprocess")
+
+
+# Data
+Group1to4 <- readRDS("../chapter_3_data/Group1to4.rds")
+group_5 <- readRDS("../chapter_3_data/Group5.rds")
+pilot_efficacy <- 
+  Group1to4 %>% 
+  transmute(CandidateId = cid,
+            SexId = SexId, 
+            Group = Group,
+            TrainEfficacy1 = v47, TrainEfficacy2 = v48, TrainEfficacy3 = v49,
+            TrainEfficacy4 = v50, TrainEfficacy5 = v51, TrainEfficacy6 = v52,
+            TrainEfficacy7 = v53, TrainEfficacy8 = v54, TrainEfficacy9 = v55,
+            TrainEfficacy10 = v56, TrainEfficacy11 = v57,
+            PreAssessmentSelfEfficacy1 = v92, PreAssessmentSelfEfficacy2 = v93,
+            PreAssessmentSelfEfficacy3 = v94, PreAssessmentSelfEfficacy4 = v95,
+            PreAssessmentSelfEfficacy5 = v96, PreAssessmentSelfEfficacy6 = v97,
+            PreAssessmentSelfEfficacy7 = v98, PreAssessmentSelfEfficacy8 = v99,
+            PreAssessmentSelfEfficacy9 = v100, PreAssessmentSelfEfficacy10 = v101,
+            PreAssessmentSelfEfficacy11 = v102) %>% 
+  filter(!Group %in% c("Group2", "Group4")) # Group2 & 4 were not asked any self efficacy questions
+
+# Split pilot data into to data sets for EFA and then CFA
+
+pilot_efficacy_2 <- within(pilot_efficacy,{
+  pilot_efficacy_blocked <- 
+    block_ra(num_arms = 2, 
+             blocks = c(as.factor(as.factor(pilot_efficacy$Group):as.factor(pilot_efficacy$SexId))))
+})
+
+pilot_efficacy_2 %>% 
+  group_by(pilot_efficacy_blocked, SexId, Group) %>% 
+  count
+
+pilot_efficacy_a <- 
+  filter(pilot_efficacy_2, pilot_efficacy_blocked == "T1")
+pilot_efficacy_b <- 
+  filter(pilot_efficacy_2, pilot_efficacy_blocked == "T2")
+
+```
+
+
+# MLSS
+
+## Study 1: Exploratory Bayes CFA
+
+### BCFA
+
+```{r}
+pilot_efficacy_a %>% 
+  select(SexId, starts_with("PreAssessment")) %>% 
+  prepareMplusData(., "pilot_efficacy_a.dat", inpfile = TRUE)
+
+pilot_efficacy_b %>% 
+  select(SexId, starts_with("PreAssessment")) %>% 
+  prepareMplusData(., "pilot_efficacy_b.dat", inpfile = TRUE)
+```
+
+### One factor model

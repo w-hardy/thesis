@@ -1,0 +1,8 @@
+starting worker pid=5405 on localhost:11786 at 14:41:51.489
+starting worker pid=5406 on localhost:11786 at 14:41:51.495
+Error in unserialize(node$con) : error reading from connection
+Calls: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Error in unserialize(node$con) : error reading from connection
+Calls: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Execution halted
+Execution halted

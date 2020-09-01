@@ -14,5 +14,7 @@ impact_activity/
 3_ML_quantitative_v1.2_files/
 old/
 dropbox_conflicts/
-_bookdown_files/
+_bookdown_files/*
+libs/
+analyses/
 .Rproj.user

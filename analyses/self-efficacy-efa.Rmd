@@ -1,0 +1,452 @@
+---
+title: "Self-efficacy factor analysis"
+output: html_notebook
+---
+```{r setup}
+set.seed(343)
+library(tidyverse)#tidyverse for basic data management + plotting
+library(psych)#psych for dataset + basic psychometrics
+library(lavaan)#lavaan for CFA/SEM
+library(semTools)#semTools for additional CFA/SEM functionality
+library(randomizr) #for randomly assigning participants to block
+library(parallel)
+
+
+# Data
+Group1to4 <- readRDS("../chapter_3_data/Group1to4.rds")
+group_5 <- readRDS("../chapter_3_data/Group5.rds")
+pilot_efficacy <- 
+  Group1to4 %>% 
+  transmute(CandidateId = cid,
+            SexId = SexId, 
+            Group = Group,
+            TrainEfficacy1 = v47, TrainEfficacy2 = v48, TrainEfficacy3 = v49,
+            TrainEfficacy4 = v50, TrainEfficacy5 = v51, TrainEfficacy6 = v52,
+            TrainEfficacy7 = v53, TrainEfficacy8 = v54, TrainEfficacy9 = v55,
+            TrainEfficacy10 = v56, TrainEfficacy11 = v57,
+            PreAssessmentSelfEfficacy1 = v92, PreAssessmentSelfEfficacy2 = v93,
+            PreAssessmentSelfEfficacy3 = v94, PreAssessmentSelfEfficacy4 = v95,
+            PreAssessmentSelfEfficacy5 = v96, PreAssessmentSelfEfficacy6 = v97,
+            PreAssessmentSelfEfficacy7 = v98, PreAssessmentSelfEfficacy8 = v99,
+            PreAssessmentSelfEfficacy9 = v100, PreAssessmentSelfEfficacy10 = v101,
+            PreAssessmentSelfEfficacy11 = v102) %>% 
+  filter(!Group == "Group4") # Group 4 were not asked any self efficacy questions
+
+# Split pilot data into to data sets for EFA and then CFA
+
+pilot_efficacy_2 <- within(pilot_efficacy,{
+  pilot_efficacy_blocked <- 
+    block_ra(num_arms = 2, 
+             blocks = c(as.factor(as.factor(pilot_efficacy$Group):as.factor(pilot_efficacy$SexId))))
+})
+
+pilot_efficacy_2 %>% 
+  group_by(pilot_efficacy_blocked, SexId, Group) %>% 
+  count
+
+pilot_efficacy_a <- 
+  filter(pilot_efficacy_2, pilot_efficacy_blocked == "T1")
+pilot_efficacy_b <- 
+  filter(pilot_efficacy_2, pilot_efficacy_blocked == "T2")
+
+```
+
+## Study 1
+
+### Data Vis
+
+```{r data-vis-preassess}
+corr.test(select(pilot_efficacy_a, starts_with("PreAssess")),  use = "pairwise.complete.obs")
+cor_mat <- cor(select(pilot_efficacy_a, starts_with("PreAssess")),  use = "pairwise.complete.obs")
+```
+
+
+### Parallel Analysis
+
+```{r parallel-analysis-preassess}
+#parallel analysis of common factor eigenvalues (i.e., from reduced correlation matrix), with 50 simulations
+parallel <- 
+  fa.parallel(select(pilot_efficacy_a, starts_with("PreAssess")),
+              fm = "ml", fa = "fa", n.iter = 500, SMC = TRUE, show.legend = TRUE)
+
+```
+
+Parallel analysis suggests `r parallel$nfact` factors.
+
+
+### EFA
+
+```{r}
+pilot_a_efa <- 
+  fa(select(pilot_efficacy_a, starts_with("preassess")), 
+     nfactors = parallel$nfact, rotate = "promax", SMC = TRUE, 
+     fm = "ml", alpha = .05, n.iter = 1000)
+
+print(pilot_a_efa)
+
+print(pilot_a_efa$loadings, cutoff = .2)
+
+```
+
+
+### CFA
+
+Retained items that had a loading >.4 and no cross-loadings >.2
+
+* PreAssessmentSelfEfficacy1 removed 
+* PreAssessmentSelfEfficacy8 removed
+* PreAssessmentSelfEfficacy11 removed
+* PreAssessmentSelfEfficacy3 removed as single item factor
+* PreAssessmentSelfEfficacy10 removed as single item factor
+
+
+```{r}
+two_fac <- '
+tech =~ PreAssessmentSelfEfficacy2 + PreAssessmentSelfEfficacy4 + PreAssessmentSelfEfficacy5 + PreAssessmentSelfEfficacy7
+emer =~ PreAssessmentSelfEfficacy6 + PreAssessmentSelfEfficacy9
+'
+pilot_m1 <- cfa(model = two_fac, data = pilot_efficacy_b, missing = "listwise")
+summary(pilot_m1, standardized = TRUE, fit.measures = TRUE)
+
+modindices(pilot_m1, sort. = TRUE, standardized = TRUE)
+
+one_fac <- '
+tech =~ PreAssessmentSelfEfficacy2 + PreAssessmentSelfEfficacy4 + PreAssessmentSelfEfficacy5 + PreAssessmentSelfEfficacy7
+'
+
+pilot_m2 <- cfa(model = one_fac, data = pilot_efficacy_b)
+summary(pilot_m2, standardized = TRUE, fit.measures = TRUE)
+
+modindices(pilot_m2, sort. = TRUE)
+```
+
+
+### Invariance
+
+#### Two Factor
+
+```{r study-2-invariance-two-fac}
+###############################################
+#####6) Invariance testing #####
+# label SexId
+if (is.numeric(pilot_efficacy_b$SexId)) {
+pilot_efficacy_b$SexId <- 
+  factor(pilot_efficacy_b$SexId, levels = 1:2, labels = c("male", "female"))
+}
+
+#Specify config model
+two_fac_config <- two_fac
+
+#Fit config model
+pilot_m1_config <- cfa(two_fac_config, data = pilot_efficacy_b,
+                       missing = "listwise",
+                     meanstructure = TRUE, std.lv = TRUE,
+                     group = "SexId")
+
+#####(b) Weak Invariance Model ####
+
+#Specify model; note the diverging constraint/estimation for
+#the latent variance between groups
+two_fac_weak <- '
+tech =~ PreAssessmentSelfEfficacy2 + PreAssessmentSelfEfficacy4 + PreAssessmentSelfEfficacy5 + PreAssessmentSelfEfficacy7
+emer =~ PreAssessmentSelfEfficacy6 + PreAssessmentSelfEfficacy9
+
+# Fix first group latent variance to 1
+tech ~~ c(1,NA)*tech
+emer ~~ c(1,NA)*emer
+'
+
+#Fit model, and now impose equality constraints (group.equal) on loadings
+pilot_m1_weak <- cfa(two_fac_weak, data = pilot_efficacy_b,
+                      missing = "listwise",
+                     meanstructure = TRUE, std.lv = TRUE,
+                     group = "SexId", group.equal = "loadings")
+summary(pilot_m1_weak, standardized = TRUE, fit.measures = TRUE)
+
+
+#####(c) Strong Invariance Model ####
+
+two_fac_strong <- '
+tech =~ PreAssessmentSelfEfficacy2 + PreAssessmentSelfEfficacy4 + PreAssessmentSelfEfficacy5 + PreAssessmentSelfEfficacy7
+emer =~ PreAssessmentSelfEfficacy6 + PreAssessmentSelfEfficacy9
+
+tech ~~ c(1,NA)*tech
+emer ~~ c(1,NA)*emer
+'
+
+#Fit model, and now impose equality constraints (group.equal) on loadings & intercepts
+pilot_m1_strong <- cfa(two_fac_strong, data = pilot_efficacy_b,
+                        missing = "listwise",
+                     meanstructure = TRUE, std.lv = TRUE,
+                     group = "SexId", group.equal = c("loadings", "intercepts"))
+
+summary(pilot_m1_strong, standardized = TRUE, fit.measures = TRUE)
+
+
+#####(d) Comparing Invariance Models####
+
+anova(pilot_m1_config, pilot_m1_weak, pilot_m1_strong)
+
+#####(e) Permutation Tests for Invariance  (Conscientiousness)####
+
+# fit alternative null model:
+pilot_m1_null <- '
+     PreAssessmentSelfEfficacy2 ~~ c(psi1, psi1)*PreAssessmentSelfEfficacy2 
+     PreAssessmentSelfEfficacy4 ~~ c(psi2, psi2)*PreAssessmentSelfEfficacy4 
+     PreAssessmentSelfEfficacy5 ~~ c(psi3, psi3)*PreAssessmentSelfEfficacy5 
+     PreAssessmentSelfEfficacy7 ~~ c(psi4, psi4)*PreAssessmentSelfEfficacy7
+
+     PreAssessmentSelfEfficacy6 ~~ c(psi5, psi5)*PreAssessmentSelfEfficacy6 
+     PreAssessmentSelfEfficacy9 ~~ c(psi6, psi6)*PreAssessmentSelfEfficacy9
+
+     PreAssessmentSelfEfficacy2 ~ c(tau1, tau1)*1 
+     PreAssessmentSelfEfficacy4 ~ c(tau2, tau2)*1 
+     PreAssessmentSelfEfficacy5 ~ c(tau3, tau3)*1 
+     PreAssessmentSelfEfficacy7 ~ c(tau4, tau4)*1 
+
+     PreAssessmentSelfEfficacy6 ~ c(tau5, tau5)*1
+     PreAssessmentSelfEfficacy9 ~ c(tau6, tau6)*1
+
+'
+pilot_m1_null_fit <- cfa(pilot_m1_null, data = pilot_efficacy_b,
+                         missing = "listwise",
+                       meanstructure = TRUE, std.lv=TRUE,
+                       group = "SexId")
+
+summary(pilot_m1_null_fit, standardized = TRUE, fit.measures = TRUE)
+
+## fit target model with varying levels of measurement equivalence
+
+miout <- 
+  measurementInvariance(model = pilot_m1_config, data = pilot_efficacy_b, 
+                        std.lv = TRUE, group = "SexId")
+# miout <- measEq.syntax(configural.model = pilot_m1_config, data = pilot_efficacy_b, 
+#                         std.lv = TRUE, group = "SexId")
+
+(fit.config <- miout[["fit.configural"]])
+(fit.metric <- miout[["fit.loadings"]])
+(fit.scalar <- miout[["fit.intercepts"]])
+
+## Names of the fit indices of interest
+myAFIs <- c("chisq","cfi","rmsea","mfi","aic")
+moreAFIs <- c("gammaHat","adjGammaHat")
+
+## Set up parallel processing
+copies_r <- detectCores()-2
+cl <- makeCluster(2, outfile = FALSE)
+
+## test configural invariance
+out.config <- permuteMeasEq(nPermute = 1000, con = pilot_m1_config, AFIs = myAFIs,
+                            moreAFIs = moreAFIs, iseed = 3141593, parallelType = "snow")
+out.config
+
+## test metric/weak invariance
+out.weak <- permuteMeasEq(nPermute = 1000, uncon = pilot_m1_config, con = pilot_m1_weak,
+                          param = "loadings", AFIs = myAFIs, null = pilot_m1_null_fit,
+                          moreAFIs = moreAFIs, iseed = 3141593)
+summary(out.weak)
+
+## test scaler/strong invariance
+out.strong <- permuteMeasEq(nPermute = 1000, uncon = pilot_m1_config, con = pilot_m1_strong,
+                          param = c("loadings", "intercepts"), AFIs = myAFIs, null = pilot_m1_null_fit,
+                          moreAFIs = moreAFIs, iseed = 3141593)
+summary(out.strong)
+stopCluster(cl = cl)
+
+## visualize permutation distribution
+hist(out.config, AFI = "chisq")
+hist(out.weak, AFI = "chisq", nd = 2, alpha = .01,
+     legendArgs = list(x = "topright"))
+hist(out.strong, AFI = "cfi", printLegend = FALSE)
+```
+
+
+#### One Factor
+
+```{r study-2-invariance-one-fac, warning=FALE}
+###############################################
+#####6) Invariance testing #####
+# label SexId
+if (is.numeric(pilot_efficacy_b$SexId)) {
+pilot_efficacy_b$SexId <- 
+  factor(pilot_efficacy_b$SexId, levels = 1:2, labels = c("male", "female"))
+}
+
+#Specify config model
+one_fac_config <- one_fac
+
+#Fit config model
+pilot_m1_config <- cfa(one_fac_config, data = pilot_efficacy_b,
+                       missing = "listwise",
+                     meanstructure = TRUE, std.lv = TRUE,
+                     group = "SexId")
+
+#####(b) Weak Invariance Model ####
+
+#Specify model; note the diverging constraint/estimation for
+#the latent variance between groups
+one_fac_weak <- '
+tech =~ PreAssessmentSelfEfficacy2 + PreAssessmentSelfEfficacy4 + PreAssessmentSelfEfficacy5 + PreAssessmentSelfEfficacy7
+
+# Fix first group latent variance to 1
+tech ~~ c(1,NA)*tech
+'
+
+#Fit model, and now impose equality constraints (group.equal) on loadings
+pilot_m1_weak <- cfa(one_fac_weak, data = pilot_efficacy_b,
+                      missing = "listwise",
+                     meanstructure = TRUE, std.lv = TRUE,
+                     group = "SexId", group.equal = "loadings")
+summary(pilot_m1_weak, standardized = TRUE, fit.measures = TRUE)
+
+
+#####(c) Strong Invariance Model ####
+
+one_fac_strong <- '
+tech =~ PreAssessmentSelfEfficacy2 + PreAssessmentSelfEfficacy4 + PreAssessmentSelfEfficacy5 + PreAssessmentSelfEfficacy7
+
+tech ~~ c(1,NA)*tech
+'
+
+#Fit model, and now impose equality constraints (group.equal) on loadings & intercepts
+pilot_m1_strong <- cfa(one_fac_strong, data = pilot_efficacy_b,
+                        missing = "listwise",
+                     meanstructure = TRUE, std.lv = TRUE,
+                     group = "SexId", group.equal = c("loadings", "intercepts"))
+
+summary(pilot_m1_strong, standardized = TRUE, fit.measures = TRUE)
+
+
+#####(d) Comparing Invariance Models####
+
+anova(pilot_m1_config, pilot_m1_weak, pilot_m1_strong)
+
+#####(e) Permutation Tests for Invariance  (Conscientiousness)####
+
+# fit alternative null model:
+pilot_m1_null <- '
+     PreAssessmentSelfEfficacy2 ~~ c(psi1, psi1)*PreAssessmentSelfEfficacy2 
+     PreAssessmentSelfEfficacy4 ~~ c(psi2, psi2)*PreAssessmentSelfEfficacy4 
+     PreAssessmentSelfEfficacy5 ~~ c(psi3, psi3)*PreAssessmentSelfEfficacy5 
+     PreAssessmentSelfEfficacy7 ~~ c(psi4, psi4)*PreAssessmentSelfEfficacy7
+
+     PreAssessmentSelfEfficacy2 ~ c(tau1, tau1)*1 
+     PreAssessmentSelfEfficacy4 ~ c(tau2, tau2)*1 
+     PreAssessmentSelfEfficacy5 ~ c(tau3, tau3)*1 
+     PreAssessmentSelfEfficacy7 ~ c(tau4, tau4)*1 
+'
+
+pilot_m1_null_fit <- cfa(pilot_m1_null, data = pilot_efficacy_b,
+                         missing = "listwise",
+                       meanstructure = TRUE, std.lv=TRUE,
+                       group = "SexId")
+
+summary(pilot_m1_null_fit, standardized = TRUE, fit.measures = TRUE)
+
+## fit target model with varying levels of measurement equivalence
+
+miout <- 
+  measurementInvariance(model = pilot_m1_config, data = pilot_efficacy_b, 
+                        std.lv = TRUE, group = "SexId")
+# miout <- measEq.syntax(configural.model = pilot_m1_config, data = pilot_efficacy_b, 
+                        # std.lv = TRUE, group = "SexId")
+
+(fit.config <- miout[["fit.configural"]])
+(fit.metric <- miout[["fit.loadings"]])
+(fit.scalar <- miout[["fit.intercepts"]])
+
+## Names of the fit indices of interest
+myAFIs <- c("chisq","cfi","rmsea","mfi","aic")
+moreAFIs <- c("gammaHat","adjGammaHat")
+
+
+
+
+## test configural invariance
+out.config <- permuteMeasEq(nPermute = 1000, con = fit.config, AFIs = myAFIs,
+                            moreAFIs = moreAFIs, iseed = 3141593)
+out.config
+
+## test metric/weak invariance
+out.weak <- permuteMeasEq(nPermute = 1000, uncon = fit.config, con = fit.metric,
+                          param = "loadings", AFIs = myAFIs, null = pilot_m1_null_fit,
+                          moreAFIs = moreAFIs, iseed = 3141593)
+summary(out.weak)
+
+## test scaler/strong invariance
+# out.strong <- permuteMeasEq(nPermute = 1000, uncon = fit.intercepts, con = pilot_m1_strong,
+#                           param = c("loadings", "intercepts"), AFIs = myAFIs, null = pilot_m1_null_fit,
+#                           moreAFIs = moreAFIs, iseed = 3141593)
+# summary(out.strong)
+
+## test scalar invariance
+out.scalar <- permuteMeasEq(nPermute = 1000, uncon = fit.config, con = fit.scalar,
+                          param = c("loadings", "intercepts"), AFIs = myAFIs, null = pilot_m1_null_fit,
+                          moreAFIs = moreAFIs, iseed = 3141593, parallelType = "multicore",
+                          ncpus = 3, cl = )
+summary(out.scalar)
+
+stopCluster(cl)
+
+## visualize permutation distribution
+hist(out.config, AFI = "chisq")
+hist(out.weak, AFI = "chisq", nd = 2, alpha = .01,
+     legendArgs = list(x = "topright"))
+hist(out.scalar, AFI = "cfi", printLegend = FALSE)
+```
+
+---
+
+### Study 2
+
+#### Measure validity
+
+```{r}
+main_m1 <- cfa(model = one_fac, data = group_5)
+summary(main_m1, standardized = TRUE, fit.measures = TRUE)
+```
+
+
+
+#### Regression Analyses
+
+```{r}
+if (is.numeric(group_5$SexId)) {
+  group_5$SexId <- 
+    factor(group_5$SexId, levels = 1:2, labels = c("male", "female"))
+}
+
+group_5_tech_scores <- 
+  data.frame(
+    cbind(
+      filter(group_5, 
+             !is.na(PreAssessmentSelfEfficacy1))$CandidateId,
+      predict(main_m1)))
+colnames(group_5_tech_scores) <- c("CandidateId", "tech")
+
+df <- 
+  group_5_tech_scores %>% 
+  left_join(group_5, by = "CandidateId")
+
+corr.test(df$tech, df$t18_num_days_7)
+
+
+m1 <- lm(tech ~ t18_num_days_7, data = df)
+m2 <- lm(tech ~ t18_num_days_7 + SexId, data = df)
+m3 <- lm(tech ~ t18_num_days_7 * SexId, data = df)
+interactions::interact_plot(model = m3, pred = t18_num_days_7, modx = "SexId",
+                            plot.points = TRUE)
+
+summary(m1)
+summary(m2)
+summary(m3)
+
+anova(m1, m2, m3)
+```
+
+
+
+```{r}
+save.image(file = "chapter_4_analyses.RData")
+```
+

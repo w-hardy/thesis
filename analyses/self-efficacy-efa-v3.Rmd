@@ -1,0 +1,709 @@
+---
+title: "Self-efficacy factor analysis v3"
+output: 
+  html_notebook: 
+    toc: yes
+---
+```{r setup}
+set.seed(343)
+library(MASS)
+library(tidyverse)#tidyverse for basic data management + plotting
+library(psych)#psych for dataset + basic psychometrics
+library(lavaan)#lavaan for CFA/SEM
+library(semTools)#semTools for additional CFA/SEM functionality
+library(randomizr) #for randomly assigning participants to block
+library(parallel)
+library(interactions)
+library(lubridate)
+future::plan("multiprocess")
+
+
+# Data
+Group1to4 <- readRDS("../chapter_3_data/Group1to4.rds")
+group_5 <- readRDS("../../3 eshot/Data/group_5_v4.Rds")
+group_5_ftp <- read_csv("../../3 eshot/Data/G5_FTP_full_v3.csv")
+dlog_data <- read_csv("../../3 eshot/Data/c_exp_var_GTA18_cast.csv")
+
+
+group_5 <- 
+  group_5 %>% 
+  left_join(
+    group_5_ftp %>% 
+      dplyr::select(CandidateId, starts_with("a_")), by = "CandidateId") %>% 
+  mutate(Assessed_survey = case_when(firstMLAssessmentDate <= SurveyEndDate ~ TRUE,
+                                     firstMLAssessmentDate > SurveyEndDate ~ FALSE,
+                                     is.na(firstMLAssessmentDate) ~ FALSE))
+
+pilot_efficacy <- 
+  Group1to4 %>% 
+  transmute(CandidateId = cid,
+            SexId = SexId, 
+            Group = Group,
+            Assessed_survey = case_when(firstMLAssessmentDate <= EndDate ~ TRUE,
+                                        firstMLAssessmentDate > EndDate ~ FALSE,
+                                        is.na(firstMLAssessmentDate) ~ FALSE),
+            PreAssessmentSelfEfficacy1 = v92, PreAssessmentSelfEfficacy2 = v93,
+            PreAssessmentSelfEfficacy3 = v94, PreAssessmentSelfEfficacy4 = v95,
+            PreAssessmentSelfEfficacy5 = v96, PreAssessmentSelfEfficacy6 = v97,
+            PreAssessmentSelfEfficacy7 = v98, PreAssessmentSelfEfficacy8 = v99,
+            PreAssessmentSelfEfficacy9 = v100, PreAssessmentSelfEfficacy10 = v101,
+            PreAssessmentSelfEfficacy11 = v102) %>% 
+  filter(!Group %in% c("Group2", "Group4")) # Group2 & 4 were not asked any self efficacy questions
+
+if (!is.factor(pilot_efficacy$SexId)) {
+pilot_efficacy$SexId <- 
+  factor(pilot_efficacy$SexId, levels = 1:2, labels = c("male", "female"))
+}
+
+```
+
+## Study 5
+
+### Data Vis
+
+```{r data-vis-preassess}
+pilot_efficacy %>% 
+  dplyr::select(-c(CandidateId, Group, Assessed_survey)) %>% 
+  describe()
+
+cor_mat <- cor(dplyr::select(pilot_efficacy, starts_with("PreAssess")),  use = "pairwise.complete.obs")
+corPlot(cor_mat)
+
+```
+
+
+### One factor CFA
+
+```{r}
+one_fac <- paste("efficacy =~", paste0("PreAssessmentSelfEfficacy", 1:11, collapse = " + "))
+
+pilot_one_fac_cfa <-  cfa(one_fac, data = pilot_efficacy, estimator = "mlr")
+summary(pilot_one_fac_cfa, standardized = TRUE, fit.measures = TRUE)
+
+modificationIndices(pilot_one_fac_cfa, sort = TRUE)
+
+
+# ## v2 with items 1, 3, & 11 removed as loadings <.6
+# one_fac_v2 <- paste("efficacy =~", paste0("PreAssessmentSelfEfficacy", c(2, 4:10), collapse = " + "))
+# 
+# pilot_one_fac_cfa_v2 <-  cfa(one_fac_v2, data = pilot_efficacy_a, estimator = "mlr")
+# summary(pilot_one_fac_cfa_v2, standardized = TRUE, fit.measures = TRUE)
+# 
+# modificationIndices(pilot_one_fac_cfa_v2, sort = TRUE)
+
+## v2 with items 6 & 9 as second factor
+one_fac_v2 <- 
+  paste(
+  paste("efficacy =~", paste0("PreAssessmentSelfEfficacy", c(1:5, 7:8, 10:11), collapse = " + ")),
+  "\n",
+  paste("emer =~", paste0("PreAssessmentSelfEfficacy", c(6,9), collapse = " + ")))
+
+pilot_one_fac_cfa_v2 <-  cfa(one_fac_v2, data = pilot_efficacy, estimator = "mlr")
+summary(pilot_one_fac_cfa_v2, standardized = TRUE, fit.measures = TRUE)
+
+modificationIndices(pilot_one_fac_cfa_v2, sort = TRUE)
+
+## v3 with item 2 in emer
+one_fac_v3 <- 
+  paste(
+  paste("efficacy =~", paste0("PreAssessmentSelfEfficacy", c(1, 3:5, 7:8, 10:11), collapse = " + ")),
+  "\n",
+  paste("emer =~", paste0("PreAssessmentSelfEfficacy", c(2,6,9), collapse = " + ")))
+
+pilot_one_fac_cfa_v3 <-  cfa(one_fac_v3, data = pilot_efficacy, estimator = "mlr")
+summary(pilot_one_fac_cfa_v3, standardized = TRUE, fit.measures = TRUE)
+
+modificationIndices(pilot_one_fac_cfa_v3, sort = TRUE)
+
+## v4 with item 2 removed in emer
+one_fac_v4 <- 
+  paste(
+  paste("efficacy =~", paste0("PreAssessmentSelfEfficacy", c(1, 3:5, 7:8, 10:11), collapse = " + ")),
+  "\n",
+  paste("emer =~", paste0("PreAssessmentSelfEfficacy", c(6,9), collapse = " + ")))
+
+pilot_one_fac_cfa_v4 <-  cfa(one_fac_v4, data = pilot_efficacy, estimator = "mlr")
+summary(pilot_one_fac_cfa_v4, standardized = TRUE, fit.measures = TRUE)
+
+modificationIndices(pilot_one_fac_cfa_v4, sort = TRUE)
+
+## v5 with item 10 removed
+one_fac_v5 <- 
+  paste(
+  paste("efficacy =~", paste0("PreAssessmentSelfEfficacy", c(1, 3:5, 7:8, 11), collapse = " + ")),
+  "\n",
+  paste("emer =~", paste0("PreAssessmentSelfEfficacy", c(6,9), collapse = " + ")))
+
+pilot_one_fac_cfa_v5 <-  cfa(one_fac_v5, data = pilot_efficacy, estimator = "mlr")
+summary(pilot_one_fac_cfa_v5, standardized = TRUE, fit.measures = TRUE)
+
+modificationIndices(pilot_one_fac_cfa_v5, sort = TRUE)
+
+## v6 with item 3 removed 
+one_fac_v6 <- 
+  paste(
+  paste("efficacy =~", paste0("PreAssessmentSelfEfficacy", c(1, 4:5, 7:8, 11), collapse = " + ")),
+  "\n",
+  paste("emer =~", paste0("PreAssessmentSelfEfficacy", c(6,9), collapse = " + ")))
+
+pilot_one_fac_cfa_v6 <-  cfa(one_fac_v6, data = pilot_efficacy, estimator = "mlr")
+summary(pilot_one_fac_cfa_v6, standardized = TRUE, fit.measures = TRUE)
+
+modificationIndices(pilot_one_fac_cfa_v6, sort = TRUE)
+
+## v7 with item 5 removed
+one_fac_v7 <- 
+  paste(
+  paste("tech =~", paste0("PreAssessmentSelfEfficacy", c(1, 4, 7:8, 11), collapse = " + ")),
+  "\n",
+  paste("emer =~", paste0("PreAssessmentSelfEfficacy", c(6,9), collapse = " + ")))
+
+pilot_one_fac_cfa_v7 <-  cfa(one_fac_v7, data = pilot_efficacy, estimator = "mlr")
+summary(pilot_one_fac_cfa_v7, standardized = TRUE, fit.measures = TRUE)
+
+modificationIndices(pilot_one_fac_cfa_v7, sort. = TRUE)
+
+## v8 with item 11 removed
+one_fac_v8 <- 
+  paste(
+  paste("tech =~", paste0("PreAssessmentSelfEfficacy", c(1, 4, 7:8), collapse = " + ")),
+  "\n",
+  paste("emer =~", paste0("PreAssessmentSelfEfficacy", c(6,9), collapse = " + ")))
+
+pilot_one_fac_cfa_v8 <-  cfa(one_fac_v8, data = pilot_efficacy, estimator = "mlr")
+summary(pilot_one_fac_cfa_v8, standardized = TRUE, fit.measures = TRUE)
+
+modificationIndices(pilot_one_fac_cfa_v8, sort. = TRUE)
+
+## v9 with item 4 in emergency
+one_fac_v9 <- 
+  paste(
+  paste("tech =~", paste0("PreAssessmentSelfEfficacy", c(1,7,8), collapse = " + ")),
+  "\n",
+  paste("emer =~", paste0("PreAssessmentSelfEfficacy", c(4,6,9), collapse = " + ")))
+
+pilot_one_fac_cfa_v9 <-  cfa(one_fac_v9, data = pilot_efficacy, estimator = "mlr")
+summary(pilot_one_fac_cfa_v9, standardized = TRUE, fit.measures = TRUE)
+
+modificationIndices(pilot_one_fac_cfa_v9, sort. = TRUE)
+```
+
+### Discriminant validity
+
+```{r}
+one_fac_v8_discrim <- 
+  paste(
+  paste("tech =~", paste0("PreAssessmentSelfEfficacy", c(1, 4, 6:9), collapse = " + ")))
+
+pilot_one_fac_cfa_v8_discrim <-  cfa(one_fac_v8_discrim, data = pilot_efficacy, estimator = "mlr")
+summary(pilot_one_fac_cfa_v8_discrim, standardized = TRUE, fit.measures = TRUE)
+
+pilot_discrim <- anova(pilot_one_fac_cfa_v8_discrim, pilot_one_fac_cfa_v8)
+
+diff(pilot_discrim$`Chisq`)
+
+```
+
+
+
+### Gender Invariance
+
+```{r study-1-invariance-two-fac, eval=TRUE}
+###############################################
+#####6) Invariance testing #####
+# label SexId
+if (!is.factor(pilot_efficacy$SexId)) {
+pilot_efficacy$SexId <- 
+  factor(pilot_efficacy$SexId, levels = 1:2, labels = c("male", "female"))
+}
+
+
+#Specify config model
+two_fac_config <- one_fac_v8
+
+#Fit config model
+pilot_m1_config <- cfa(two_fac_config, data = pilot_efficacy,
+                       missing = "listwise", estimator = "mlr",
+                       meanstructure = TRUE, std.lv = TRUE,
+                       group = "SexId")
+
+summary(pilot_m1_config, standardized = TRUE, fit.measures = TRUE)
+modificationIndices(pilot_m1_config, sort. = TRUE)
+
+## fit target model with varying levels of measurement equivalence
+miout <- 
+  measurementInvariance(model = pilot_m1_config, data = pilot_efficacy, 
+                        estimator = "mlr", std.lv = TRUE, group = "SexId")
+
+(pilot.fit.config <- miout[["fit.configural"]])
+(pilot.fit.metric <- miout[["fit.loadings"]])
+(pilot.fit.scalar <- miout[["fit.intercepts"]])
+
+#####(b) Weak Invariance Model ####
+
+#Fit model, and now impose equality constraints (group.equal) on loadings
+pilot_m1_weak <- cfa(pilot.fit.metric, data = pilot_efficacy,
+                     missing = "listwise", estimator = "mlr",
+                     meanstructure = TRUE, std.lv = TRUE,
+                     group = "SexId", group.equal = "loadings")
+summary(pilot_m1_weak, standardized = TRUE, fit.measures = TRUE)
+
+
+#####(c) Strong Invariance Model ####
+
+#Fit model, and now impose equality constraints (group.equal) on loadings & intercepts
+pilot_m1_strong <- cfa(pilot.fit.scalar, data = pilot_efficacy,
+                       missing = "listwise", estimator = "mlr",
+                       meanstructure = TRUE, std.lv = TRUE,
+                       group = "SexId", group.equal = c("loadings", "intercepts"))
+
+summary(pilot_m1_strong, standardized = TRUE, fit.measures = TRUE)
+
+modindices(pilot_m1_strong, sort. = TRUE)
+
+#####(d) Comparing Invariance Models####
+
+anova(pilot_m1_config, pilot_m1_weak, pilot_m1_strong)
+
+```
+
+
+### Assessed Invariance
+
+```{r study-1-assessed-invariance-two-fac, eval=TRUE}
+###############################################
+#####6) Invariance testing #####
+# label Assessed
+if (!is.factor(pilot_efficacy$Assessed_survey)) {
+pilot_efficacy$Assessed_survey <- 
+  factor(pilot_efficacy$Assessed_survey, levels = c(TRUE,FALSE), 
+         labels = c("Assessed", "Not assessed"))
+}
+
+
+#Specify config model
+two_fac_config <- one_fac_v8
+
+#Fit config model
+pilot_assessed_m1_config <- cfa(two_fac_config, data = pilot_efficacy,
+                       missing = "listwise", estimator = "mlr",
+                       meanstructure = TRUE, std.lv = TRUE,
+                       group = "Assessed_survey")
+
+summary(pilot_assessed_m1_config, standardized = TRUE, fit.measures = TRUE)
+modificationIndices(pilot_assessed_m1_config, sort. = TRUE)
+
+## fit target model with varying levels of measurement equivalence
+miout <- 
+  measurementInvariance(model = pilot_assessed_m1_config, data = pilot_efficacy, 
+                        estimator = "mlr", std.lv = TRUE, group = "Assessed_survey")
+
+(pilot_assessed.fit.config <- miout[["fit.configural"]])
+(pilot_assessed.fit.metric <- miout[["fit.loadings"]])
+(pilot_assessed.fit.scalar <- miout[["fit.intercepts"]])
+
+#####(b) Weak Invariance Model ####
+
+#Fit model, and now impose equality constraints (group.equal) on loadings
+pilot_assessed_m1_weak <- cfa(pilot_assessed.fit.metric, data = pilot_efficacy,
+                     missing = "listwise", estimator = "mlr",
+                     meanstructure = TRUE, std.lv = TRUE,
+                     group = "Assessed_survey", group.equal = "loadings")
+summary(pilot_assessed_m1_weak, standardized = TRUE, fit.measures = TRUE)
+
+
+#####(c) Strong Invariance Model ####
+
+#Fit model, and now impose equality constraints (group.equal) on loadings & intercepts
+pilot_assessed_m1_strong <- cfa(pilot_assessed.fit.scalar, data = pilot_efficacy,
+                       missing = "listwise", estimator = "mlr",
+                       meanstructure = TRUE, std.lv = TRUE,
+                       group = "Assessed_survey", group.equal = c("loadings", "intercepts"))
+
+summary(pilot_assessed_m1_strong, standardized = TRUE, fit.measures = TRUE)
+
+modindices(pilot_assessed_m1_strong, sort. = TRUE)
+
+#####(d) Comparing Invariance Models####
+
+anova(pilot_assessed_m1_config, pilot_assessed_m1_weak, pilot_assessed_m1_strong)
+
+```
+
+---
+
+### Study 6
+
+#### Measure validity
+
+```{r study-6-cfa}
+main_cfa1 <- cfa(model = one_fac_v8, data = group_5, missing = "listwise",
+               estimator = "mlr")
+main_cfa1_discrim <- cfa(model = one_fac_v8_discrim, data = group_5, missing = "listwise",
+               estimator = "mlr")
+summary(main_cfa1, standardized = TRUE, fit.measures = TRUE)
+main_discrim <- anova(main_cfa1, main_cfa1_discrim)
+
+```
+
+#### Gender Invariance
+
+```{r study-6-gender-invariance}
+###############################################
+#####6) Invariance testing #####
+# label SexId
+if (!is.factor(group_5$SexId)) {
+group_5$SexId <- 
+  factor(group_5$SexId, levels = 1:2, labels = c("male", "female"))
+}
+
+
+#Specify config model
+two_fac_config <- one_fac_v8
+
+#Fit config model
+main_m1_config <- cfa(two_fac_config, data = group_5,
+                       missing = "listwise", estimator = "mlr",
+                       meanstructure = TRUE, std.lv = TRUE,
+                       group = "SexId")
+
+summary(main_m1_config, standardized = TRUE, fit.measures = TRUE)
+modificationindices(main_m1_config, sort. = TRUE)
+
+## fit target model with varying levels of measurement equivalence
+miout <- 
+  measurementInvariance(model = main_m1_config, data = group_5, 
+                        estimator = "mlr", std.lv = TRUE, group = "SexId")
+
+(main.fit.config <- miout[["fit.configural"]])
+(main.fit.metric <- miout[["fit.loadings"]])
+(main.fit.scalar <- miout[["fit.intercepts"]])
+
+#####(b) Weak Invariance Model ####
+
+#Fit model, and now impose equality constraints (group.equal) on loadings
+main_m1_weak <- cfa(main.fit.metric, data = group_5,
+                     missing = "listwise", estimator = "mlr",
+                     meanstructure = TRUE, std.lv = TRUE,
+                     group = "SexId", group.equal = "loadings")
+summary(main_m1_weak, standardized = TRUE, fit.measures = TRUE)
+
+
+#####(c) Strong Invariance Model ####
+
+#Fit model, and now impose equality constraints (group.equal) on loadings & intercepts
+main_m1_strong <- cfa(main.fit.scalar, data = group_5,
+                       missing = "listwise", estimator = "mlr",
+                       meanstructure = TRUE, std.lv = TRUE,
+                       group = "SexId", group.equal = c("loadings", "intercepts"))
+
+summary(main_m1_strong, standardized = TRUE, fit.measures = TRUE)
+
+modindices(main_m1_strong, sort. = TRUE)
+
+
+#####(d) Comparing Invariance Models####
+
+anova(main_m1_config, main_m1_weak, main_m1_strong)
+
+```
+
+
+#### Assessed Invariance
+
+```{r study-6-assessed-invariance}
+###############################################
+#####6) Invariance testing #####
+# label Assessed_survey
+if (!is.factor(group_5$Assessed_survey)) {
+group_5$Assessed_survey <- 
+  factor(group_5$Assessed_survey, levels = c(TRUE,FALSE), 
+         labels = c("Assessed", "Not assessed"))
+}
+
+
+#Specify config model
+two_fac_config <- one_fac_v8
+
+#Fit config model
+main_assessed_m1_config <- cfa(two_fac_config, data = group_5,
+                       missing = "listwise", estimator = "mlr",
+                       meanstructure = TRUE, std.lv = TRUE,
+                       group = "Assessed_survey")
+
+summary(main_assessed_m1_config, standardized = TRUE, fit.measures = TRUE)
+modificationindices(main_assessed_m1_config, sort. = TRUE)
+
+## fit target model with varying levels of measurement equivalence
+miout <- 
+  measurementInvariance(model = main_assessed_m1_config, data = group_5, 
+                        estimator = "mlr", std.lv = TRUE, group = "Assessed_survey")
+
+(main_assessed.fit.config <- miout[["fit.configural"]])
+(main_assessed.fit.metric <- miout[["fit.loadings"]])
+(main_assessed.fit.scalar <- miout[["fit.intercepts"]])
+
+#####(b) Weak Invariance Model ####
+
+#Fit model, and now impose equality constraints (group.equal) on loadings
+main_assessed_m1_weak <- cfa(main_assessed.fit.metric, data = group_5,
+                     missing = "listwise", estimator = "mlr",
+                     meanstructure = TRUE, std.lv = TRUE,
+                     group = "Assessed_survey", group.equal = "loadings")
+summary(main_assessed_m1_weak, standardized = TRUE, fit.measures = TRUE)
+
+
+#####(c) Strong Invariance Model ####
+
+#Fit model, and now impose equality constraints (group.equal) on loadings & intercepts
+main_assessed_m1_strong <- cfa(main_assessed.fit.scalar, data = group_5,
+                       missing = "listwise", estimator = "mlr",
+                       meanstructure = TRUE, std.lv = TRUE,
+                       group = "Assessed_survey", group.equal = c("loadings", "intercepts"))
+
+summary(main_assessed_m1_strong, standardized = TRUE, fit.measures = TRUE)
+
+modindices(main_assessed_m1_strong, sort. = TRUE)
+
+
+#####(d) Comparing Invariance Models####
+
+anova(main_assessed_m1_config, main_assessed_m1_weak, main_assessed_m1_strong)
+
+```
+
+
+
+#### Regression Analyses
+
+```{r study-6-tech-regression}
+if (!is.factor(group_5$SexId)) {
+  group_5$SexId <- 
+    factor(group_5$SexId, levels = 1:2, labels = c("male", "female"))
+}
+
+group_5_tech_scores <- 
+  data.frame(
+    cbind(
+      filter(group_5, 
+             !is.na(PreAssessmentSelfEfficacy1) &
+               !is.na(SexId))$CandidateId,
+      predict(main_cfa1)[,1],
+      predict(main_cfa1)[,2]))
+colnames(group_5_tech_scores) <- c("CandidateId", "routine", "emergency")
+
+
+
+#Jan update presentation cids(ish)
+x <- c(197393, 150444, 158112, 161680, 176042, 221755, 257455, 180156, 191263, 291942, 295366, 330169, 188311, 160624, 177744, 191396, 146735, 193967, 186887, 187148, 327321, 170729, 174849, 181261, 137941, 181411, 191498, 186083, 193358, 295164, 184977, 333494, 275495, 254600, 197708, 190425, 169490, 329660, 190248, 177458, 192601, 255296, 171120, 291529, 161277, 180660, 160129, 255923, 149055, 275551, 186257, 295505, 191210, 193840, 295715, 164263, 274705, 256709, 177296, 182395, 172355, 258100, 191099, 183758, 257150, 188543, 130629, 112773, 93386, 260582, 166405, 294048, 292407, 185630, 161559, 186366, 171895, 178387, 258131, 190247, 190897, 183258, 193950, 75161, 292051, 165177, 192196, 191407, 193614, 176407, 190481, 171249, 191118, 185372, 165457, 32631, 191612, 182187, 191494, 254355, 162527, 331462, 292033, 190473, 271357, 335384, 261248, 173629, 147116, 179945, 256406, 188279, 276718, 190224, 193877, 260048, 192152, 261251, 184996, 255423, 155957, 184208, 256739, 183013, 257849, 175264, 183745, 178251, 256239, 333875, 161360, 295059, 198217, 190336, 52352, 176146, 190715, 293178, 132424, 193387, 181022, 171597, 155428, 332442, 151662, 180393, 191753, 181383, 162215, 148339, 178993, 193046, 179982, 178775, 293047, 193675, 187278, 190188, 333468, 257967, 180312, 255738, 190643, 293097, 177344, 33584, 257215, 146670, 276559, 293928, 257997, 133087, 189200, 188872, 197391, 175662, 189563, 257869, 336005, 335493, 328206, 254221, 172436, 335732, 188703, 193074, 329317, 188655, 271394, 291114, 257779, 186857, 290386, 290765, 114436, 172527, 256933, 178060, 296132, 165198, 132580, 182202, 149980, 292002, 291883, 256959, 291062, 198250, 173908, 326650, 182494, 192257, 256720, 193637, 326787, 255960, 328550, 266273, 192478, 259639, 257736, 170289, 130036, 193051, 184239, 191371, 257231, 193723, 187162, 274752, 159689, 199745, 291800, 143789, 255443, 257349, 193066, 295798, 257069, 257069, 340255, 181737, 190421, 189136, 257499, 146854, 294789, 181271, 176209, 339123, 328992, 197358, 176831, 180425, 256056, 193738, 327565, 197331, 157947, 340364, 175050, 123440, 128195, 339969, 254250, 127614, 197981, 189847, 256479, 254111, 260692, 178126, 178390, 190376, 148825, 189888, 151169, 331447, 296151, 155985, 190966, 326761, 330129, 327881, 185508, 188999, 295389, 116931, 178902, 162924, 176982, 326831, 174763, 190971, 188533, 292876, 340851, 182599, 193165, 218796, 177077, 172616, 257755, 116745, 136971, 191695, 193718, 178629, 295009, 175872, 291354, 193089, 164060, 191840, 192559, 190404, 293524, 189550, 193223, 100989, 163594, 108019, 256631, 338423, 257244, 190209, 259549, 185986, 190900, 292336, 293976, 293281, 190994, 257182, 175519, 257089, 179868, 178347, 175959, 180669, 293359, 256376, 254670, 254174, 334655, 260817, 339126, 104794, 276159, 338040, 152430, 290456, 146192, 183084, 193190, 332862, 196610, 254145, 183706, 333762, 260964, 260099, 178181, 183579, 193455, 266330, 192797, 165435, 162389, 162836, 256871, 255836, 275525, 158858, 178253, 193992, 337468, 193920, 327187, 193256, 184188, 296271, 257657, 197748, 183229, 198368, 195030, 191991, 188878, 291226, 293078, 295915, 295302, 189069, 276844, 291821, 294965, 182936, 257713, 178124, 335448, 293436, 294189, 259825, 193762, 290713, 292266, 193660, 179848, 291044, 331260, 327000, 258718, 193218, 186105, 198372, 337860, 187597, 330719, 293610, 185171, 159004, 256536, 274076, 177060, 283451, 271501, 193294, 333112, 260972, 168670, 293474, 330000, 155828, 186137, 275119, 193587)
+
+study_6_regression_df <- 
+  group_5_tech_scores %>% 
+  left_join(group_5, by = "CandidateId") %>% 
+  #filter(CandidateId %in% x) %>% 
+  filter(LogbookType != 2) %>% # remove paperlog only
+  filter(!DLOGQuality == 4) %>% # remove made up DLOGs
+  mutate(routine2 = routine + 1 + abs(min(.$routine)),
+         conf = emergency+routine,
+         time = 
+           as.factor(case_when(firstMLAssessmentDate < SurveyEndDate ~ "retro",
+                               !firstMLAssessmentDate < SurveyEndDate ~ "pros",
+                               is.na(firstMLAssessmentDate) ~ "pros")),
+         exp = case_when(
+           time == "retro" & !is.na(a_num_days_walk_7) ~ 
+             a_num_days_walk_7,
+           TrainToSurvey > 1 ~ t18_num_days_7,
+           between(TrainToSurvey, .5, 1) ~ t12_num_days_7,
+           between(TrainToSurvey, 0, .5) ~ t6_num_days_7),
+         across(.cols = c(PreAssessmentSelfEfficacyTotal, exp, 
+                          TrainSelfEfficacyTotal, t_num_days_7, t18_num_days_7, 
+                          TrainToSurvey), .fns = scale)
+  ) %>% 
+  dplyr::select(routine, routine2, conf, time, emergency, TrainMCBSGoalSetting,
+         PreAssessmentSelfEfficacyTotal, PreAssessmentSelfEfficacy7, SexId, exp, TrainSelfEfficacyTotal, 
+         t_num_days_7, t18_num_days_7, TrainToSurvey, CandidateId) %>% 
+  na.omit()
+
+## GLM Gamma unstandardised
+
+glm_main_m1 <- glm(routine2 ~ SexId, data = study_6_regression_df, family = "Gamma")
+glm_main_m2 <- glm(routine2 ~ SexId + exp, data = study_6_regression_df, family = "Gamma")
+glm_main_m3 <- glm(routine2 ~ SexId * exp, data = study_6_regression_df, family = "Gamma")
+interact_plot(model = glm_main_m3, pred = exp, modx = "SexId",
+                            plot.points = TRUE, data = study_6_regression_df)
+sim_slopes(glm_main_m3, pred = exp, modx = "SexId", data = study_6_regression_df, robust = TRUE,jnplot = T)
+
+summary(glm_main_m1)
+summary(glm_main_m2)
+summary(glm_main_m3)
+
+modEvA::Dsquared(glm_main_m3, adjust = T) - modEvA::Dsquared(glm_main_m2, adjust = T)
+
+anova(glm_main_m1, glm_main_m2, glm_main_m3, test = "Chisq")
+
+##  routine
+
+z_routine_main_m1 <- lm(routine ~ SexId, data = study_6_regression_df)
+z_routine_main_m2 <- lm(routine ~ SexId + exp, data = study_6_regression_df)
+z_routine_main_m3 <- lm(routine ~ SexId * exp, data = study_6_regression_df)
+z_routine_main_m4 <- lm(routine ~ SexId * exp + TrainMCBSGoalSetting, data = study_6_regression_df)
+interact_plot(model = z_routine_main_m3, pred = exp, modx = "SexId",
+                            plot.points = TRUE, data = study_6_regression_df)
+sim_slopes(z_routine_main_m3, pred = exp, modx = "SexId", data = study_6_regression_df, robust = TRUE)
+
+summary(z_routine_main_m1)
+summary(z_routine_main_m2)
+summary(z_routine_main_m3)
+summary(z_routine_main_m4)
+
+anova(z_routine_main_m1, z_routine_main_m2, z_routine_main_m3, z_routine_main_m4)
+
+plot(z_routine_main_m3)
+
+## emergency
+z_emergency_main_m1 <- lm(emergency ~ SexId, data = study_6_regression_df)
+z_emergency_main_m2 <- lm(emergency ~ SexId + exp, data = study_6_regression_df)
+z_emergency_main_m3 <- lm(emergency ~ SexId * exp, data = study_6_regression_df)
+interact_plot(model = z_emergency_main_m3, pred = exp, modx = "SexId",
+                            plot.points = TRUE, data = study_6_regression_df)
+sim_slopes(z_emergency_main_m3, pred = exp, modx = "SexId", data = study_6_regression_df, robust = TRUE)
+
+summary(z_emergency_main_m1)
+summary(z_emergency_main_m2)
+summary(z_emergency_main_m3)
+anova(z_emergency_main_m1, z_emergency_main_m2, z_emergency_main_m3)
+
+```
+
+```{r}
+group_5 %>% 
+  ggplot(aes(x = t18_num_days_7, y = PreAssessmentSelfEfficacyTotal, colour = SexId)) +
+  geom_smooth(se = FALSE, method = "gam") + 
+  geom_point(alpha = .5, size = .5) 
+```
+
+
+
+```{r}
+save.image(file = "chapter_4_analyses.RData")
+```
+
+
+#### GLM with transformed variables
+
+```{r study-6-tech-glm-regression}
+if (!is.factor(group_5$SexId)) {
+  group_5$SexId <- 
+    factor(group_5$SexId, levels = 1:2, labels = c("male", "female"))
+}
+
+group_5_tech_scores <- 
+  data.frame(
+    cbind(
+      filter(group_5, 
+             !is.na(PreAssessmentSelfEfficacy1) &
+               !is.na(SexId))$CandidateId,
+      predict(main_cfa1)[,1],
+      predict(main_cfa1)[,2]))
+colnames(group_5_tech_scores) <- c("CandidateId", "routine", "emergency")
+
+
+#Jan update presentation cids(ish)
+x <- c(197393, 150444, 158112, 161680, 176042, 221755, 257455, 180156, 191263, 291942, 295366, 330169, 188311, 160624, 177744, 191396, 146735, 193967, 186887, 187148, 327321, 170729, 174849, 181261, 137941, 181411, 191498, 186083, 193358, 295164, 184977, 333494, 275495, 254600, 197708, 190425, 169490, 329660, 190248, 177458, 192601, 255296, 171120, 291529, 161277, 180660, 160129, 255923, 149055, 275551, 186257, 295505, 191210, 193840, 295715, 164263, 274705, 256709, 177296, 182395, 172355, 258100, 191099, 183758, 257150, 188543, 130629, 112773, 93386, 260582, 166405, 294048, 292407, 185630, 161559, 186366, 171895, 178387, 258131, 190247, 190897, 183258, 193950, 75161, 292051, 165177, 192196, 191407, 193614, 176407, 190481, 171249, 191118, 185372, 165457, 32631, 191612, 182187, 191494, 254355, 162527, 331462, 292033, 190473, 271357, 335384, 261248, 173629, 147116, 179945, 256406, 188279, 276718, 190224, 193877, 260048, 192152, 261251, 184996, 255423, 155957, 184208, 256739, 183013, 257849, 175264, 183745, 178251, 256239, 333875, 161360, 295059, 198217, 190336, 52352, 176146, 190715, 293178, 132424, 193387, 181022, 171597, 155428, 332442, 151662, 180393, 191753, 181383, 162215, 148339, 178993, 193046, 179982, 178775, 293047, 193675, 187278, 190188, 333468, 257967, 180312, 255738, 190643, 293097, 177344, 33584, 257215, 146670, 276559, 293928, 257997, 133087, 189200, 188872, 197391, 175662, 189563, 257869, 336005, 335493, 328206, 254221, 172436, 335732, 188703, 193074, 329317, 188655, 271394, 291114, 257779, 186857, 290386, 290765, 114436, 172527, 256933, 178060, 296132, 165198, 132580, 182202, 149980, 292002, 291883, 256959, 291062, 198250, 173908, 326650, 182494, 192257, 256720, 193637, 326787, 255960, 328550, 266273, 192478, 259639, 257736, 170289, 130036, 193051, 184239, 191371, 257231, 193723, 187162, 274752, 159689, 199745, 291800, 143789, 255443, 257349, 193066, 295798, 257069, 257069, 340255, 181737, 190421, 189136, 257499, 146854, 294789, 181271, 176209, 339123, 328992, 197358, 176831, 180425, 256056, 193738, 327565, 197331, 157947, 340364, 175050, 123440, 128195, 339969, 254250, 127614, 197981, 189847, 256479, 254111, 260692, 178126, 178390, 190376, 148825, 189888, 151169, 331447, 296151, 155985, 190966, 326761, 330129, 327881, 185508, 188999, 295389, 116931, 178902, 162924, 176982, 326831, 174763, 190971, 188533, 292876, 340851, 182599, 193165, 218796, 177077, 172616, 257755, 116745, 136971, 191695, 193718, 178629, 295009, 175872, 291354, 193089, 164060, 191840, 192559, 190404, 293524, 189550, 193223, 100989, 163594, 108019, 256631, 338423, 257244, 190209, 259549, 185986, 190900, 292336, 293976, 293281, 190994, 257182, 175519, 257089, 179868, 178347, 175959, 180669, 293359, 256376, 254670, 254174, 334655, 260817, 339126, 104794, 276159, 338040, 152430, 290456, 146192, 183084, 193190, 332862, 196610, 254145, 183706, 333762, 260964, 260099, 178181, 183579, 193455, 266330, 192797, 165435, 162389, 162836, 256871, 255836, 275525, 158858, 178253, 193992, 337468, 193920, 327187, 193256, 184188, 296271, 257657, 197748, 183229, 198368, 195030, 191991, 188878, 291226, 293078, 295915, 295302, 189069, 276844, 291821, 294965, 182936, 257713, 178124, 335448, 293436, 294189, 259825, 193762, 290713, 292266, 193660, 179848, 291044, 331260, 327000, 258718, 193218, 186105, 198372, 337860, 187597, 330719, 293610, 185171, 159004, 256536, 274076, 177060, 283451, 271501, 193294, 333112, 260972, 168670, 293474, 330000, 155828, 186137, 275119, 193587)
+
+library(rcompanion)
+study_6_glm_df <- 
+  group_5_tech_scores %>% 
+  left_join(group_5, by = "CandidateId") %>% 
+  #filter(CandidateId %in% x) %>% 
+  filter(LogbookType != 2) %>% # remove paperlog only
+  filter(!DLOGQuality == 4) %>% # remove made up DLOGs
+  mutate(routine2 = transformTukey(routine),
+         routine2 = routine2 + abs(min(routine2)) + 1,
+         conf = emergency+routine,
+         time = 
+           as.factor(case_when(firstMLAssessmentDate < SurveyEndDate ~ "retro",
+                               !firstMLAssessmentDate < SurveyEndDate ~ "pros",
+                               is.na(firstMLAssessmentDate) ~ "pros")),
+         exp = transformTukey(case_when(time == "retro" & !is.na(a_num_days_walk_7) ~ 
+             a_num_days_walk_7,
+           TrainToSurvey > 1 ~ t18_num_days_7,
+           between(TrainToSurvey, .5, 1) ~ t12_num_days_7,
+           between(TrainToSurvey, 0, .5) ~ t6_num_days_7)),
+         across(.cols = c(PreAssessmentSelfEfficacyTotal, exp, 
+                          TrainSelfEfficacyTotal, t_num_days_7, t18_num_days_7, 
+                          TrainToSurvey, EmotionalStability, Robustness,
+                          Resilience), .fns = scale),
+         neg_exp = case_when(NegExp1 > 0 ~ TRUE,
+                             NegExp1 == 0 ~ FALSE)) %>% 
+  dplyr::select(routine, routine2, conf, time, emergency, SexId, exp, 
+                TrainSelfEfficacyTotal, CandidateId, neg_exp, NegExpTotal, 
+                NegExp1, NegExp2, NegExp3,
+                EmotionalStability, Robustness, Resilience) %>%
+    filter(exp < 100) %>% 
+  na.omit()
+
+
+plot(density(log(100-study_6_glm_df$routine2)))
+min(study_6_glm_df$routine2)
+
+## GLM Gamma unstandardised
+
+glm_main_m1 <- glm(routine2 ~ SexId, data = study_6_glm_df, family = "Gamma")
+glm_main_m2 <- glm(routine2 ~ SexId + exp, data = study_6_glm_df, family = "Gamma")
+glm_main_m3 <- glm(routine2 ~ SexId * exp, data = study_6_glm_df, family = "Gamma")
+glm_main_m4 <- glm(routine2 ~ SexId + exp + SexId:exp + neg_exp, data = study_6_glm_df, family = "Gamma")
+glm_main_m5 <- glm(routine2 ~ SexId * exp + neg_exp + SexId:neg_exp, data = study_6_glm_df, family = "Gamma")
+glm_main_m6 <- glm(routine2 ~ SexId * exp + neg_exp + EmotionalStability + Robustness + Resilience, data = study_6_glm_df, family = "Gamma")
+interact_plot(model = glm_main_m4, pred = exp, modx = "SexId",
+                            plot.points = TRUE, data = study_6_glm_df)
+sim_slopes(glm_main_m4, pred = exp, modx = "SexId", data = study_6_glm_df, robust = TRUE,jnplot = T)
+
+summary(glm_main_m1)
+summary(glm_main_m2)
+summary(glm_main_m3)
+summary(glm_main_m4)
+summary(glm_main_m5)
+summary(glm_main_m6)
+
+modEvA::Dsquared(glm_main_m3, adjust = T) - modEvA::Dsquared(glm_main_m2, adjust = T)
+
+anova(glm_main_m1, glm_main_m2, glm_main_m3, glm_main_m5, glm_main_m5, glm_main_m6,
+      test = "Chisq")
+
+plot(glm_main_m4)
+
+
+## normal regression
+
+m1 <- lm(routine2 ~ SexId, data = study_6_glm_df)
+m2 <- lm(routine2 ~ SexId + exp, data = study_6_glm_df)
+m3 <- lm(routine2 ~ SexId * exp, data = study_6_glm_df)
+m4 <- lm(routine2 ~ SexId + exp + SexId:exp + neg_exp, data = study_6_glm_df)
+m5 <- lm(routine2 ~ SexId * exp + neg_exp + SexId:neg_exp, data = study_6_glm_df)
+m6 <- lm(routine2 ~ SexId * exp + neg_exp + EmotionalStability + Robustness + Resilience, data = study_6_glm_df)
+m7 <- lm(routine2 ~ SexId * exp + I(exp*exp) + neg_exp + EmotionalStability + Robustness + Resilience, data = study_6_glm_df)
+
+plot(m7)
+
+anova(m1,m2,m3,m4,m5,m6,m7)
+
+
+summary(m1)
+summary(m2)
+summary(m3)
+summary(m4)
+summary(m5)
+summary(m6)
+summary(m7)
+
+apaTables::apa.reg.table(m1,m2,m3,m4,m5,m6,m7)
+plot(m6)
+
+lmtest::bptest(m6)
+```
+
+
+
+
+
