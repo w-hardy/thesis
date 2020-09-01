@@ -1,0 +1,922 @@
+# PhD Impact and Dissemination {#impact-activities}
+
+Given the applied nature of the PhD, it was important that the results were disseminated to the organisation. To do so, we produced a report, which is largely a lay summary of Chapter \@ref(ml-pra), and presented to various aspects of the Mountain Training organisation.
+  
+
+## Mountain Training Report
+
+Physical copies distributed to all Mountain Training board members (n = 106) and Mountain Leader course providers (n = 109).
+
+\includepdf[pages=-, scale = .9, pagecommand={}, frame=true, offset = 0 -25]{impact_activity/mt_report.pdf}
+
+
+## Mountain Training Boards Presentation
+
+Presented to MTUKI (n = 26), MTE (n = 21), MTC (n = 16), MTS (n = 14) boards, MTS (n = 25) providers in October 2019, and Mountain Training staff (n = 15) in January 2020.
+
+\includepdf[pages=-, scale=.9, nup=1x2, frame=true, pagecommand={}]{impact_activity/board_presentation.pdf}
+
+
+## Mountain Training UK Coaching Provider Presentation
+
+Presented to *all* MTUKI coaching providers (n = 22) in November 2019
+
+\includepdf[pages=-, scale=.9, nup=1x2,frame=true, pagecommand={}]{impact_activity/coaching_provider_presentation.pdf}
+
+
+## Moutain Training Scotland
+
+Following the presentations to Mountain Training Scotland, they were keen to understand if there were any differences to the important factors in completion of their qualifications to those identified in the report. This resulted in a project with two key outputs. There were two key outputs agreed for this project: 1) A report containing summary statistics for pathway progress for Mountain Training Scotland Mountain Leader candidates and for Winter Mountain Leader candidates trained 2009-2019, and 2) A report identifying differences between MTS candidates who complete the Mountain Leader qualification and those who do not.
+
+
+### Part A: Mountain Training Scotland Mountain Leader and Winter Mountain Leader Completion Statistics
+
+
+```{r mts-walking completion-setup, include=FALSE}
+library(tidyverse)
+library(lubridate)
+library(data.table)
+library(survival)
+library(survminer)
+library(knitr)
+library(tidytidbits)
+library(ggthemes)
+library(kableExtra)
+library(DAMisc)
+
+load("impact_activity/mts_walking_completion.RData")
+
+```
+
+
+#### Introduction. {#mts-part-a-intro}
+
+* Following the presentation of results from the collaborative research project between Bangor University and Mountain Training UK and Ireland [@Hardy2019b], Mountain Training Scotland (MTS) commissioned this report to provide some basic statistics about completion rates of Mountain Leader (ML) candidates registered with MTS and for the Winter Mountain Leader qualification (WML).
+* This report provides summary statistics for pathway progress for Mountain Training Scotland Mountain Leader candidates and for Winter Mountain Leader candidates 2009-2019. 
+* This report has three main sections, a description of the data used for the analyses, results for the ML, and results for the WML. Both of the results sections follow the same format: (a) a section about candidates getting to a training course having registered, (b) a section about candidates getting to an assessment course having been trained, and (c) a section on candidates passing their first assessment.
+
+
+#### Data. {#mts-part-a-data}
+
+* The data for these analyses are taken from a backup of Mountain Trainings Candidate Management System (CMS) created on 12/08/2019.
+* The results for each analysis covers the period: 12/08/2009 to 12/08/2019.
+
+
+##### Demographics. {#mts-part-a-demographics}
+
+* There are a total of `r nrow(filter(mts_data, !sex_id %in% c(1, 2)))` non female/male candidates in this sample, which is too few to form a meaningful subgroup, therefore they have not been included as a sub-group in the analyses.
+* Ethnicity was added to CMS in 2012. Most candidates who registered before 2012 do not have an ethnicity on CMS unless they have added their ethnicity since. Whilst it is likely that a large proportion of these candidates are white we cannot assume that they all are, therefore they ahve been excluded from analysis including ethnicity.
+* There are a total of `r nrow(filter(mts_data, is_white == 0))` candidates who have registered for either the ML or WML with MTS whose ethnicity is not either "White - European" or "White - Other." None of the non-white ethnic groups would form a large enough subgroup to include in the analyses, therefore we have collapsed ethnic groups into white and non-white. 
+* Candidates were excluded from the analyses if:
+    * They are marked as deceased on CMS (n = 42).
+    * Pathway dates are not in order on CMS (e.g., has been assessed before their training date; n = 586), only 42 of whom registered for the ML after 2000. It is likely that this is due to inaccuracies in historic records, thus will have little influence on the results of the analyses presented in this report.
+* A summary of the candidates included in the analyses can be seen in Table \@ref(tab:mts-candidate-demographics) - it is important to note that not all candidates will be included in each analysis due to missingness of their data.
+
+
+```{r mts-candidate-demographics}
+filter(mts_data, reg_date_ml > ymd(20090812)) %>% 
+  full_join(filter(mts_data, reg_date_wml > ymd(20090812)), by = c("candidate_id", "Sex", "White")) %>% 
+  full_join(filter(mts_data_sex, reg_date_ml > ymd(20090812)), by = c("candidate_id", "Sex", "White")) %>% 
+  full_join(filter(mts_data_sex, reg_date_wml > ymd(20090812)), by = c("candidate_id", "Sex", "White")) %>% 
+  group_by(Sex, White) %>% 
+  count() %>% 
+  kable(booktabs = TRUE, caption = "MTS ML and WML candidate demographics") %>% 
+  kable_styling(full_width = FALSE) %>% 
+  collapse_rows(c(1), valign = "top") %>% 
+  add_footnote('Note: "NA" represents missing data, for example, candidates who do not have an ethnicity assigned on CMS.', notation = "none")
+
+```
+
+
+##### Outcomes. {#mts-part-a-outcomes}
+
+There are three outcomes considered in this report, **trained**, **assessed**, and **passed**:
+
+* Candidates who have been *trained* must have completed the training course and not have withdrawn from the course.
+* Candidates who have *been assessed* may have passed, deferred, failed, or have withdrawn from the course.
+* Candidates who *did not pass their first assessment* may have been deferred, failed, or have withdrawn from the course.
+
+
+#### Methods. {#mts-part-a-methods}
+
+##### Survival Analyses. {#mts-part-a-survival-analyses}
+
+* Kaplan-Meier survival curve were plotted using the `survival` package in `R` [@HarrellJr2015; @R-survival; @R-base].
+* Differences between groups were tested for using a log-rank test; p < .05 denotes a significant difference, *however this should be interpreted with caution when the sample size is low*.
+* **Number at risk** is the number of candidates still included in the analysis (i.e., a candidate who was trained five years ago will be included up to the five-year point on the x-axis, but not beyond).
+* **Number of events** is the number of trainings/assessments that have occurred up to that time point.
+* Example from Figure \@ref(fig:ml-get-to-train-sex):
+    * At 0 years after registering on the x-axis, there are 2360 male candidates and 916 female candidates *at risk* of being trained and there have been 13 and 2 *events* for male and female candidates respectively (i.e., they have been trained).^[It is likely that these candidates registered immediately before or on their training course.]
+    * Two years after registering, there are 783 male and 250 female candidates who remain at risk of being trained and 1326 male and 555 female candidates who have been trained. Considering the female candidates, clearly the number of candidates originally at risk minus the number who have been trained two years after registering is not equal to the number of candidates who remain at risk. The missing candidates have been *censored* from the analysis (i.e., they registered for the ML less than two years before the data for this analysis was collected and therefore have been excluded from the analysis).
+
+    
+##### Pass Rates. {#mts-part-a-pass-rates}
+
+* Where there were enough candidates, we used regression techniques to test for changes in the pass rate over time and for differences in the pass rate between groups. The results at then presented in graphs with a solid line representing a moving average of the pass rate surrounded by a *ribbon* that represents the 95% confidence interval for the estimate of the pass rate. A wider ribbon denotes greater uncertainty.
+* When there were not enough candidates to analyse the data as decribed above, we present the pass rates in tables as descriptive (and not inferential) statistics.
+
+
+\newpage
+#### Mountain Leader. {#mts-part-a-mountain-leader}
+
+##### Getting to Training. {#mts-part-a-getting-to-training-ml}
+
+* Average time from registration to training for all candidates: mean = `r round(mean(filter(mts_data, reg_date_ml > ymd(20090812))$ml_time_to_train), 2)` and median = `r round(median(filter(mts_data, reg_date_ml > ymd(20090812))$ml_time_to_train), 2)` years.
+* Significantly more female candidates than male candidates get to training, after two years 59% and 64% respectively (Figure \@ref(fig:ml-get-to-train-sex)).
+
+
+```{r ml-get-to-train-sex, fig.height = 6, fig.cap="Time to Mountain Leader training from registration, split by sex"}
+df <- mts_data_sex %>% 
+  filter(reg_date_ml > ymd(20090812))
+
+fit1 <- survfit(Surv(time = ml_time_to_train, 
+                     event = ml_trained) ~ sex_id, data = df)
+
+mts_surv_plot(fit = fit1, type = "trained")
+
+```
+
+
+* No significant differences in the proportion of white and non-white candidates getting to training, after two years 62% and 57% respectively  (Figure \@ref(fig:ml-get-to-train-ethnicity)).
+
+
+```{r ml-get-to-train-ethnicity, fig.height = 6, fig.cap="Time to Mountain Leader training from registration, split by ethnicity"}
+df <- mts_data %>% 
+  filter(reg_date_ml > ymd(20090812))
+
+fit1 <- survfit(Surv(time = ml_time_to_train, 
+                     event = ml_trained) ~ is_white, data = df)
+
+mts_surv_plot(fit = fit1, type = "trained", censor = FALSE)
+```
+
+
+##### Getting to Assessment. {#mts-part-a-getting-to-assessment-ml}
+
+* Average time to assessment for all candidates: mean = `r round(mean(filter(mts_data, is.na(reg_date_ml) == FALSE & first_ml_training_date > ymd(20090812))$ml_time_to_assess), 2)` and median = `r round(median(filter(mts_data, is.na(reg_date_ml) == FALSE & first_ml_training_date > ymd(20090812))$ml_time_to_assess), 2)` years.
+* Significantly more male candidates than female candidates get to assessment, after four years 43% and 39% respectively (Figure \@ref(fig:ml-get-to-train-sex)).
+
+
+```{r ml-get-to-assess-sex, fig.height = 6, fig.cap="Time to Mountain Leader assessment from training, split by sex"}
+df <- mts_data_sex %>% 
+  filter(is.na(reg_date_ml) == FALSE & first_ml_training_date > ymd(20090812))
+
+fit1 <- survfit(Surv(time = ml_time_to_assess,
+                     event = ml_assessed) ~ sex_id, data = df)
+
+mts_surv_plot(fit1, "assessed")
+
+```
+
+
+* No significant differences in the proportion of white and non-white candidates getting to assessment, after four years 47% and 49% respectively (Figure \@ref(fig:ml-get-to-train-ethnicity)).
+
+
+```{r ml-get-to-assess-ethnicity, fig.height = 6, fig.cap="Time to Mountain Leader assessment from training, split by ethnicity"}
+df <- mts_data %>% 
+  filter(is.na(reg_date_ml) == FALSE & first_ml_training_date > ymd(20090812))
+
+fit1 <- survfit(Surv(time = ml_time_to_assess,
+                     event = ml_assessed) ~ is_white, data = df)
+
+# x <- summary(fit1)
+# 
+# tibble(x$time, 1-x$surv, x$strata) %>% 
+#   filter(between(x$time, 2.9, 4.1))
+
+mts_surv_plot(fit1, "assessed", censor = FALSE)
+
+```
+
+
+##### First Assessment {#mts-part-a-first-assessment-ml}
+
+```{r ml-ftp-sex-tab}
+df <- mts_data_sex %>% 
+  filter(is.na(reg_date_ml) == FALSE & 
+           first_ml_assessment_date > ymd(20090812)) %>% 
+  mutate(first_ml_assessment_date =
+           round_date(first_ml_assessment_date, unit = "week"))
+```
+
+
+* No significant differences in the proportion of female and male candidates passing their first assessment, nor has the pass rate changed over time (Figure \@ref(fig:ml-ftp-sex)). The mean pass rate was `r round(mean(df$ml_pass_first_time*100))` %.
+
+
+```{r ml-ftp-sex, fig.cap="Pass rates for MTS ML female and male candidates"}
+
+df %>%
+  mutate(sex_id=rename_factor(sex_id, `1` = "male", `2` = "female"),
+         Sex =
+           rename_factor(
+             sex_id,
+             "male" = paste("Male \nn =",
+                            nrow(filter(df, sex_id == 1))),
+             "female" = paste("Female \nn =",
+                              nrow(filter(df, sex_id == 2))))) %>% 
+  ggplot(aes(x = first_ml_assessment_date, y = 100 * ml_pass_first_time, colour = Sex, fill = Sex)) +
+  geom_smooth(method = "loess") +
+  labs(x = "Assessment Year",
+       y = "First Time Pass Rate %",
+       caption = paste("n = ", nrow(df))) +
+  coord_cartesian(ylim = c(0,100)) +
+  #coord_cartesian(xlim = c(2000,2020), ylim = c(50,90)) +
+  theme_few(base_size = 10) +
+  theme(legend.position = "bottom")
+
+# lm <- lm(ml_pass_first_time ~ as.numeric(first_ml_assessment_date)*as.factor(sex_id), data = df)
+# lo <- loess(ml_pass_first_time ~ as.numeric(first_ml_assessment_date)*as.numeric(sex_id), data = df)
+# testLoess(lm, lo, alpha = .05)
+# summary(lm)
+```
+
+
+```{r ml-first-time-pass-ethnicity, fig.cap="Pass rates for MTS ML split by ethnicity", eval=FALSE}
+df <- mts_data %>% 
+  filter(is.na(reg_date_ml) == FALSE & 
+           first_ml_assessment_date > ymd(20090812) &
+           is_white %in% c(TRUE, FALSE)) %>% 
+  mutate(sex_id=rename_factor(sex_id, `1` = "male", `2` = "female")) -> df
+
+df %>%
+  mutate(
+    Sex =
+      rename_factor(
+        sex_id,
+        "male" = paste("Male \nn =",
+                       nrow(filter(df, sex_id == "male"))),
+        "female" = paste("Female \nn =",
+                         nrow(filter(df, sex_id == "female")))
+       ),
+     first_ml_assessment_date =
+       round_date(first_ml_assessment_date, unit = "week")
+  ) %>%
+  ggplot(aes(x = first_ml_assessment_date, y = 100 * ml_pass_first_time, colour = White, fill = White)) +
+  geom_smooth(method = "loess") +
+  coord_cartesian(ylim = c(0,100)) +
+  labs(x = "Assessment Year",
+       y = "First Time Pass Rate %",
+       caption = paste("n = ", nrow(df))) +
+  #coord_cartesian(xlim = c(2000,2020), ylim = c(50,90)) +
+  theme_few(base_size = 10) +
+  theme(legend.position = "bottom")
+
+```
+
+
+* There were too few non-white MTS ML candidates to make a meaningful comparison with white MTS ML candidates, the pass rates are reported in Table \@ref(tab:ml-ftp-tab-ethnicity).
+
+
+```{r ml-ftp-tab-ethnicity}
+mts_data %>% 
+  filter(is.na(reg_date_ml) == FALSE & 
+           first_ml_assessment_date > ymd(20090812) &
+           is_white %in% c(TRUE, FALSE)) %>% 
+  group_by(White) %>% 
+  summarise(first_time_pass = mean(ml_pass_first_time) * 100,
+            n = n()) %>% 
+  kable(col.names = c("White","Pass \nrate (%)", "n"),
+        caption = "MTS ML first time pass rates per year by ethnicity",
+        digits = 1,
+        booktabs = TRUE) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), 
+                full_width = FALSE) %>% 
+  collapse_rows(c(1), valign = "top")
+
+# df <- mts_data %>% 
+#   filter(is.na(reg_date_ml) == FALSE & 
+#            first_ml_assessment_date > ymd(20090812) &
+#            is_white %in% c(TRUE, FALSE))
+# 
+# chisq.test(df$ml_pass_first_time, df$ethnic_id)
+```
+
+
+#### Winter Mountain Leader. {#mts-part-a-winter-ml}
+
+##### Getting to Training. {#mts-part-a-getting-to-training-wml}
+
+* Average time from registration to training for all candidates: mean = `r round(mean(filter(mts_data, reg_date_wml > ymd(20090812))$wml_time_to_train), 2)` and median = `r round(median(filter(mts_data, reg_date_wml > ymd(20090812))$wml_time_to_train), 2)` years.
+* No significant differences in the proportion of female and male candidates getting to training, after two years 84% and 82% respectively (Figure \@ref(fig:wml-get-to-train-sex)).
+
+
+
+```{r wml-get-to-train-sex, fig.height = 6, fig.cap="Time to Winter Mountain Leader training from registration, split by sex"}
+df <- mts_data_sex %>% 
+  filter(reg_date_wml > ymd(20090812))
+
+fit1 <- survfit(Surv(time = wml_time_to_train, 
+                     event = wml_trained) ~ sex_id, data = df)
+
+mts_surv_plot(fit1, "trained")
+
+```
+
+
+* Significantly more white candidates than non-white candidates get to training, after four years 73% and 82% respectively (Figure \@ref(fig:wml-get-to-train-ethnicity)).
+
+
+```{r wml-get-to-train-ethnicity, fig.height = 6, fig.cap="Time to Winter Mountain Leader training from registration, split by ethnicity"}
+df <- mts_data %>% 
+  filter(reg_date_wml > ymd(20090812))
+
+fit1 <- survfit(Surv(time = wml_time_to_train, 
+                     event = wml_trained) ~ is_white, data = df)
+
+mts_surv_plot(fit1, "trained", censor = FALSE)
+
+```
+
+
+##### Getting to Assessment.  {#mts-part-a-getting-to-assessment-wml}
+
+* Average time from training to assessment for all candidates: mean = `r round(mean(filter(mts_data, first_wml_training_date > ymd(20090812))$wml_time_to_assess), 2)` and median = `r round(median(filter(mts_data, first_wml_training_date > ymd(20090812))$wml_time_to_assess), 2)` years.
+* Significantly more male candidates than female candidates get to assessment, after four years 44% and 37% respectively (Figure \@ref(fig:wml-get-to-assess-sex)).
+
+
+```{r wml-get-to-assess-sex, fig.height = 6, fig.cap="Time to Winter Mountain Leader assessment from training, split by sex"}
+df <- mts_data_sex %>% 
+  filter(first_wml_training_date > ymd(20090812))
+
+fit1 <- survfit(Surv(time = wml_time_to_assess,
+                     event = wml_assessed) ~ sex_id, data = df)
+
+mts_surv_plot(fit1, "assessed")
+
+```
+
+
+* No significant differences in the proportion of white and non-white candidates getting to assessment, after four years 46% and 54% respectively (Figure \@ref(fig:wml-get-to-assess-ethnicity)). *This should be interpreted with caution as only 21 non-white candidates were included in the analysis.*
+
+
+```{r wml-get-to-assess-ethnicity, fig.height = 6, fig.cap="Time to Winter Mountain Leader assessment from training, split by ethnicity"}
+df <- mts_data %>% 
+  filter(first_wml_training_date > ymd(20090812))
+
+fit1 <- survfit(Surv(time = wml_time_to_assess,
+                     event = wml_assessed) ~ is_white, data = df)
+
+mts_surv_plot(fit1, "assessed", censor = FALSE)
+
+```
+
+
+##### First Assessment. {#mts-part-a-first-assessment-wml}
+
+```{r wml-ftp-sex-tab}
+df <- mts_data_sex %>% 
+  filter(first_wml_assessment_date > ymd(20090812)) %>% 
+  mutate(sex_id=rename_factor(sex_id, `1` = "male", `2` = "female"))
+```
+
+
+* No significant differences in the proportion of female and male candidates passing their first assessment, nor has the pass rate changed over time (Figure \@ref(fig:ml-ftp-sex)). The mean pass rate was `r round(mean(df$wml_pass_first_time*100))` %.
+* Because there are few female candidates being assessed each year for the Winter Mountain Leader, the variability in the pass rate year on year is high, hence the large confidence interval represented by the blue ribbon. Some of this variability has been smoothed out in Figure \@ref(fig:wml-ftp-sex). Therefore, we have also included a summary table (Table \@ref(tab:wml-ftp-tab-sex)) that shows both the pass rate and total number of candidates assessed each year.
+
+
+```{r wml-ftp-sex, fig.cap="Pass rates for WML female and male candidates"}
+
+df %>%
+  mutate(
+    Sex =
+      rename_factor(
+        sex_id,
+        "male" = 
+          paste("Male \nn =",
+                nrow(filter(df, sex_id == "male"))),
+        "female" = 
+          paste("Female \nn =",
+                nrow(filter(df, sex_id == "female")))),
+    # first_wml_assessment_date =
+    #   round_date(first_wml_assessment_date, unit = "week")
+    ) %>%
+  ggplot(aes(x = first_wml_assessment_date, 
+             y = 100 * wml_pass_first_time, colour = Sex, fill = Sex)) +
+  geom_smooth(method = "loess") +
+  coord_cartesian(ylim = c(0,100)) +
+  labs(x = "Assessment Year",
+       y = "First Time Pass Rate %",
+       caption = paste("n = ", nrow(df))) +
+  theme_few(base_size = 10) +
+  theme(legend.position = "bottom")
+
+# lm <- lm(ml_pass_first_time ~ as.numeric(first_ml_assessment_date)*as.factor(sex_id), data = df)
+# lo <- loess(ml_pass_first_time ~ as.numeric(first_ml_assessment_date)*as.numeric(sex_id), data = df)
+# testLoess(lm, lo, alpha = .05)
+# summary(lm)
+
+```
+
+
+
+```{r wml-ftp-tab-sex}
+mts_data_sex %>% 
+  filter(first_wml_assessment_date > ymd(20090812), sex_id == 2) %>% 
+  group_by(Sex, year(first_wml_assessment_date)) %>% 
+  summarise(first_time_pass = mean(wml_pass_first_time) * 100,
+            n = n()) %>% 
+  kable(col.names = c("Sex","Year","Pass \nrate (%)", "n"),
+        caption = "Female Winter ML first time pass rates per year",
+        digits = 1,
+        booktabs = TRUE, format = ) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), 
+                full_width = FALSE) %>% 
+   collapse_rows(c(1), valign = "top")
+
+```
+
+
+
+```{r wml-first-time-pass-ethnicty, fig.cap="Pass rates for MTS, split by ethnicity", eval=FALSE}
+df <- mts_data %>% 
+  filter(first_wml_assessment_date > ymd(20090812) &
+           is_white %in% c(TRUE, FALSE)) -> df
+
+df %>%
+  mutate(
+     first_wml_assessment_date =
+       round_date(first_wml_assessment_date, unit = "year")) %>%
+  ggplot(aes(x = first_wml_assessment_date, 
+             y = 100 * wml_pass_first_time, colour = White, fill = White)) +
+  geom_smooth(method = "loess") +
+  labs(x = "Assessment Year",
+       y = "First Time Pass Rate %",
+       caption = paste("n = ", nrow(df))) +
+  theme_few(base_size = 10) +
+  theme(legend.position = "bottom")
+
+```
+
+
+* There were too few non-white WML candidates to make a meaningful comparison with white WML candidates, the pass rates are reported in Table \@ref(tab:wml-ftp-tab-ethnicity).
+
+
+```{r wml-ftp-tab-ethnicity}
+mts_data %>% 
+  filter(first_wml_assessment_date > ymd(20090812) &
+           is_white %in% c(TRUE, FALSE)) %>% 
+  group_by(White) %>% 
+  summarise(first_time_pass = mean(wml_pass_first_time) * 100,
+            n = n()) %>% 
+  kable(col.names = c("White","Pass \nrate (%)", "n"),
+        caption = "Winter ML first time pass rates per year by ethnicity",
+        digits = 1,
+        booktabs = TRUE) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), 
+                full_width = FALSE) %>% 
+  collapse_rows(c(1), valign = "top")
+```
+
+
+#### Summary. {#mts-part-a-summary}
+
+* Male MTS candidates are less likely to be trained for the ML. Overall, approximately 60% of MTS ML candidates who register for the ML are trained.
+* Female candidates are less likely to be assessed for the ML.
+* MTS ML candidates are 5-10% more likely to be assessed than the average UK candidate.
+* Whilst there are few non-white Scottish ML candidates, those that there are do not seem to be any less likely to be trained or assessed than white candidates. This is different to the rest of the UK, where non-white candidates are ~20% less likely to be assessed than white candidates.
+* The pass rate for ML candidates has been ~70% for the last ten years and is no different for female and male candidates.
+  * The pass rate for the whole of the UK has increased in this time period and is currently ~5% higher than the Scottish pass rate.
+* WML candidates are more likely to be trained than ML candidates are. After two years over 80% of WML candidates have completed a training course. Non-white WML candidates are less likely to be trained than white WML candidates.
+* Female WML candidates are less likely to be assessed than male WML candidates.
+* Non-white WML candidates are no more or less likely to be assessed for the WML, however they account for less than 2% of WML candidates.
+
+There are some similarities between the journeys of candidates in these analyses to those in the remainder of the Mountain Training population (e.g., female candidates being less likely to be assessed than male candidates), but there are also some differences (e.g., non-white candidates being as likely to be assessed as white candidates).
+
+For both the ML and WML MTS may want to consider ways in which they can support candidates in getting to an assessment having been trained (particularly female candidates) and also understand why a third of the candidates who register with them for the ML do not attend a training course. MTS may also wish to consider ways in which the number of non-white candidates can be increased, if appropriate, and also understand why non-white MTS candidates are more likely to be assessed than non-white candidates in other areas of the UK.
+
+
+### Part B: Mountain Leader Completion: Mountain Training Scotland
+
+
+```{r mts-ml-completion-setup, include=FALSE}
+library(tidyverse)
+library(readxl)
+library(plotly)
+library(knitr)
+library(kableExtra)
+library(lubridate)
+library(survival)
+library(survminer)
+
+load("impact_activity/ml_completion_mts.RData")
+
+```
+
+
+#### Introduction. {#mts-part-b-introduction}
+
+In October 2019 we presented a report to Mountain Training United Kingdom and Ireland (MTUKI) which discussed important factors for discriminating candidates who complete the Mountain Leader qualification from those who do not [@Hardy2019b]. Following that, Mountain Training Scotland (MTS) commissioned a second piece of project, which considered the completion rates of walking qualifications for their candidates. There were two key output agreed for this project: 1) A report containing summary statistics for pathway progress for Mountain Training Scotland Mountain Leader candidates and for Winter Mountain Leader candidates trained 2009-2019, and 2) A report identifying differences between MTS candidates who complete the Mountain Leader qualification and those who do not.
+
+The first of these outputs was submitted to MTS on 21 January 2020. This report is the second of those outputs. It presents analyses of the data collected from MTS candidates who responded to the survey conducted in January 2019 for the MTUKI project. For the sake of brevity, we have not duplicated information that is presented in either the MTUKI report or the previous MTS report, instead we refer the reader to these documents where appropriate. Whilst there are some differences between the MTS population and the remainder of the MTUKI population, it is unlikely that what is good for the MTUKI population is bad for the MTS population. With that in mind, the results from this study would be best considered in conjunction with those in the MTUKI report.
+
+The remainder of the report is structured as follows, firstly, there is a brief methods section, describing the candidates included in the analyses. This is followed by a section that presents and discusses the results for the analysis of data collected from female candidates and then a similar section for data collected from male candidates. Finally, there is a conclusion and potential implications section, where we discuss what this may mean for MTS and its candidates.
+
+
+#### Methods. {#mts-part-b-methods}
+
+##### Participants. {#mts-part-b-participants}
+
+Participants for this study were drawn from the pool of participants for the MTUKI project (i.e., candidates who attended their first Mountain Leader training course 2017-2018). There were `r nrow(mts_pra)` candidates who met the inclusion criteria for this study: 1) registered for the Mountain Leader qualification with MTS, 2) completed their first training between 2017 and 2018, and 3) completed the MTUKI survey. These candidates are 15.2% of the MTS candidates trained 2017-2018. Descriptive statistics about the candidates included in this study and their pathway progress can be seen in Table \@ref(tab:mts-pra-descriptives). 
+
+It is important to note that the MTS candidates who completed the survey are more likely to have been assessed than those who did not complete the survey but were trained during the same period. Female and male candidates who completed the survey were approximately 20% more likely to have been assessed 12 months post-training than those who did not complete the survey.
+
+
+```{r mts-pra-descriptives}
+mts_pra %>% 
+  mutate(Sex = case_when(SexId == 2 ~ "Female",
+                         SexId == 1 ~ "Male")) %>% 
+  group_by(Sex) %>% 
+  summarise(n = n(),
+            Age = round(mean(TrainAge),1),
+            age_sd = round(sd(TrainAge), 1),
+            white_n = sum(IsWhite, na.rm = TRUE),
+            `White` = round(mean(IsWhite)*100, 1),
+            assessed_18m_n = round(sum(Assessed_18months), 1),
+            assessed_n = round(sum(Assessed), 1),
+            passed_n = round(sum(FirstTimePass, na.rm = TRUE), 1),
+            `Assessed within 18 months` = 
+              round((sum(Assessed_18months, na.rm = TRUE)/n)*100, 1),
+            `Assessed` = round((sum(Assessed)/n)*100, 1),
+            `Passed first time` = 
+              round((sum(FirstTimePass, na.rm = TRUE)/assessed_n)*100, 1)
+            ) %>% 
+  transmute(Sex = Sex,
+            n = n,
+            Age = paste0(Age, "±", age_sd),
+            White = n_pct_col(white_n, White),
+            Assessed = n_pct_col(assessed_n, Assessed),
+            `Assessed within 18 months` = n_pct_col(assessed_18m_n, `Assessed within 18 months`),
+            `Passed first time` = n_pct_col(passed_n, `Passed first time`)) %>% 
+  my_table(caption = "Participant descriptive statistics.", digits = 1) %>% 
+  column_spec(5, width = "3cm") %>% 
+  column_spec(6, width = "3cm") %>% 
+  column_spec(7, width = "3cm") %>% 
+  add_footnote(notation = "none", label = "")
+
+```
+
+
+```{r, eval=FALSE}
+
+mts_data <- readRDS("../data/mts_data.rds") %>%
+  filter((!ml_time_to_train < 0 | is.na(ml_time_to_train)) &
+           (!ml_time_to_assess < 0 | is.na(ml_time_to_assess)) &
+           (!wml_time_to_train < 0 | is.na(wml_time_to_train)) &
+           (!wml_time_to_assess < 0 | is.na(wml_time_to_assess))) %>% 
+  mutate(surveyed = if_else(candidate_id %in% mts_pra$CandidateId, TRUE, FALSE))
+
+mts_data %>% 
+  filter(first_ml_training_date > ymd(20161231) &
+           first_ml_training_date < ymd(20190101)) %>% 
+  .$surveyed %>% 
+  mean()
+
+df <- mts_data %>% 
+  filter(is.na(reg_date_ml) == FALSE & 
+           first_ml_training_date > ymd(20161231) &
+           sex_id %in% c(1:2))
+
+fit1 <- survfit(Surv(time = ml_time_to_assess,
+                     event = ml_assessed) ~ surveyed + sex_id, data = df)
+
+ggsurvplot(fit1,
+           fun = "event",
+           surv.scale = "percent",
+           ylim = c(0,.7),
+           break.y.by = .1,
+           xlim = c(1, 1.5),
+           break.x.by = .5,
+           xlab = "Time after training in years",
+           ylab = "% of candidates assessed",
+           # legend.labs = 
+           #   if (str_detect(paste((fit$call))[2], "sex")) 
+           #   {c("Male", "Female")} else
+           #     if (str_detect(paste((fit$call))[2], "white")) 
+           #     {c("Non-White", "White")} else
+           #       if (str_detect(paste((fit$call))[2], "surveyed")) 
+           #     {c("Non-White", "White")} else
+           #     {stop("neither `sex_id` nor `is_white` detected in call")},
+           conf.int = FALSE, 
+           pval = TRUE,
+           pval.coord = c(.5, .8),
+           censor = FALSE, 
+           risk.table = TRUE,
+           cumevents = TRUE,
+           tables.height = .2,
+           tables.y.text = FALSE,
+           font.family = font,
+           font.main = 10,
+           ggtheme = 
+             theme_survminer(base_size = 10,
+                             base_family = font),
+           tables.theme = 
+             theme_survminer(font.main = 10, font.x = 10,
+                             font.y = 10, base_family = font,
+                             base_size = 10))
+
+```
+
+
+##### Analytical Procedure. {#mts-part-b-analytical-procedure}
+
+As in the MTUKI project we used state of the art pattern recognition analyses to identify the key discriminatory variables [@Duda2000]. In brief, the purpose of this analysis is to identify variables that can successful discriminate the class of an object (i.e., whether or not a candidate has been assessed). This study used the same procedure as in the MTUKI project,^[With the exception of swapping one feature selection algorithm (Correlation Feature Subset) for another [Fast Correlation Based Filter; @Yu2003].] further details can be found in the MTUKI report [see @Hardy2019b pg 31 for details].
+
+Results from the pattern recognition have two distinct parts that should be of interest to readers: 1) the feature subset, which is the group of variables selected as discriminatory variables by the analysis; and 2) the classification accuracy, the percentage of candidates that are correctly classified by the feature subset. 
+
+In these analyses a classification rate of 50% is no better than the toss of a coin (i.e., random chance). We present the classification accuracy across four different classification algorithms: Naïve Bayes [NB; @John1995], Sequential Minimal Optimization [SMO; @Platt1998], Instance Based Learning [IBk; @Aha1991] , J48 Decision Tree [J48; @Quinlan1993]. The more consistent the results from these classification algorithms, the more confidence one can place in the feature subset [@Gullich2019].
+
+**For all of the feature subsets presented in this document, it is important to note that it is the** _**combination**_ **of features that discriminates the groups with the particular level of accuracy and not any single feature. Any visualisation is only a crude representation of the relationship between these variables and reflects an attempt to aid interpretation of the findings for the reader. Within the results there may be a series of complex interactions between the discriminating variables, which are impossible to represent graphically in two (or even three) dimensions.**
+
+
+#### Female Candidates Getting to Assessment Within 18 Months of Training. {#mts-part-b-female-gta}
+
+##### Results. {#mts-part-b-female-gta-results}
+
+A subset of 20 features was selected as the best combination of discriminatory features. This subset classified the female candidates as having been assessed within 18 months of their training course or not with *excellent* accuracy (NB = 87%, SMO = 93%, IBk = 97%, J48 = 67%). Stereotypical profiles of female candidates who had and had not been assessed 18 months post training can be seeing in Figure \@ref(fig:gta18m-female-plot).
+
+Female candidates who were assessed within 18 months were more likely to have:
+
+* An external motive for registering (i.e., someone else wanted them to do it or a situation needed them to do it).
+* Less of an understanding of the qualification pre-training.
+* A greater intention to be assessed at the start of training.
+* Felt that their training staff provided them with structure on their training course.
+* Felt that their training staff engaged in effective questioning, goal setting, and motivational feedback.
+* Felt they could easily access their nearest mountainous area.
+* Felt that becoming a Mountain was more important to them than other life goals.
+* Made progress towards becoming a Mountain Leader.
+* Made more progress towards becoming a Mountain Leader than they had towards other life goals.
+* Felt that they had more resources and skills available to them to successfully become a Mountain Leader than they did to successfully achieve other life goals.
+* Felt they had enough available time to become a Mountain Leader.
+* Done all that they could to prepare effectively for a Mountain Leader assessment.
+* Higher levels of self-efficacy pre-assessment to:
+  * Lead a group effectively in the mountains.
+  * Navigate to a chosen point on a map in any conditions, night or day.
+  * Look after the mountain environment and encourage others to do so too.
+* Felt closer to their ideal level of self-efficacy to look after themselves and others in steep ground/crossing a river (n.b., no female candidate felt more confident than their ideal self would have).
+* Less than their ideal level of efficacy to "look after the mountain environment and encourage others to do so too."
+* Included working in steep ground/scrambling/rope work in their preparation.
+
+
+```{r gta18m-female-plot, fig.cap="Normalised training group means for female candidates getting to assessment within 18 months of their training course.", out.width="100%"}
+df <- 
+  gta18m_female %>% 
+  select(filter(gta18m_female_fs, count > 1)$variable, Assessed_18months) %>% 
+  lapply(normalize) %>% 
+  as_tibble() %>% 
+  group_by(Assessed_18months) %>% 
+  summarise_all(mean) %>% 
+  reshape2::melt(id.vars = "Assessed_18months", 
+                 measure.vars = colnames(.)) %>% 
+  filter(variable != "Assessed_18months") %>% 
+  mutate(variable = as.character(variable)) %>% 
+  left_join(var_labels, by = c("variable" = "var_label")) %>% 
+  mutate(variable = var_description)
+
+plot_ly(type = 'scatterpolargl',
+        mode = "lines+markers",
+        fill = 'toself') %>%
+  add_trace(r = c(subset(df, Assessed_18months == 0, select = c("variable", "value"))$value,
+                  subset(df, Assessed_18months == 0, select = c("variable", "value"))$value[1]),
+            theta = c(subset(df, Assessed_18months == 0, select = c("variable", "value"))$variable, 
+                      subset(df, Assessed_18months == 1, select = c("variable", "value"))$variable[1]),
+            name = 'Not assessed') %>%
+  add_trace(r = c(subset(df, Assessed_18months == 1, select = c("variable", "value"))$value, 
+                  subset(df, Assessed_18months == 1, select = c("variable", "value"))$value[1]),
+            theta = c(subset(df, Assessed_18months == 1, select = c("variable", "value"))$variable, 
+                      subset(df, Assessed_18months == 1, select = c("variable", "value"))$variable[1]),
+            name = 'Assessed') %>%
+  layout(polar = list(radialaxis = list(visible = T, range = c(0,1))),
+         legend = list(orientation = "h", y = 1.2, x = .7),
+         margin = list(r = 100, t = 0, b = 90),
+         font = list(size = 12, family = font)) -> p
+
+if (knitr::is_html_output()) {
+  p
+} else
+{
+  p %>%
+    orca(file = "plots/gta18m-female-plot-combined.png")
+  
+  include_graphics("plots/gta18m-female-plot-combined.png",
+                   auto_pdf = FALSE, dpi = 300)
+}
+```
+
+
+```{r gta18m-female-classification-rates, eval=FALSE}
+gta18m_female_classification_rates %>% 
+  my_table(caption = "Female classification rates")
+```
+
+
+```{r gta18m-female-group-means, eval=FALSE}
+df <- 
+  gta18m_female %>% 
+  select(filter(gta18m_female_fs, count > 1)$variable, Assessed_18months) %>% 
+  group_by(Assessed_18months) %>% 
+  summarise_all(mean) %>% 
+  t() %>% 
+  as.data.frame() %>% 
+  rownames_to_column() %>% 
+  left_join(var_labels, by = c("rowname" = "var_label")) %>% 
+  filter(rowname != "Assessed_18months") %>% 
+  transmute(Variable = var_description,
+            `Not assessed` = V1,
+            `Assessed` = V2)
+
+df %>% 
+  my_table(caption = "Unstandardised group means for female candidates getting to assessment within 18 months of training.", digits = 1) %>% 
+  column_spec(column = 1, width = "10cm")
+```
+
+
+##### Discussion. {#mts-part-b-female-gta-discussion}
+
+The 20 variables selected as important discriminators between female candidates who are assessed within 18 months of their training and those who are not can be grouped into four areas: (a) why they have registered, (b) their experience of the training course, (c) how becoming a Mountain Leader fits into their lives, and (d) how they have prepared for an assessment, if at all. 
+
+Candidates who were assessed within 18 months of their training were **more likely to have an external motive for registering**, had **less confidence in their understanding of the qualification pre-training**, and **at the start of their training course had a greater intention of being assessed**. One explanation for this combination of variables being included as important discriminatory variables is that there are some candidates who have registered as it is something required of them by others (e.g., employers) and that it is the qualification they need and not just the training course.
+
+Coaching usually aims to improve an individual's knowledge, skills, and competencies [@Wagstaff2018]. Course staff will engage in coaching behaviours to a greater or lesser extent and their facilitation of candidate's development will vary accordingly. Three coaching behaviours were selected as important discriminatory variables: **effective questioning**, **goal setting**, and **motivational feedback**. In addition to these three coaching behaviours, the **provision of structure by training staff** was an important discriminatory variable. It is important to note that candidates who were not assessed within 18 months of their training course reported that their course staff did engage in these behaviours, just not to the same extent as those who had been assessed within 18 months.
+
+The provision of structure coupled with goal setting will make it clear to candidates exactly what they need to do in order to prepare for an assessment by setting clear and specific goals. Clear and specific goals are more effective than broad/vague goals for influencing behaviour change [@Gould2005]. The use of effective questioning may encourage candidates to think and reflect on their actions, thus encouraging self-directed learning supporting candidates' autonomy [@Wagstaff2018]. Motivational feedback will also support candidates' sense of autonomy and competence by rewarding good performance and has been associated with self-determined motivation and persistence [@Reinboth2004; @Wagstaff2018].
+
+As in the report presented to MTUKI [@Hardy2019b] several variables that indicate the extent to which become a Mountain Leader fits into a candidate's life were selected as important discriminatory variables. There we suggested that candidates who **feel that becoming a Mountain Leader is more important than other life goals** may be more likely to commit time and resources towards it than candidates who felt that their other life goals were more important than becoming a Mountain Leader. Committing time and resources may be reflected in a **greater level of confidence that one could achieve the goal of becoming a Mountain Leader than of achieving other life goals**. This greater relative importance of and confidence in becoming a Mountain Leader combined with a feeling that they had **easy access to their nearest mountainous area** and **enough available time to become a Mountain Leader** would likely make it easier to **make progress towards that goal both generally and relative to other life goals**, resulting in candidates feeling that they had **done more to effectively prepare for an assessment**.
+
+In the qualitative study described by Hardy and colleagues [-@Hardy2019b pg 10], one of the themes identified in the data was that candidates needed to feel "confident enough" before they would attend an assessment, particularly in skills relating to navigation and security in steep ground. In this study female candidates who were assessed within 18 months of training had a **smaller difference between their ideal and pre-assessment efficacy to look after themselves and others in steep ground/crossing a river** than those who had not been and were also more likely to have **spent part of their time preparing for an assessment in steep ground/scrambling/practicing rope work** (60% vs 10%). It is likely that this deliberate practice will have increased their self-efficacy to look after themselves and others in steep ground, thus helping them reduce the discrepancy between their ideal and actual level of self-efficacy to do so.
+
+On average, female candidates who are assessed within 18 months of training are more confident pre-assessment in their abilities to **lead a group effectively in the mountains** and to **navigate to a chosen point on a map in any conditions, night or day** than those who are not but are less confident pre-assessment in their abilities to **look after the mountain environment and encourage others to do so**. One may reasonably expect candidates who are assessed to be more confident in all of their skills than those who are not assessed. 
+
+There are several possible explanations for this result, one of which is that this may suggest that candidates do not place equal importance on all of the skills they will be required to demonstrate on an assessment. They may feel that it is very important to be able to lead groups and navigate, but less important that they are able to look after the mountains and encourage others to do so too. A second explanation is that there may be that there are a group of candidates who are very interested in the environment, but do not feel as confident in their mountaineering or leadership skills. Both the fact that this is the only pre-assessment self-efficacy variable where the not assessed group has a higher mean score than the assessed group and candidates who are assessed having a **greater discrepancy between their ideal and pre-assessment self-efficacy to look after the mountain environment and encourage others to do so too** than those who were not assessed would support both these hypotheses.
+
+
+#### Male Candidates Getting to Assessment Within 18 Months of Training. {#mts-part-b-male-gta}
+
+##### Results. {#mts-part-b-male-gta-results}
+
+A subset of 13 features was selected as the best combination of discriminatory features. This subset classified the male candidates as having been assessed within 18 months of their training course or not with *very good* accuracy (NB = 81%, SMO = 83%, IBk = 75%, J48 = 84%). Stereotypical profiles of male candidates who had and had not been assessed 18 months post training can be seeing in Figure \@ref(fig:gta18m-male-plot).
+
+Male candidates who had been assessed within 18 months were more likely to have:
+
+* Higher levels of conscientiousness.
+* Felt it would take fewer hours to travel to their nearest mountainous region.
+* Had an introjected motive for registering (i.e., they would have felt ashamed, guilty, or anxious if they didn't).
+* Felt that it was important to other people in their lives (e.g., friends, family, employers) that they became a Mountain Leader.
+* Expected it would take them less time to get to assessment at: registration, the start of, and the end of their training course.
+* Lower efficacy post-training to "choose appropriate routes whilst leading others in the mountains."
+* Felt they had enough available time to become a Mountain Leader.
+* Experienced less change in their professional life (e.g., changing job, change in income, retirement).
+* Felt that they had prepared effectively for an assessment.
+* Had higher ideal levels of self-efficacy to:
+  * Look after themselves and others in steep ground/crossing a river.
+  * Navigate to a chosen point on a map in any conditions, night or day.
+
+
+```{r gta18m-male-plot, fig.cap="Normalised training group means for male candidates getting to assessment within 18 months of their training course.", out.width="100%"}
+df <- 
+  gta18m_male %>% 
+  select(filter(gta18m_male_fs, count > 1)$variable, Assessed_18months) %>% 
+  lapply(normalize) %>% 
+  as_tibble() %>% 
+  group_by(Assessed_18months) %>% 
+  summarise_all(mean) %>% 
+  reshape2::melt(id.vars = "Assessed_18months", 
+                 measure.vars = colnames(.)) %>% 
+  filter(variable != "Assessed_18months") %>% 
+  mutate(variable = as.character(variable)) %>% 
+  left_join(var_labels, by = c("variable" = "var_label")) %>% 
+  mutate(variable = as.character(var_description))
+
+
+plot_ly(type = 'scatterpolargl',
+        mode = "lines+markers",
+        fill = 'toself') %>%
+  add_trace(r = c(subset(df, Assessed_18months == 0, select = c("variable", "value"))$value,
+                  subset(df, Assessed_18months == 0, select = c("variable", "value"))$value[1]),
+            theta = c(subset(df, Assessed_18months == 0, select = c("variable", "value"))$variable, 
+                      subset(df, Assessed_18months == 1, select = c("variable", "value"))$variable[1]),
+            name = 'Not assessed') %>%
+  add_trace(r = c(subset(df, Assessed_18months == 1, select = c("variable", "value"))$value, 
+                  subset(df, Assessed_18months == 1, select = c("variable", "value"))$value[1]),
+            theta = c(subset(df, Assessed_18months == 1, select = c("variable", "value"))$variable, 
+                      subset(df, Assessed_18months == 1, select = c("variable", "value"))$variable[1]),
+            name = 'Assessed') %>%
+  layout(polar = list(radialaxis = list(visible = T, range = c(0,1))),
+         legend = list(orientation = "v", y = .95, x = .9),
+         margin = list(r = 100, t = 50),
+         font = list(size = 11, family = font)) -> p
+
+if (knitr::is_html_output()) {
+  p
+} else
+{
+  p %>%
+    orca(file = "plots/gta18m-male-plot-combined.png")
+  
+  include_graphics("plots/gta18m-male-plot-combined.png",
+                   auto_pdf = TRUE)
+}
+```
+
+
+```{r gta18m-male-classification-rates, eval=FALSE}
+gta18m_male_classification_rates %>% 
+  my_table(caption = "Male classification rates")
+```
+
+
+```{r gta18m-male-group-means, eval=FALSE}
+df <- 
+  gta18m_male %>% 
+  select(filter(gta18m_male_fs, count > 1)$variable, Assessed_18months) %>% 
+  group_by(Assessed_18months) %>% 
+  summarise_all(mean) %>% 
+  t() %>% 
+  as.data.frame() %>% 
+  rownames_to_column() %>% 
+  left_join(var_labels, by = c("rowname" = "var_label")) %>% 
+  filter(rowname != "Assessed_18months") %>% 
+  transmute(Variable = var_description,
+            `Not assessed` = V1,
+            `Assessed` = V2)
+
+df %>% 
+  my_table(caption = "Unstandardised group means for male candidates getting to assessment within 18 months of training.", digits = 1) %>% 
+  column_spec(column = 1, width = "10cm")
+```
+
+##### Discussion {#mts-part-b-male-gta-discussion}
+
+The 13 variables selected as important discriminators between male candidates who are assessed within 18 months of their training and those who are not can be grouped into four areas: (a) why they have registered, (b) how becoming a Mountain Leader fits into their lives, (c) how if at all they have prepared for an assessment, and (d) self-efficacy.
+
+Candidates who had been assessed within 18 months of their training course were more likely to have a **more introjected motive for registering** (i.e., they would have felt ashamed, guilty, or anxious if they didn't) and were also more likely to **feel that it was important to other people in their lives that they became a Mountain Leader** (e.g., friends, family, employers).
+
+Candidates who had been assessed were more likely to have **higher levels of conscientiousness** than those who had not been assessed within 18 months of their training course. Given that conscientiousness is the tendency to be self-disciplined, diligent and well organised [@Costa1992], this may suggest that the personality of these candidates helps them to prepare for an assessment, particularly when coupled with an introjected motive. There is some evidence in academic research of an interactive effect between conscientiousness and the relative autonomy of motivation, where performance is positively predicted by autonomous motivation, conscientiousness, and the interactive effect of the two [@DiDomenico2015; @Zhou2015].^[i.e., performance is lowest when conscientiousness is low and relative autonomy is low.]
+
+Candidates who **expected it to take them longer to get to assessment at: (a) registration, (b) the start of training, and (c) the end of training** were less likely to have been assessed 18 months after their training course. On average by the end of their training course, candidates who had been assessed after 18 months expected to be assessed within 8 months of their training course, whereas candidates who had not been assessed expected to be assessed within 18 months.^[Ten of the 16 candidates who had not been assessed within 18 months of their training course expected it to take less than 18 months to be assessed.]
+
+Candidates who had not been assessed within 18 months of their training course were less likely to **feel that they had enough available time to become a Mountain Leader**, **felt it would take them longer to travel to their nearest mountainous area** (5.1 hours vs. 3.6 hours), and were more likely to have **experienced a change in their professional life post-training** (e.g., changing job, change in income, retirement). Having an unrealistic expectation of the time it would take to be assessed or experiencing life change would both explain the discrepancies between the expected time to assessment and actual time to assessment. There is also a substantial body of evidence that suggests goals that are proximal in time are more likely to be adhered to [@Hardy1996; @Weinberg2014].
+
+As with the female candidates in this study and all candidates in the MTUKI study, those who had been assessed within 18 months were more likely to have felt that they had **prepared effectively for an assessment** than those who had not been.
+
+Candidate who had been  assessed 18 months post-training were also more likely to report **higher ideal levels of self-efficacy to look after themselves and others in steep ground/crossing a river** and **navigate to a chosen point on a map in any conditions, night or day**. Candidates who feel that being able to look after themselves and others in steep ground/when crossing rivers and being able to navigate to a chosen point on a map night or day are important skills may be more likely to spend time practicing these skills. These skills are not always developed when spending time in the mountains (e.g., when walking on obvious paths) and if this higher ideal level of self-efficacy is manifested as deliberate practice candidates may feel better prepared for a Mountain Leader assessment.
+
+On average candidates who assessed were within 18 months of their training course had **lower efficacy post-training to choose appropriate routes whilst leading others in the mountains**. A possible explanation for this is that these candidates were aware that they were less confident in this skill either than other candidates on their course or than they would like to have been. This difference may have helped them to set goals for their preparation.
+
+
+```{r, eval = FALSE}
+gta18m_male %>% 
+  mutate(exp_over_18 = if_else(TrainEndExpTimeToAssess > 18, TRUE, FALSE)) %>% 
+  group_by(Assessed_18months, exp_over_18) %>% 
+  count()
+
+mts_pra %>% 
+  ggplot(aes(x = TrainToAssess, y = RegExpTimeToAssess/12,
+         colour = as.factor(Assessed_18months), shape = as.factor(SexId))) +
+  geom_point() +
+  geom_smooth(method = "lm") + 
+  geom_point() + 
+  coord_cartesian(xlim = c(0,3), ylim = c(0,3))
+
+gta18m_male %>% 
+  group_by(Assessed_18months) %>% 
+  select(starts_with("Train")) %>% 
+  summarise_all(mean)
+
+gta18m_male %>% 
+  ggplot(aes(x = ParticipatoryMotiveMean, y = PerceivedPreparation, colour = as.factor(Assessed_18months))) +
+  geom_violin()
+```
+
+
+#### General Discussion. {#mts-part-b-general-discussion}
+
+This study reports a set of variables for identifying female candidate who had been assessed 18 months post-training and another for identifying male candidates who had been assessed 18 months post-training. There are some similarities between these sets of variables and those reported in the MTUKI project, therefore it is likely that reconsiderations based on the MTUKI project will benefit MTS candidates. However, some of the variables identified as important discriminatory variables for MTS candidates were not selected in the MTUKI project. MTS may want to consider additional implications for their providers and candidates. As such, in the following section we will discuss findings that are different to the MTUKI report and their potential implications.
+
+As in the MTUKI project, how becoming a Mountain Leader fitted into candidates' lives was important. An additional aspect of this was identified as important for both female and male candidates, access to the nearest mountainous area. For females this was perceived ease of access and for males, it was perceived travel time. **Finding ways to support those candidates with less good access to the mountains may increase the likelihood of them being assessed, by making it easier for them to gain the necessary experience.** This may be in the form of specific initiatives targeted at these candidates (e.g., travel bursaries, shared transport arrangements), or may be a broader scheme with the aim of improving access to the mountains for people from these areas. 
+
+*Self-determination theory* (SDT) suggests that every motivated behaviour can be placed on a continuum, from autonomous to controlled. Intrinsic motives (e.g., a person engaging in an activity because they find it interesting and enjoyable) will be closer to the autonomous end of this continuum, whereas extrinsic motives (e.g., to gain external approval or reward) will be closer to the controlled end [@Deci1985; @Deci2000]. Candidates with higher levels of controlled forms of motivation were more likely to have been assessed.^[External motives for female candidates and introjected motives for male candidates.] Neither male nor female candidates reported high levels of intrinsic motivation and we did not measure integrated or identified motives. These findings may simply be a result of candidates registering for the Mountain Leader qualification to use if for work (e.g., so they could run Duke of Gainsborough) which would likely be seen as a controlled form of motivation.
+
+SDT would normally suggest that autonomous forms of motivation are better predictors of performance and goal persistence than controlled forms of motivation are [@Hagger2015]. Given that most candidates reported low scores for autonomous forms of motivation, using the training course as an opportunity to develop more autonomous forms of motivation may help some candidates get to an assessment. Perceived competence, motivational feedback, and perceived control have all been related to intrinsic motivation [@Vallerand2001] and it course staff should be able to positive influence each of these by coaching their candidates.
+
+Variables related to three different sets of skills were identified as important: navigation, security in steep ground, and leadership. To pass an assessment, it is important for candidates to be competent in all three of these areas. In general, the more experience one has the more confident and competent they will be. Whilst the relationship between confidence and experience may vary between individuals [@Weinberg2014; @Hardy2019b], mastery experiences^[Experiences of success, which arise from effective performance [@Bandura1977].] will enhance one's confidence [@Bandura1977]. **Providing candidates with the opportunity for mastery experiences, both on training courses and during their consolidation, will help them prepare for an assessment.**
+
+Female candidates in this study who had been assessed within 18 months of their training course rated their three of their training course staff's coaching behaviours (effective questioning, goal setting, and motivational feedback) and the provision of structure as higher than those who had not been assessed. The training course is probably the best opportunity in the pathway to influence candidates; **supporting course staff by developing their coaching skills and helping them to create an environment which supports candidates' basic psychological needs may help candidates prepare effectively for an assessment and also foster more autonomous forms of motivation.** Whilst this may be more important for female candidates, it is unlike to have a negative influence on male candidates. 
+
+If candidates leave their training course wanting to be assessed (i.e., they are motivated) and they understand what they need to do in order to get to an assessment (i.e., they have a plan) they are more likely to be assessed. Any plan for getting to assessment that a candidate creates should consider how becoming a Mountain Leader fits into the rest of their life as this is clearly very important. This should include consideration of other life goals, how much time candidates' feel they have to prepare, and also how easy it is for them to access the mountains. It is important that these considerations are made, as if a plan is unrealistic it is unlikely to be followed and failure to attain goals will have a negative impact on candidates' motivation and confidence. Similarly, it is important that candidates who experience changes in their life reconsider their plan, as the changes they have experienced may then make the plan unrealistic.
+
+Candidates' plans for consolidation should include goals that provide them with the opportunity for mastery experiences. When set in conjunction with course staff who can provide structure. These goals will offer candidates the opportunity to experience success as a result of good performance, which should increase their level of confidence to perform tasks related to passing a Mountain Leader assessment. Course staff may benefit from additional training, aimed at enhancing their coaching skills and helping them to provide a need supportive environment for their candidates.
+
+
+#### Conclusion and Potential Implications {#mts-part-b-conclusion-implications}
+
+The results presented in this report present two feature subsets, which discriminate female and male candidates who are assessed within 18 months of their training from those who are not. Whilst a number of the features selected are similar or even the same as those presented in the MTUKI report, there are a several differences. Therefore, any implication or recommendation from the MTUKI project should still be considered by MTS as they will all likely benefit MTS candidates. In addition to these, MTS may wish to consider the following:
+
+* Workshops for course staff that help develop their coaching behaviours and their ability to foster a need supportive environment. Improving course staff's coaching skills and ability to support candidates' basic psychological needs should help foster more autonomous forms of motivation.
+* Developing consolidation plans for candidates whilst considering relevant theory
+  * Plans should, include short- and long-term goals; include a combination of outcome, performance, and process goals; consider the individual situation and needs of the candidate; have the opportunity for feedback on goal progress; have review points scheduled (either by time or event); and importantly should have input from both the candidates and training course staff.
+* Identifying and supporting candidates who have difficulty accessing the mountains. This may happen at two levels:
+  * Direct support could be offered to candidates who are registered for the Mountain Leader qualification if they are identified as having difficulty accessing the mountains. If these candidates are geographically dispersed, then travel bursaries may help them to join up public transport links with more expensive forms of transport (e.g., taxis). However, if these candidates are located near one another, it might be possible to try and develop a community transport system. 
+  * If there are candidates who have difficulty accessing the mountains, it is likely that there are others in the same position as them. Finding ways to support these people may have a greater impact than just helping candidates to become Mountain Leaders.
+
+When considering any intervention, it is important to test its efficacy. Therefore, we would recommend that any intervention that MTS wishes to carry out should be tested to ensure that it provides a suitable return for the investment.
+
