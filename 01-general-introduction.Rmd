@@ -1,2 +1,312 @@
-# General Introduction
+# General Introduction {#gen-intro}
+
+```{r 01-setup, include=FALSE}
+library(plyr)
+library(tidyverse)
+library(lubridate)
+library(readxl)
+library(knitr)
+library(kableExtra)
+library(ggthemes)
+library(plotly)
+library(mousetrap)
+library(randomizr)
+library(data.table)
+library(lavaan)
+library(survival)
+library(survminer)
+library(papaja)
+library(tidytidbits)
+
+doc.type <- knitr::opts_knit$get('rmarkdown.pandoc.to')
+
+################# DATA #################
+GTA_Survival <- 
+  read_rds("chapter_3_data/GTA_Survival.rds")
+
+GTA_Survival2008 =
+  GTA_Survival %>%
+  filter(year(firstMLTrainingDate) > 2008 &
+           (firstMLTrainingDate < firstMLAssessmentDate |
+              is.na(firstMLAssessmentDate) == TRUE) &
+           (SexId == 1 | SexId == 2)) %>%
+  mutate(Gender = rename_factor(SexId, `1` = "Male", `2` = "Female"))
+
+all_qual_annual_pathway_count <- 
+  read_csv("../3 eshot/DLog_Analysis/SQL_Outputs/all_qual_annual_pathway_count.csv", na = "NULL")
+distinct_qual_annual_pathway_count <- 
+  read_csv("../3 eshot/DLog_Analysis/SQL_Outputs/distinct_qual_annual_pathway_count.csv", na = "NULL")
+distinct_qual_annual_pathway_count$AwardId[distinct_qual_annual_pathway_count$AwardId== 1] <- 526
+distinct_qual_annual_pathway_count$AwardId[distinct_qual_annual_pathway_count$AwardId== 2] <- 527
+distinct_qual_annual_pathway_count$AwardId[distinct_qual_annual_pathway_count$AwardId== 3] <- 529
+distinct_qual_annual_pathway_count$AwardId[distinct_qual_annual_pathway_count$AwardId== 5] <- 11
+distinct_qual_annual_pathway_count$AwardId[distinct_qual_annual_pathway_count$AwardId== 18] <- 528
+
+KEY_award <- 
+  read_csv("../3 eshot/DLog_analysis/SQL_Outputs/KEYS/KEY_Award.csv")
+
+
+if (is_latex_output()) {font = "serif" } else {font = "sans"}
+
+```
+
+
+## Mountain Training
+
+Mountain Training is responsible for training instructors for walking, climbing, and mountaineering in the UK and Ireland. Mountain Training is not one single entity, it is in fact the outward facing name for a group of organisations in the United Kingdom and Ireland. Mountain Training England, Cymru, Scotland, and the Mountain Training Board of Ireland are responsible for administering the Mountain Leader qualification in their respective countries. Mountain Training United Kingdom and Ireland are responsible for the generic training pathway for all qualifications. However, as this project has stakeholders within each Mountain Training organisation, we simply refer to Mountain Training as a single entity throughout the thesis.
+
+Mountain Training's qualifications all follow a similar pathway to qualification, which was originally created in 1964 for the Mountain Leadership Certificate (what is now the Mountain Leader qualification) and has not changed significantly since then. Candidates must first gain some *prerequisite experience and register for the qualification*, then they *complete a training course*, following that they are required to gain *further experience to consolidate skills*, and finally they need to *successfully complete an assessment course*, following which they will be awarded the relevant qualification.
+
+In 2018 there were `r printnum(all_qual_annual_pathway_count %>% filter(year == 2018) %>% select(pass_count), digits=0)` qualifications awarded to candidates, which suggests that this pathway is successful to some degree, as each year a large number of candidates progress from registration to qualification. However, there is a drop off in the number of candidates at each step in the pathway for all qualifications (i.e., registration to training, training to assessment, and passing an assessment). This drop off can be seen in Figure \@ref(fig:qual-pathway-drop-off-plot). 
+
+
+```{r qual-pathway-drop-off-plot, warning=FALSE, fig.height=5, fig.cap="Average number of candidates at each pathway stage 2009-2018.  LLA = Lowland Leader Award, CWI = Climbing Wall Instructor, ML = Mountain Leader - Summer, RCI = Rock Climbing Instructor, MLW = Mountain Leader - Winter, MCI = Mountaineering and Climbing Instructor."}
+distinct_qual_annual_pathway_count %>%
+  left_join(KEY_award %>% select(Id, Label, CategoryId),
+            by = c("AwardId" = "Id")) %>%
+  filter(between(year, 2009, 2018) &
+           Label %in% c("LLA", "MLS", "MLW", "CWI", "RCI", "MCI")) %>%
+  mutate(Label = factor(Label, c("LLA", "CWI", "MLS", "RCI", "MLW", "MCI")),
+         Label = rename_factor(Label, "MLS" = "ML")) %>%
+  group_by(Label) %>%
+  summarise(
+    Registered = mean(reg_count),
+    Trained = mean(train_count),
+    Assessed = mean(first_assess_count),
+    Qualified = mean(first_time_pass_count)
+    #reassess = mean(reassessment_count),
+    #reassess_pass = mean(reassessment_pass_count)
+  ) %>%
+  melt(id = c("Label")) %>%
+  ggplot(aes(x = variable, y = value, fill = variable)) +
+  geom_col() +
+  #geom_text(aes(label = value)) +
+  guides(fill = FALSE) +
+  facet_wrap(~ Label, ncol = 2, scales = "free_x") +
+  labs(x = "Pathway stage", y = "Count") +
+  coord_flip() +
+  theme_few(base_size = 10, base_family = font) +
+  theme(plot.margin = margin(l = 15, r = 5, t = 10, b = 5, unit = "pt"))
+```
+
+
+It is estimated that Mountain Training qualification holders impact over 1.5 million people each year [@MTE2019] with the number likely to increase in the coming years as the "The overall growth in numbers [of active adults] continue [*sic*] to be driven by strong upward trends in walking and adventure sports (a category which includes hill and mountain walking, climbing and orienteering)" [@SportEngland2020, p 14]. Therefore, it is very important to Mountain Training that they understand why people do not complete their qualifications.
+
+To begin to understand the factors influencing the completion of Mountain Training qualifications, this thesis focuses on the Mountain Leader qualification and does so for four main reasons: (a) it is the largest qualification as measured by number of candidates; (b) it has one of the largest drop-off in candidates progressing from training to assessment, the drop-off at this point is of particular interest as candidates have engaged with the Mountain Training delivery system; (c) it is the highest entry level qualification; and (d) it is the oldest qualification and has had few major changes to it recently.
+
+
+## The Mountain Leader Qualification
+
+The Mountain Leader qualification is for "people who want to lead groups in the mountains, hills and moorlands of the UK and Ireland" [@MountainTrainingUK2015a, p 5]. Whilst the Mountain Leader qualification is UK based and aimed at those who wish to lead others in the UK, training programmes in other countries are based on the success of the Mountain Leader qualification [@UIAA2015]. To qualify as a Mountain Leader, candidates must: (a) *register for the qualification* and gain a minimum of 20 Quality Mountain Days (QMDs),^[There is not a simple definition for a QMD, however it is expected that a QMD will "make a positive contribution towards a person’s development and maturity as an all round mountaineer" [@MountainTraining2019].] (b) complete a six day *training course*,  (c) gain a minimum of 20 additional QMDs as *further experience to consolidate skills (to give a minimum of 40 QMDs in total)*, and (d) successfully complete a five day *assessment course*. Therefore, to become a Mountain Leader, one must spend a minimum of 51 days in the mountains. Most successful candidates will have more experience than this, whether that is additional QMDs, experience of mountain walking that does not meet the QMD criteria, or other mountaineering experience. Becoming a Mountain Leader requires candidates to commit a significant amount of time and money in order for them to qualify as Mountain Leaders.
+
+Between 2009 and 2018 an average of 2,278 candidates registered for the Mountain Leader qualification each year, but only 559 qualified a year. When looking more closely at the numbers of candidates who did qualify it became clear that there are two main components to qualifying: (a) getting to an assessment and (b) passing an assessment. Interestingly, most candidates who got to an assessment passed their first assessment (Figure \@ref(fig:PassRate)), but most candidates did not get to an assessment (Figure \@ref(fig:survival-sex)). It is also noteworthy that, as shown in Figure \@ref(fig:survival-sex), becoming a Mountain Leader is not a quick process (period between training and assessment, $M =$ `r GTA_Survival %>% filter(year(firstMLTrainingDate) > 2008 & Assessed == 1) %>% .$TimeToAssessment %>% mean() %>% printnum()` years, $SD =$ `r GTA_Survival %>% filter(year(firstMLTrainingDate) > 2008 & Assessed == 1) %>%  .$TimeToAssessment %>% sd() %>% printnum()`).
+
+To examine this difference for the Mountain Leader qualification in more detail we carried out a *survival analysis*, where rather than looking at summary statistics averaged over a number of years, we look at the probability of an individual candidate having been assessed over time following their training course. As can be seen in Figure \@ref(fig:survival-sex) at any given point in time, fewer female candidates get to an assessment than male candidates. The percentage likelihood of a candidate having been assessed five years following their training course is ~32% and ~40% respectively for female and male candidates, after this point the rate of candidates being assessed decreases for both genders Over half of candidates who did reach assessment did that within 18 months of their training courses, but it is not unusual to take longer, and some candidates do go on to be assessed over five years after their training course.
+
+We also examined the pass rates for the Mountain Leader qualification. The pass rate is increasing over time and there have been changes in pass rates over the last 10 years for female and male candidates (Figure \@ref(fig:PassRate)). When looking at pass rates for the last 10 years, women were less likely to pass their first assessment, but the pass rate was increasing faster for them than it was for men. However, when looking at data from the last five years, neither the effect of gender on the pass rate or rate of change of the pass rate are statistically significant.
+
+
+## Thesis Rationale
+
+Mountain Training would like to understand why more people do not complete the Mountain Leader qualification and identify if there are any changes to the pathway that they can make in order to better support their candidates. It is unlikely that there is a single factor that would be a “silver bullet” to improve completion rates. Instead there are likely a myriad of factors which influence completion at various stages of the pathway. Some of these factors will be generic to all candidates, whilst some may be specific to individual (groups of) candidates.
+
+Prior to the work reported in this thesis, there has been no empirical investigation of the factors that influence the completion rate for the Mountain Leader qualification. This thesis is an important first step for Mountain Training towards making evidence based change to their training pathway to improve the completion rates of their qualifications.
+
+```{r}
+cap <- paste0("Pass rates for female and male candidates assessed since 2000 ", "($N = ", printnum(as.numeric(nrow(GTA_Survival %>%
+  filter(Assessed == 1 & year(firstMLAssessmentDate) > 1999 & 
+           (SexId == 1 | SexId == 2)))), digits = 0), "$).")
+```
+
+
+```{r PassRate, fig.cap=cap, fig.height=3}
+GTA_Survival %>%
+  filter(Assessed == 1 & year(firstMLAssessmentDate) > 1999 & 
+           (SexId == 1 | SexId == 2)) %>% 
+  mutate(SexId = rename_factor(SexId, `1` = "male", `2` = "female")) -> df
+
+df %>%
+  mutate(
+    Gender =
+      rename_factor(
+        SexId,
+        "male" = 
+          paste("Male \nn =",
+                printnum(
+                  as.numeric(nrow(filter(df, SexId == "male"))), digits = 0)),
+        "female" = 
+          paste("Female \nn =",
+                printnum(
+                  as.numeric(nrow(filter(df, SexId == "female"))), digits = 0))
+      ),
+    firstMLAssessmentDate =
+      round_date(firstMLAssessmentDate, unit = "week")
+  ) %>%
+  ggplot(aes(x = firstMLAssessmentDate, 
+             y = 100 * FirstTimePass, 
+             colour = Gender, fill = Gender)) +
+  geom_smooth(method = "loess") +
+  coord_cartesian(xlim = c(ymd(20000101), ymd(20200101))) +
+  labs(x = "Assessment Year",
+       y = "First Time Pass Rate %") +
+  theme_few(base_size = 10, base_family = font) +
+  # theme(legend.position = "bottom")
+  theme(legend.position = c(.5, .85), legend.direction = "horizontal")
+```
+
+
+```{r}
+cap <- 
+  paste0("Survival rates for female and male candidates post-training. Candidates trained 2009-2019 ($N = ", 
+         printnum(as.numeric(filter(GTA_Survival, year(firstMLTrainingDate) > 2008) %>% nrow()), digits = 0), 
+         "$). Green dotted and dashed line represents median time to assessment and blue dashed line represents mean time to assessment.")
+```
+
+
+```{r survival-sex, warning=FALSE, fig.cap=cap, fig.height=3}
+GTA_Survival2008 =
+  GTA_Survival %>%
+  filter(year(firstMLTrainingDate) > 2008 &
+           (firstMLTrainingDate < firstMLAssessmentDate |
+              is.na(firstMLAssessmentDate) == TRUE) &
+           (SexId == 1 | SexId == 2)) %>%
+  mutate(Gender = rename_factor(SexId, `1` = "Male", `2` = "Female"))
+
+surv_object <-
+  Surv(time = GTA_Survival2008$TimeToAssessment,
+       event = GTA_Survival2008$Assessed)
+
+fit1 <-
+  survfit(surv_object ~ Gender, GTA_Survival2008)
+
+ggsurvplot(
+  fit1, 
+  # data = GTA_Survival2008,
+  fun = "event",
+  surv.scale = "percent",
+  pval = FALSE,
+  # pval.coord = c(4, .05),
+  # xlim = c(0, 5),
+  # ylim = c(0,.45),
+  break.x.by = 1,
+  break.y.by = .05,
+  xlab = "Time after training in years",
+  ylab = "% of candidates assessed",
+  censor = FALSE,
+  conf.int = TRUE,
+  ggtheme = theme_few(base_size = 10,
+                      base_family = font),
+  tables.theme = 
+    theme_survminer(font.main = 10, font.x = 10,
+                    font.y = 10, base_family = font,
+                    base_size = 10)
+) -> p
+
+p$plot + 
+  theme(legend.position = c(.8,.1), legend.direction = "horizontal") +
+  rremove("legend.title") +
+  geom_vline(xintercept = (GTA_Survival2008 %>% filter(Assessed == 1) %>%  .$TimeToAssessment %>% mean()), lty = 2, colour = "blue") +
+  geom_vline(xintercept = (GTA_Survival2008 %>% filter(Assessed == 1) %>%  .$TimeToAssessment %>% median()), lty = 4, colour = "green3")
+  
+```
+
+
+## Terminology 
+
+It is important that we provide a note on terminology used in this thesis. Historically, and somewhat incorrectly, the terms \textit{sex} and \textit{gender} have been used somewhat interchangeably. Current guidelines from the American Psychological Association (\citeyear[][]{APA2020}) define gender as, "the attitudes, feelings, and behaviors that a given culture associates with a person’s biological sex" \citep[][p 12]{APA2012}; sex as, "biological sex assignment;" and \textit{gender identity} as "a component of gender that describes a person’s psychological sense of their gender" \citep[][Section 5.5]{APA2020}. 
+
+Considering the definitions of sex and gender presented above, it would be more appropriate to use terms such as ``man" and ``woman" than ``female" and ``male" when discussing gender differences. However, in the studies reported in this thesis, participants' gender was retrieved from Mountain Training's Candidate Management System (CMS), where it is stored as female, gender neutral, and male. To avoid making presumptions about participants gender identities we have used the terms female and male throughout this chapter. No data were collected from gender neutral candidates, which may be unsurprising given that 0.03\% of all Mountain Training Candidates report being gender neutral \citep{MountainTrainingUK2019a}. Further, following the same principal, when discussing previous research, we have used terminology consistent with that of the original authors.
+
+
+## Thesis Structure
+
+This thesis does not follow the traditional format. A substantial body of work is reported in appendices and empirical chapters have been written in a way that aids their preparation for publication. The reasons for this are twofold. Firstly, a substantial amount of work was required to develop the data collection tool needed for the work reported in Chapter \@ref(ml-pra). This work was foundational in the PhD process, in both developing the researcher and enabling completion of five of the main studies. However, including it in the main body of the thesis would distract the reader and likely detract from the "story” presented in the thesis. Therefore, this work is reported in an appendix so that the reader can engage with it having read the main body of the thesis, which reports on the work answering the research question/s. Secondly, this thesis aims to satisfy the dual objective of writing a thesis and preparing the research for publication. A consequence of writing this thesis with publication in mind is the self-referential terminology used in the empirical chapters. Accordingly, empirical chapters are written in first-person plural, consistent with conventions in reporting co-authored research, and the remaining chapters are written in first-person singular.
+
+The remainder of this chapter introduces relevant theory that is useful for understanding the results of the empirical chapters that follow. Following this chapter are three empirical chapters that report the results of six studies.
+Chapter \@ref(ml-qualitative) presents a qualitative inquiry that aimed to explore organisational managers' understanding of factors that influence completion of the Mountain Leader qualification (Study 1). 
+Chapter \@ref(ml-pra) comprises three studies, each of which use state of the art pattern recognition techniques to identify key discriminatory features that provide insight into the factors influencing different stages of the qualification pathway (Studies 2-4). 
+Chapter \@ref(self-efficacy-qmds) explores the main and interactive effects of gender and experience on self-efficacy. In this chapter I present two studies (Studies 5 and 6). Study 5 presents the development and validation of a measure that used to assess Mountain Leader related self-efficacy. Study 6 presents the findings of a study examining relationships between gender and experience on self-efficacy.
+Chapter \@ref(general-discussion) is a discussion of the three empirical chapters, identifying consistent themes and their implications as well as identifying potential future directions for research.
+Chapter\@ref(impact-activities) then describes the dissemination of this research to Mountain Training.
+
+
+
+## Relevant Theory
+
+Across the empirical chapters of this thesis, a wide range of factors were considered, therefore we provide an overview of relevant theory below, but discuss them in more detail within the chapters that they are relevant to.
+It is beyond the scope of this thesis to provide a comprehensive review of all relevant literature, however, below are brief descriptions of theories which provide useful frameworks for discussing the results of the empirical chapters. Whilst these theories are useful for understanding the relationships between various factors, this thesis is not a test of any specific theory.
+
+
+### Pathways to Expertise
+
+The development of expertise and the pathways to it are of interest in a variety of domains. Historically, most studies have examined the impacts of specific factors on the completion of a training pathway [e.g., delays in completing PhDs; @VandeSchoot2013a]. However, these single-variable approaches fail to acknowledge that there may be vast differences between individuals in their pathways to expertise. As such, a growing number of researchers now recommend that multi-disciplinary approaches should be adopted for identifying the potentially complex interactions that influence talent/expertise development [e.g., @Abernethy2013; @Gullich2019; @Johnston2018; @Pearson2006; @Rees2016; @Schorer2013].
+
+Developing expertise is likely to be the result of complex interactions between a variety of developmental factors [e.g., practice and training, personality traits, motivation, social support; @Baker2013; @Gagne2004; @Johnston2018]. Further, different factors will be more salient at different points of development pathways [@Rees2016]. Based on these principles, a number of projects in the elite sport domain have recently begun to explore the most important factors in the development of athletes in elite pathways [e.g., @Gullich2019; @Hardy2017; @Jones2019a; @Jones2019b; @Jones2020; @Rees2016]. These projects have used a mixed-methods approach, collecting both rich qualitative data from athletes and making use of state-of-the-art machine learning techniques to identify sets of variables, whose main-effects and interactive-effects were able to discriminate between athletes at different performance levels. The methodology for chapters \@ref(ml-qualitative) and \@ref(ml-pra) is based on these studies, however, we have adapted it to allow us to collect data from a greater number of participants. To do so, we used the results of Study 1 to help us develop a quantitative survey tool, so that we could collect, and subsequently analyse, data from more candidates than we would be able to if we adopted the interview based approach of those studies.
+
+
+### Self-Determination Theory {#gen-intro-sdt}
+
+Self-determination theory [@Deci1985b; @Deci2000; @Ryan2017] is a theory of human behaviour with six mini-theories that sit within it: *cognitive evaluation theory* [@Deci1975; @Deci1980], *organismic integration theory* [@Deci1985b; @Ryan1989], *causality orientations theory* [@Deci1985a], *basic psychological needs theory* [@Ryan2000a], *goal contents theory* [@Kasser1996; @Niemiec2009], and *relationship motivation theory* [@Deci2014; @Ryan2017]. Cognitive evaluation theory, organismic integration theory, and basic psychological needs theory are particularly relevant to the present study and are described below.
+
+
+#### Basic Psychological Needs Theory.
+
+*Basic psychological needs theory* is central to self-determination theory and each of these mini-theories [@Ryan2002]. Basic psychological needs theory posits three basic psychological needs: *autonomy*, feelings of volition, choice, and internal control; *competence*, the feeling of mastery and effectiveness; and *relatedness*, feeling connected and involved with others. Self-determination theorists suggest that the satisfaction of all three of these needs supports well-being and "high-quality" motivation [@Ryan2019] and that need satisfaction is essential for optimal-functioning, good mental health, and well-being  [@Chen2015; @Deci2000].
+
+
+#### Organismic Integration Theory.
+
+*Organismic integration theory* is concerned with extrinsic motivation and activities where the outcome is separable from the behaviour [@Ryan1985]. Self-determination theory traditionally suggests that every behaviour can be placed on a continuum, the relative autonomy continuum,  with autonomous or self-determined motives on one side and controlled or non-self-determined motives on the other, and that people will therefore vary in both levels of and quality of motivation [@Deci1985b; @Sheldon2019].^[There is some evidence that the various types of motivation should not be placed on a continuum but may in fact be better considered as contiguous [@Chemolli2014]. That notwithstanding, it is still considered that the different types of motivation may have different outcomes.]
+
+Organismic integration theory suggests that there are four types of extrinsic motive---despite suggesting that they form a continuum. Two of these are considered controlled forms of extrinsic motive and the other two are considered autonomous forms of extrinsic motive. The most controlled form of extrinsic motivation proposed is *external regulation*, where an individual is motivated by external pressures or reward. Whist external regulation can be a powerful form of motivation, it is not typically thought of as long lasting [@Ryan2000c]. The next form of extrinsic motive is *introjected regulation*, where behaviour is motivated by internally controlling pressures (e.g., ego-involvement, contingent self-worth). This form of motivation may also be powerful, but may be weakened in the face of setbacks and behaviours that result from introjected regulation are unlikely to be stable [@Deci1995; @Ryan2019].
+
+Considering the more autonomous forms of extrinsic motivation, *identified regulation* is when an individual consciously values their engagement in the activity and accepts the behaviour as personally important. Finally, the most autonomous form of extrinsic motivation proposed is *integrated regulation*, when the behaviour is congruent with personally endorsed values. Integrated regulation shares features with intrinsic motivation, however, it is considered an extrinsic form of motivation as the outcome is separable from the behaviour [@Ryan2002]. Self-determination theory would normally suggest that autonomous forms of motivation are more sustainable and better predictors of performance and goal persistence than controlled forms of motivation are [@Hagger2015; @Pelletier2001; @Ryan2019].
+
+Organismic integration theory suggests that social factors that support the basic psychological needs foster the development of more autonomous forms of extrinsic motivation, however it does not suggest that the relative autonomy continuum is a developmental continuum [@Deci1991; @Ryan1995; @Ryan2002]. Autonomy support, the provision of structure, and involvement have been identified as need supportive behaviours, which support the development of autonomous regulation [@Ryan2016; @Markland2010].
+
+
+#### Cognitive Evaluation Theory.
+
+*Cognitive evaluation theory* is concerned with the relationships between social factors (e.g., rewards, motivational strategies)---which may be autonomy supportive, controlling or amotivating---and motivation [@Deci1975; @Deci1980]. Cognitive evaluation theory suggests that competence and autonomy will foster intrinsic motivation. Social factors that are perceived as *controlling* will lead to an external *perceived locus of causality*, frustrating individual's need for autonomy, thus undermining intrinsic motivation; where as social factors that are perceived as *informational* support perceived competence, thus enhancing intrinsic motivation [@Ryan2019].
+
+
+#### Hierarchical Models of Motivation.
+
+Researchers have suggested that motivation is a complex construct and operates in a hierarchical fashion on at least three different levels [@Ingledew2009; @Vallerand1997; @Vallerand2002]. These levels are: the global/dispositional, (why an individual generally engages in activities), contextual/participatory (the contents of motives within a particular domain or what an individual is trying to achieve or avoid), and situational/regulatory motives [the perceived locus of causality of the behavioural goals---where the motive sits on the relative autonomy continuum; @Deci2000; @Ingledew2009; @Vallerand1997; @Vallerand2002]. Whilst at the global level, motivation is considered to be an individual difference and therefore results in general consequences, at the participatory level, the context will influence motivation and may be manipulated more easily [@Vallerand2002].
+
+The results from the qualitative study suggested that motives for becoming a Mountain Leader existed on at least two of these levels, the participatory and regulatory. Therefore, in this study we measured two levels of motivation proposed by self-determination theorists: participatory motives and regulatory motives the perceived loci of causality of behavioural goals. In the [qualitative study](#qual-part-motives), all participants suggested that candidates (both female and male) with extrinsic participatory motives were more likely to be assessed than those who had intrinsic participatory motives.
+
+
+### Self-Discrepancy Theory.
+
+Self-discrepancy theory [@Higgins1987] considers three types of self: the actual-self is the way in which an individual perceives themselves, the ideal-self represents their hopes and aspirations, and the ought-self represents their obligations and responsibilities. The theory posits that individuals will be motivated to reduce discrepancies between their actual-self and their different self-guides (ideal and ought) and that different discrepancies will result in specific types of emotions: actual/ideal discrepancies will result in dejection-related emotions (e.g., sadness, disappointment, dissatisfaction) and actual/ought discrepancies will results in agitation-related emotions (e.g., guilt, worry, tension).
+
+
+### Self-Efficacy Theory. {#gen-intro-self-efficacy}
+
+Self-efficacy refers to an individual's confidence in their ability to carry out a specific task at a given time. Self-efficacy theory suggests that if an individual possesses the necessary skills and is sufficiently motivated, then their level of self-efficacy will be the primary determinant of their performance, how much effort they will put in, and how long they will persist---particularly in the face of adversity [@Bandura1977; @Bandura1982; @Bandura1997]. @Bandura1977 suggested that an individual's efficacy beliefs could vary in level, strength, and generality.
+
+Meta-analyses have found evidence supporting the relationships suggested by Bandura between self-efficacy and performance and persistence across several domains, for example in sports [@Moritz2000], in work contexts [@Stajkovic1998], and academic environments [@Multon1991]. Several experimental lab studies have that manipulated participants' level of self-efficacy found that higher levels of self-efficacy are related to increased task persistence [@Hutchinson2008; @Tenenbaum2001; @Weinberg1979; @Weinberg1980; @Weinberg1981]. However, a meta-analysis of within-person studies across various domains found evidence that supported the hypothesised relationship between previous experiences and self-efficacy, but suggested that the relationships between self-efficacy and performance in between-person studies may be a result of those with higher levels of self-efficacy having been successful in the past [@Sitzmann2013].
+
+@Bandura1982 suggested that an individual's perception of self-efficacy will be based on four main sources of information:^[Other researchers [e.g., @Maddux1995] have added additional sources, however, most research considers the four sources proposed by Bandura.] previous performance accomplishments, vicarious experience/modelling, social/verbal persuasion, and physiological/emotional states. 
+
+*Performance accomplishments* will be the strongest source of information as it is based on one's mastery experiences; successful experiences will increase perceived self-efficacy and repeated failures will decrease it, especially if failure occurs early and are not attributed to a lack of effort or external circumstances. Previous efficacy beliefs will influence how an individual integrates an experience; experiences that are congruent with previous efficacy beliefs will be integrated more readily than those which are incongruent [@Bandura1997; @Cervone1990; @Chase2001]. @Bandura1997 also suggested that weak efficacy beliefs will be more easily reduced by disconfirming events. Research on self-efficacy for future physical activity---across a range of age groups---supports the hypothesis that that self-efficacy beliefs for future participation are influenced by previous performance [e.g., @Dawson2000; @McAuley2006; @Miller2002].
+
+In addition to gleaning information from their own experiences, individual's self-efficacy will be informed by *vicarious experiences* also known as *modelling*; seeing other people, similar to oneself, successfully carry out a task can increase an individual's level of self-efficacy [@Bandura1982; @Lirgg1991], and seeing them fail may lower their efficacy expectations [@Brown1978]. Vicarious experiences provide less information about efficacy, but are still important [@McCullagh2001] and may be an especially important source of information to those who lack experience and therefore, their own mastery experience [@Weinberg2014]. @Bandura1986 suggested that the greater the similarity between the individual and the model, the greater the potential for the model to influence the individual's efficacy beliefs. However, empirical research had yielded equivocal findings when testing this hypothesis [see @Samson2011].
+
+*Social/verbal persuasion* are techniques used by the self and others, usually with the aim of improving confidence and can lead to improved performance assuming that the individual's resultant efficacy beliefs are realistic [@Bandura1982]. Social/verbal persuasion can come in different forms including, feedback, social support, goal setting, and self-talk [@Samson2011].
+
+*Physiological/emotional states* both influence efficacy beliefs [@Bandura1977; @Bandura1982]. If an individual associates physiological arousal with poor performance their efficacy beliefs will be reduced, but if there is a positive association with that physiological arousal then their self-efficacy will be enhanced [@Hauck2008; @Jones1995; @Jones1992]. There is also evidence that positive emotional states are more likely to lead to positive efficacy beliefs than negative emotional states are [@Maddux1995; @Martin2002].
+
+
+### Theory of Planned Behaviour
+
+The theory of planned behaviour [@Ajzen1991; @Ajzen1986] is a model for predicting behaviour and builds on the theory of reasoned action [@Ajzen1980]. The theory of reasoned action suggests that intentions are the best predictor of future behaviour. It suggests than an individual's intentions are the result of their attitudes towards the behaviours and the *subjective norm* surrounding that behaviour. Subjective norms are formed based on an individual's belief about other's views and the motivation of the individual to comply with those views. The theory of planned behaviour extends the theory of reasoned action by including *perceived behavioural control* as an influence on both the intention and the behaviour. An individual's perceived behavioural control is extent to which they feel that they have the resources and opportunities to control the behaviour.
+
+Meta-analyses have found evidence that the constructs that make up the theory of planned behaviour can predict future behaviour [@Armitage2001; @Hagger2002]. However, the theory of planned behaviour is not without its critics, some of whom suggest that the theory is too limited in the constructs that it includes [cf. @Sniehotta2014].
+
+
+### Integrated Models
+
+All of the theories introduced above have substantial bodies of research behind them, however several researchers have sought to better explain phenomena of interest by integrating more than one of these theories into new models [e.g., @Fishbein2000; @Hagger2009; @Hagger2014; @Hamilton2017]. The *integrated behaviour change model* [@Hagger2009; @Hagger2014; @Hamilton2017] suggests that motivation will cause attitudes, subjective norms, and perceived behavioural control in the theory of planned behaviour. In a model including various individual difference variables, @Fishbein2000 replaced the perceived behavioural control construct of the theory of planned behaviour with self-efficacy [n.b., @Ajzen1991 suggested that perceived behavioural control is similar to the construct of *self-efficacy*] and included skills and environmental constraints as addition caused of behaviour.
 
