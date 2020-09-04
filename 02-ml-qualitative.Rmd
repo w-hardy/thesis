@@ -1,380 +1,574 @@
-# Qualitative
+# Study 1: Qualitative {#ml-qualitative}
+
+```{r setup-01, include=FALSE}
+library(tidyverse)
+library(knitr)
+library(kableExtra)
+```
+
 
 ## Introduction
+
+```{r interview-guide-factors}
+interview_factors <- 
+  readxl::read_xlsx("chapter_2_data/factor_expectancy_value.xlsx", 
+                    sheet = "Sheet2")
+```
+
+There has been no research into the factors influencing the completion rate of the Mountain Leader qualification, or indeed any other element of Mountain Training qualifications, and as discussed in Chapter \@ref(gen-intro) the development of expertise the results of complex interactions between variables from a variety of disciplines. Consistent with contemporary recommendations for conducting expertise development research [e.g., @Gullich2019; @Jones2019a; @Rees2016], this study considered a wide range of variables, which could influence the completion rate of the Mountain Leader qualification. However, given the lack of previous research that considers the Mountain Leader qualification, it is likely that a "bottom-up" (inductive) approach will provide insights that a deductive approach may not fully explore.
+
+The present study aimed to develop an understanding of the multidimensional influences on the completion rate of the Mountain Leader qualification and identify the particularly important factors. Consequently, we drew from  several different elements of psychology literature when trying to identify factors that may influence the completion rate of the Mountain Leader qualification and identified `r nrow(interview_factors)` potentially relevant factors (see Table \@ref(tab:expectancy-value-table)). It is not practical to provide a comprehensive review of all these factors in this thesis, however, many of them are introduced in Chapter \@ref(gen-intro). Further, additional detail about these factors is included in the findings section of this study when relevant.
+
+### Refinement of the Research Questions
+
+Given the aim of this study was to understand the factors that were an important influence on the overall completion rate of the Mountain Leader qualification, we felt that in-depth qualitative interviews with *organisational managers* (i.e., the Mountain Training staff responsible for the qualification), who had an overview of the Mountain Leader qualification across the UK, would be the preferred method. It was clear that the organisational managers would have a much better insight into some factors than others (e.g., candidates' age vs. candidates' family values) and we felt that it was impractical to include all `r nrow(interview_factors)` factors in the interviews. Therefore, we engaged in an expectancy x utility analysis to identify the factors we felt would be most important to include in the interviews. WH rated the factors initially, with the ease of collecting meaningful data rated on a three-point scale, from *difficult* (1) to *easy* (3), and the likely importance of each factor on the completion rate also rated on a three-point scale, from *low* (1) to *high* (3). The initial ratings were then discussed with RR and discussed any disagreements until a consensus was found. We then calculated the product of these two ratings to create a single score for the expected likelihood of collecting useful data for each variable (see Table \@ref(tab:expectancy-value-table)). This score was then used to rank variables, with factors scoring less than six being removed. The remaining `r sum(!is.na(interview_factors$interview))` factors were then used to develop a guide for the interviews.
+
+It is important to note that we considered utility rather than perceived importance in this exercise. For instance, mental toughness, which was defined by @Bell2013 as "the ability to achieve personal goals in the face of pressure from a wide range of different stressors" was not included in the interview guide as we felt that it would be somewhat tautological to ask a question along the lines of "are people who are good at completing things good at completing things?" The factors retained, were split into five sections: (a) candidate background, (b) candidate career history and social influence, (c) candidate personal characteristics, (d) candidate experience and ability, and (e) candidate support. The broad research questions considered within each section of the interview are described below. In addition, the full interview guide is presented in Appendix \@ref(appendix-interview-guide).
+
+\setstretch{1.0}
+```{r expectancy-value-table}
+interview_factors %>% 
+  arrange(sort_order, desc(expectancy_value), desc(collection_ease), 
+          desc(utility)) %>% 
+  select(factor, collection_ease, utility, expectancy_value) %>% 
+  kable(caption = "Expectancy value exercise.",
+        booktabs = TRUE,
+        col.names = c("Factor", "Ease of collection", "Expected utility", 
+                      "Expectancy value")) %>% 
+  kable_styling(font_size = 10) %>% 
+  group_rows("Candidate background", 1, 7) %>% 
+  group_rows("Candidate career history and social influence", 8, 21) %>% 
+  group_rows("Candidate personal characteristics", 22, 36) %>% 
+  group_rows("Candidate experience and ability", 37, 43) %>% 
+  group_rows("Candidate support", 44, 52)
+
+```
+\setstretch{1.5}
+
+
+#### Candidate Background.
+
+Does a candidate's socioeconomic background influence their progression through the Mountain Leader qualification? How does a candidates age influence their progression? Are there any professions that help or hinder candidates' progression?
+
+
+#### Candidate Career History and Social Influence.
+
+Why do people want to become Mountain Leaders? Do these reasons influence their progression? How long do candidates think it will take to become Mountain Leaders? Do candidates see becoming a Mountain Leader as a standalone profession or do they intend to use it alongside another job? How do candidates who want to continue to higher-level qualifications differ to those who only want to be Mountain Leaders? Do candidates have role models? What influence do role models have on candidates?
+
+
+#### Candidate Personal Characteristics.
+
+What attitudes do candidates have towards the Mountain Leader qualification? How confident are candidates that they can become Mountain Leaders? What increases/decreases this confidence? Do candidates want to be as good as they can be or just good enough? What sort of disconfirmatory experiences do candidates have? How do these experiences affect different candidates? How do candidates cope with setbacks?
+
+
+#### Candidate Experience and Ability.
+
+How does prior experience influence performance at an assessment? What types of experience help/hinder candidates becoming Mountain Leaders? What causes candidates with lots of experience to perform poorly at an assessment? What causes candidates with little experience to perform well at an assessment? How do candidates' view gaining experience? How does a candidate's level of experience affect them on a training course?
+
+
+#### Candidate Support.
+
+what do the course staff think about the Mountain Leader qualification? How does a course debrief influence candidates? Do course staff help candidates plan their progression? What are the course staff's coaching and leadership behaviours like? How prevalent is mentoring? What is good/bad about mentoring? Which types of support help/hinder candidates' progression? Where do candidates get support from? Are candidates supported well enough? Which candidates need more/less support?
 
 
 ## Methods
 
-### Philosophical orientation
+### Philosophical Orientation
 
-Who knows!
+We adopted a relativist epistemology for this study, as we believe that different realities will exist for individuals on different "sides" of the Mountain Leader qualification [e.g., candidates and course staff; @Sparkes2009]. A relativist epistemology is incongruent with the *parallel perspective* [@Sparkes1998], where a researcher would seek to establish validity in a similar way to that of a quantitative study. Instead, we present the reader with evidence of the credibility of this research, allowing them to judge the rigour of the study for themselves [@Sparkes2009].
+
 
 ### Participants
-* A purposive, criterion sampling approach 
-  * What were my criteria?
-* All white and >38 – is this important? Something about their experiences and viewpoints being similar/lacking the view of a younger/newer director
-* Sampling criteria – purposive, gatekeepers. Became clear that I needed to interview some course staff as they have more interactions with candidates
-* After gaining ethical approval from Bangor University’s School of Sport, Health, and Exercise Sciences ethics committee, and individual informed consent, eight individuals participated in this study.
-* Initial interviews carried out with five members of staff from Mountain Training, three of whom were the executive officers for: Mountain Training Cymru, England, and Scotland, the three main national training boards (four men and one woman, Mage = 47.19, SD = 6.60, MML courses = 41.6, SD = 29.86). Having completed these interviews it became clear that it would be important to interview course staff who had a greater knowledge of candidates and their experiences than the Mountain Training staff had. Therefore, we interviewed two high volume course providers and a course director who had worked for eleven different providers over 14 years (two men and one woman, Mage = 55.30, SD = 5.18, MML courses = 284.00, SD = 214.68).
 
-> * In line with University ethical guidelines, interviews commenced only when the participants had provided informed consent either through written or recorded word depending on level of visual impairment. This data collection process was chosen because when done well, interviewing can generate rich, retrospective, and thick descriptions of human life. Thus, interviews are a useful source of knowledge about personal and social aspects of lives. An interview guide was used to help facilitate discussion. Questions included in ’the guide were, ‘Why did you decide to be physically active?, ’‘Why have you not been physically active , ‘What are some barriers to your physical activity? , ‘How does being active’ impact on your wellbeing? and ‘How have you remained active? Clarification, elaboration, and detail orientated probes, that is, curiosity-driven follow-up questions were used throughout to elicit richer data.20 Participants were interviewed in a location of their choosing. This was primarily in their homes and occasionally in a local coffee shop or quiet meeting place. Interviews were digitally recorded, and all data were subsequently transcribed verbatim. Data were analysed using an inductive thematic analysis. This involved the systematic organisation, description, and interpretation of the key patterns (themes) within the data set. In terms of validity, the study was guided by a list of criteria’ as assembled in Tracy's review of what constitutes ‘excellent qualitative work (p. 837). This included: the worthiness of the topic; the significant contribution of the work; rich rigor, that is, developing a sample appropriate for the purpose of the study through the processes noted above and generating data that could provide for meaningful and significant claims; the coherence of the research, which refers to how well the study’ conforms to the purpose, methods, and results as judged by an independent researcher and readers; ‘member checks’ by verbally sharing interpretations of data and inviting participants to reflect on these interpretations. Finally, an audit trail was used that involved a researcher independently scrutinised ethics, data collection and analysis. To that end, the researcher doing the majority of the data collection (M. Griffin) practiced conscious reflexivity, kept a reflexive journal and consulted with critical friends throughout the process. The project also included an independent advisory board that scrutinised ethics, the collection of data, analytic ideas, and practical recommendations that followed. The board comprised of five researchers who have published extensively on ageing, disability or physical activity, three representatives of relevant non-profit organisations, and two older adults with visual impairment.(Phoenix, Griffin, & Smith, 2015)
+After gaining ethical approval from Bangor University’s School of Sport, Health, and Exercise Sciences ethics committee, and individual informed consent, seven individuals participated in this study. Initial interviews carried out with four members of staff from Mountain Training including staff from Mountain Training Cymru, England, and Scotland, the three main national training boards and Mountain Training United Kingdom and Ireland (three men and one woman; age, $M =$ 47.19 years, $SD =$ 6.60; number of Mountain Leader courses worked, $M =$ 41.60 courses, $SD =$ 29.86, $range =$ 13-78). 
+
+Having completed these interviews it became clear that it would be important to interview course staff who had a greater knowledge of candidates and their experiences than the Mountain Training staff had. Therefore, we interviewed two high volume course providers and a course director who had worked for eleven different providers over 14 years (two men and one woman; age, $M =$ 55.30 years, $SD =$ 5.18; number of Mountain Leader courses worked, $M =$ 284.00 courses, $SD =$ 214.68, $range =$ 66-576). We used a purposive sampling strategy in this study [@Patton2002; @Sparkes2014]. The individuals who participated in the study were recruited based on their knowledge and experience of the Mountain Leader qualification from an organisational perspective, rather than their personal experience of becoming a Mountain Leader.
 
 
-### Interview guide
+### Semi-Structured Interviews
 
-* How did I develop it?
-  * Literature review, list of >50 factors, expectancy value exercise to rate each factor in terms of both ease of collection from interview and also usefulness, based on this 35(?) factors were included in the interview guide
-  * Developed a list of prompts and probes to get the most out of people in an effort to reach data saturation
-* What sort of questions?
-* 5 Pilot interviews – 2 pre-pilots and 3 real ones. 
-Data collection and analysis
-* All interviews were carried out face-to-face in a location chosen by the participants (e.g., home or office space). Given the exploratory nature of the interviews and range of factors included in the interview schedule the interviews were carried out over multiple sessions to avoid fatigue of the participants and interviewer (Mduration = 316.25, SD = 54.85 mins, range: 2-5 sessions).
-* Notes made during the interview
-* Audio recorded and then transcribed clean verbatim by someone else due to volume
-* Coded in NVivo 11 Pro <REF> using a concurrent inductive and deductive thematic analysis process. A priori deductive codes were created based on the literature and inductive codes were created as new themes emerged from the data. This combination of analytical procedures makes use of relevant literature but allows other factors to emerge from the data
-  * The concurrent application of inductive and deductive methods contributes to the development of rich rigor by recognizing the scope and context of previous research literature, whilst also allowing for the identification of additional constructs of interest. This, in combination with the collection of rich and abundant data ensured that the complexity and nuances of the data were not missed. [@Webster2017]
-* Memoing during the analysis of each transcript – by participant and some codes
-* Collection of data from different sources. MT executives, high volume providers, and course directors
+It is important to match the research method to the question being asked [@Smith2016]. For this study, we chose to use semi-structured interviews as they can provide a rich, yet broad, understanding of a given phenomenon [@Lincoln1985]. To facilitate discussion and ensure that all participants were asked broadly similar questions, covering the same topics, we developed an interview guide which included questions that covered the `r sum(!is.na(interview_factors$interview))` factors deemed as the most important following the expectancy-value ranking process described above. The interview guide was split into five sections: (a) candidate background, (b) candidate career history and social influence, (c) candidate personal characteristics, (d) candidate experience and ability, and (e) candidate support.
+
+Each section began with questions designed to help participants focus their attention on the topic of interest (e.g., "Could you start by describing a typical group of six candidates on a Mountain Leader training course to me?"). Participants were then asked more specific questions, which related to the factors identified in the expectancy-value exercise (e.g., "Are there any professions that significantly influence, positively or negatively, completion of the Mountain Leader award?"). These questions were followed up with elaboration probes (e.g., "What do you think it is about these professions that makes a difference here?") to improve the clarity and detail of the data [@Patton2002]. 
+
+Each section ended with two final questions. Firstly, a question asking if there was anything else that participants thought was relevant to the completion of the Mountain Leader qualification but had not been discussed (e.g., "Is there anything about candidates’ backgrounds that you think is important but we haven’t spoken about"). Secondly, a question that asked if they felt that any of the topics discussed in that section were more salient than the others (e.g., "We have spoken about a number of different factors relating to candidate background. Do you think that there are any factors relating to candidate background that are generally more important with regards to completion of the Mountain Leader award?"). 
+
+Eight pilot interviews were conducted with Mountain Leader course staff and a Mountain Training Officer to familiarise the interviewer with the interview guide, to identify any factors not included in the interview guide that may be important, and to ensure that participants were able to provide sufficiently detailed answers to the questions. Minor changes were made to the final interview guide following each pilot interview, the final interview guide can be found in [Appendix A](#appendix-interview-guide).
+
+WH was instructed in qualitative research methods by the RR and LH and additional knowledge was gleaned from recent literature on qualitative research methods [e.g., @Smith2018a]. The research team all had mountaineering experience and an understanding of the Mountain Leader qualification at the time the interviews were conducted. This experience allowed us to be more sensitive to the specific experiences and language of the participants, reducing the likelihood of introducing bias through insinuation and assumption [@Denzin2005]. 
+
+WH, who had 10 years of outdoor experience across the world, conducted all the interviews. Most of this experience was gained in a recreational context rather than a professional one, this is seen as a strength because the analysis was less likely to be influenced by personal experiences of Mountain Training qualifications, ensuring that it is the participants' experiences that are presented. In addition to this, RR is a senior lecturer in sports psychology with over 20 years of outdoor experience and LH is a professor in sports psychology and has over 50 years of outdoor experience and is an IFMGA Mountain Guide. The experiences of the research team meant that a good rapport could be established with participants and that the subtleties of the phenomena of interest could be fully understood.
 
 
-### Credibility and trustworthiness
+### Procedure
 
-* Member reflections. Due to the length of the transcripts (Mwords = 44907.88, SD = 7939.72) we returned an individual summary document to participants along with their transcripts that we asked them to check for authenticity. In addition to asking participants to check these documents for authenticity, we used two rounds of member reflections to better understand the interview data as well as generate new data (Smith & McGannon, 2017; Tracy, 2010). In the first round we asked participants to reflect on their individual summaries and in the second round we asked them to comment on initial findings from all of the interviews. The data generated from these member reflections were included in the final analysis. Member reflections are not intended to find agreement but, as traditional member checking did, but instead they are intended to generate additional data and encourage reflexivity. 
-* Critical friend. WH presented themes and relevant excerpts from the data to RR, who offered critical feedback. The aim of this was not to reach agreement or consensus but to encourage reflexivity [@Smith2017].
-* The first author, who has 10 years of outdoor experience across the world, conducted all of the interviews. Most of this experience has been gained in a recreational context rather than a professional one, this is seen as a strength because the analysis was less likely to be influenced by personal experiences of Mountain Training qualifications, ensuring that it is the participants experiences that are presented. In addition to this, RR is an SL in Sports Psychology with XX years of outdoor experience and LH is a Professor in Sports Psychology and has XX years of outdoor experience and is an IFMGA Mountain Guide. The experiences of the research team meant that good rapports could be established with participants and that the subtleties of the phenomena of interest could be fully understood.
-* The first author was instructed in qualitative research methods by the second and third authors and additional knowledge was gleaned from recent literature on qualitative research methods 
-* Research team experience of qualitative research
+All interviews were carried out face-to-face in a location chosen by the participants (e.g., home, office space or a café). Given the exploratory nature of the interviews and range of factors included in the interview schedule, the interviews were carried out over two to five sessions to avoid fatiguing the participants and interviewer (duration, $M = 316.25$ min, $SD = 54.85$). The interviewer made notes during the interview and the interviews were digitally recorded. The recordings were transcribed clean verbatim by UK Transcription yielding 314,927 words, or 1,329 transcript pages. Before beginning the analysis, the first author listened to the recordings whilst checking the transcripts for errors.
 
 
-## Results
+### Data Analysis
 
-###	Getting to Assessment
+The transcripts were analysed using thematic analysis in a concurrent inductive ("bottom-up"/data-driven) and deductive ("top-down"/theory-driven) fashion [@Braun2006]. Analysing the data using a concurrent inductive and deductive approach allowed us to consider the data in relation to existing theory, but also to create new themes from the data. The flexibility of this analytical approach was important to this study as we were trying to identify potentially important factors, some of which we may not have considered *a prioi*. Acknowledging the existence of relevant literature and relating the data to it whilst also considering new themes of interest allowed us to make the best use of the rich data that were collected without sacrificing its complexity and nuance.
 
-Three main themes emerged from the interviews as factors that influenced candidates’ likelihood of being assessed: confidence, motivation, and gaining experience. There were three additional themes that participants felt influenced whether candidates reached assessment (albeit to a lesser degree): candidate location, reengaging later in life, and redirection to lower qualifications.
+The analysis of the transcripts was carried out in a series of separate steps. First, WH read each transcript to familiarise himself with the data. Following this, he coded the transcripts using NVivo 11 Pro [@QSR2017] into the five *a priori* deductive codes and a sixth code---"Other." This sixth code was then analysed inductively to identify any themes not encompassed by the deductive codes. Once all first-order themes had been identified, sub-themes were identified within each theme. WH presented a summary of each theme, including raw quotes from the interviews, to RR and LH who acted as *critical friends* [cf. @Sparkes2014; @Smith2018a]. Acting as critical friends, RR and LH offered critical feedback, the aim of which was not to reach a consensus but to encourage reflexivity [@Smith2018a].
 
-####	Confidence
-The results in this section shows that candidates must be confident in their ability to pass a five-day Mountain Leader assessment before they will attend one and the threshold of confidence required is individual to them. There are several factors that influence both the level of confidence and the individualised thresholds that candidates must surpass. Level of confidence.
 
-#####	Level of confidence.
+## Findings
 
-All seven participants said that candidates needed to feel confident before they would attend an assessment. O1 said:
+When conducting the interviews, it quickly became apparent that becoming a Mountain Leader has at least two distinct steps: firstly, a candidate must *get to an assessment* and secondly, they must *pass an assessment*. If they fail to pass their first assessment then they have the opportunity to return for a *reassessment*, which they may or may not pass. Consequently, we present the findings under three main headings: (a) getting to assessment, (b) passing, and (c) reassessment. This is done as there are differences in the factors that participants felt were important at each step, but also to aid the readability of this Chapter.
 
-> [Candidates] have to put themselves on a little pedestal and go, “This is me, and this is how I’m trying to go through the scheme.” ... That takes someone who’s got a reasonable amount of confidence in themselves to do that. I can imagine some candidates not feeling comfortable in putting themselves in that position ... and I think that they will be the ones less likely to complete.
 
-O2 supported this when describing candidates on assessment courses by saying, “In their heads, they’re prepared for it.” suggesting that only well-prepared, and therefore confident, candidates attended assessment courses. Talking about candidates who did not attend assessments P1 said, “They convince themselves they’re not ready, and then they won’t book on.” However, O1 suggested that more than just experience was needed for candidates to feel confident when he talked about a candidate who, “Doesn’t have the confidence to do the assessment” despite them being a “Super keen hillwalker ... who has done the training.”
+###	Getting to Assessment {#qual-gta}
+
+Factors that influenced the likelihood of a candidate being assessed could be considered under three main themes: confidence, motivation, and gaining experience. There were three additional themes that participants felt influenced whether candidates reached assessment (albeit to a lesser degree): candidate location, re-engaging later in life, and redirection to lower qualifications.
+
+
+####	Confidence. {#qual-gta-confidence}
+
+The results in this section show that candidates must be confident in their ability to pass a five-day Mountain Leader assessment before they will attend one and the threshold of confidence required is individual to them. Several factors influence both the level of confidence and the individualised thresholds that candidates must surpass. Level of confidence.
+
+
+#####	Level of Confidence.
+
+All seven participants said that candidates needed to feel confident before they would attend an assessment. Officer 1 said:
+
+> [Candidates] have to put themselves on a little pedestal and go, “This is me, and this is how I’m trying to go through the scheme" .... That takes someone who’s got a reasonable amount of confidence in themselves to do that. I can imagine some candidates not feeling comfortable in putting themselves in that position ... and I think that they will be the ones less likely to complete.
+
+Officer 2 supported this when describing candidates on assessment courses by saying, “In their heads, they’re prepared for it.” suggesting that only well-prepared, and therefore confident, candidates attended assessment courses. Talking about candidates who did not attend assessments Provider 1 said, “They convince themselves they’re not ready, and then they won’t book on.” However, Officer 1 suggested that more than just experience was needed for candidates to feel confident when he talked about a candidate who, “Doesn’t have the confidence to do the assessment” despite them being a “Super keen hillwalker ... who has done the training.”
 
 This evidence shows that the candidates who have reached assessment were confident in their abilities and that some of those who have not reached assessment did not feel confident, it also suggests that their confidence was not always dependant on their abilities. 
 
-######	Individual differences in thresholds of confidence.
 
-This section presents evidence that candidates have their own thresholds for confidence that they must surpass before they will attend an assessment together with factors that influence that threshold, thus moderating the relationship between level of confidence and the likelihood of booking an assessment. 
+######	Individual Differences in Thresholds of Confidence. {#study1-ind-diff-conf}
+
+This section presents evidence that candidates have their own thresholds for confidence that they must surpass before they will attend an assessment together with factors that influence that threshold, thus moderating the relationship between the level of confidence and the likelihood of booking an assessment. 
+
+Five participants suggested that younger candidates have lower thresholds for confidence and that older candidates were less likely to feel confident enough to attend an assessment. Officer 4 said, “younger folk can be less constrained by lack of confidence.” Provider 2 supported this, suggesting that if older candidates did not feel confident they are more likely to refrain from booking an assessment, “Some of the older guys and girls have come in already with 40 days but they still might not come back for a year or two because they’re sometimes not as confident.” Officer 1 and Officer 2 did not comment on how age may or may not relate to confidence and getting to assessment.
+
+Five participants discussed the effect of gender on confidence and all said that females needed to be more confident than males to attend an assessment. When asked if there were many candidates who were ready for their assessment but did not feel ready, and so did not attend an assessment, Provider 1 said:
+
+> I think a lot of girls fall into that category. That they actually could do it, but it feels like such a big thing. They want every “i” dotted and every “t” crossed, and they want to be absolutely doubly sure that they can do it, and really, they could have done it earlier.
+
+Five participants suggested that some candidates may not have attended an assessment because their perfectionistic traits led to them having a higher threshold for confidence, thus not feeling confident enough to attend an assessment. Provider 2 gave an example where high-levels perfectionistic strivings may have led to candidates not feeling ready for an assessment despite being ready, “For some reason or another, they've really held back ... it could be that they're an absolute perfectionist and they just didn't want to turn up until they were totally happy.” 
+
+Officer 3 suggested that female candidates had higher levels of perfectionistic concerns, thus were more likely to incorrectly feel that they were “below the standard”, “A female might actually be overly cautious about exposing themselves, and potentially failing ... through believing they're actually below the standard. Whereas they're probably higher than that.” Officer 1 and Provider 3 did not discuss how perfectionism may or may not influence the candidates’ confidence threshold.
 
 
-#######	Age.
+######	Understanding the Standard. {#ml-qualitative-gta-understanding-the-standard}
 
-Five participants suggested that younger candidates have lower thresholds for confidence and that older candidates were less likely to feel confident enough to attend an assessment. O4 said, “younger folk can be less constrained by lack of confidence.” P2 supported this, suggesting that if older candidates did not feel confident they are more likely to refrain from booking an assessment, “Some of the older guys and girls have come in already with 40 days but they still might not come back for a year or two because they’re sometimes not as confident.” O1 and O2 did not comment on how age may or may not relate to confidence and getting to assessment.
+Throughout the interviews all participants referenced “the standard” (i.e., the standard required to pass) and commented that it is often hard for candidates, and sometimes staff, to understand what it is. The five participants that discussed “the standard” and how it related to getting to assessment all suggested that a candidate’s confidence level may not surpass the threshold needed to attend an assessment because they did not understand “the standard,” thus making it hard to be confident. Provider 3 explained that this holds some candidates back from being assessed:
+
+> They need that reassurance that ... they’re consolidating correctly, and actually they’re performing at the standard ... because they’re not going to come forward unless they feel like that .... I think that’s really hard [for candidates] to know where they’re at in relation to the bar. We think it’s clear ... but candidates always ask, “How close do I have to be? You know, like, ten metres, a hundred metres. One contour line, two contour lines.”
+
+Three other participants made similar comments, and Officer 2 did not refer to understanding the standard. 
+
+######	Raising Candidates’ Confidence Levels.
+
+Six participants discussed how support helped close the gap between candidates’ confidence levels and their confidence thresholds by raising confidence levels rather than lowering confidence thresholds. When talking about candidates who lacked confidence Provider 3 said:
+
+> They often need a lot more support, and with a bit of support they often shine as well: as soon as they realise that, “Actually, I am good enough and I can do it”, then they’re up and running, although it can be fragile, and it doesn’t take much to knock it.
+
+Talking about isolated candidates Officer 4 said, “I suppose the ones without a network ... and those at the lower end of the confidence spectrum ... are going to need help with upskilling or believing that they’ve got the skills in the first place.”
 
 
-#######	Gender.
+#####	Gender Differences in Robustness of Confidence.
 
-Five participants discussed the effect of gender on confidence and all said that females needed to be more confident than males to attend an assessment. When asked if there were many candidates who were ready for their assessment but did not feel ready, and so did not attend an assessment, P1 said:
-I think a lot of girls fall into that category. That they actually could do it, but it feels like such a big thing. They want every “i” dotted and every “t” crossed, and they want to be absolutely doubly sure that they can do it, and really, they could have done it earlier.
-
-
-#######	Perfectionism.
-Five participants suggested that some candidates may not have attended an assessment because their perfectionistic traits led to them having a higher threshold for confidence, thus not feeling confident enough to attend and assessment. P2 gave an example where high-levels perfectionistic strivings may have led to candidates not feeling ready for an assessment despite being ready, “For some reason or another, they've really held back ... it could be that they're an absolute perfectionist and they just didn't want to turn up until they were totally happy.” 
-O3 suggested that female candidates had higher levels of perfectionistic concerns, thus were more likely to incorrectly feel that they were “below the standard”, “A female might actually be overly cautious about exposing themselves, and potentially failing ... through believing they're actually below the standard. Whereas they're probably higher than that.”
-O1 and P3 did not discuss how perfectionism may or may not influence candidates’ confidence threshold.
-
-######	Understanding the standard.
-
-Throughout the interviews all participants referenced “the standard” (i.e., the standard required to pass) and commented that it is often hard for candidates, and sometimes staff, to understand what it is. The five participants that discussed “the standard” and how it related to getting to assessment all suggested that a candidate’s confidence level may not surpass the threshold needed to attend an assessment because they did not understand “the standard”, thus making it hard to be confident. P3 explained that this holds some candidates back from being assessed:
-They need that reassurance that ... they’re consolidating correctly, and actually they’re performing at the standard ... because they’re not going to come forward unless they feel like that .... I think that’s really hard [for candidates] to know where they’re at in relation to the bar. We think it’s clear ... but candidates always ask, “How close do I have to be? You know, like, ten metres, a hundred metres. One contour line, two contour lines.”
-Three other participants made similar comments, and O2 did not refer to understanding the standard. 
-
-######	Raising candidates’ confidence levels.
-
-Six participants discussed how support helped close the gap between candidates’ confidence levels and their confidence thresholds by raising confidence levels rather than lowering confidence thresholds. When talking about candidates who lacked confidence P3 said:
-They often need a lot more support, and with a bit of support they often shine as well: as soon as they realise that, “Actually, I am good enough and I can do it”, then they’re up and running, although it can be fragile, and it doesn’t take much to knock it.
-Talking about isolated candidates O4 said, “I suppose the ones without a network ... and those at the lower end of the confidence spectrum ... are going to need help with upskilling or believing that they’ve got the skills in the first place.”
-
-#####	Gender differences in robustness of confidence.
-
-In addition to the gender differences in confidence thresholds discussed above, three participants spoke about gender differences in the robustness of candidates’ confidence. When talking about the different influences of negative events on candidates, O3 said, “Who can take it in their stride? Blokes, I suppose. Not because they perform well afterwards, they will probably be weaker. They are more Bolshie, I suppose.” O2 supported this: 
+In addition to the gender differences in confidence thresholds discussed above, three participants spoke about gender differences in the robustness of candidates’ confidence. When talking about the different influences of negative events on candidates, Officer 3 said, “Who can take it in their stride? Blokes, I suppose. Not because they perform well afterwards, they will probably be weaker. They are more Bolshie, I suppose.” Officer 2 supported this: 
 
 > For some candidates, particularly men, those effects of that bit of negative feedback or that bad day they had on the hill, they try and brush off and just carry on ... and get it right next time .... What you might find with many females is that’s thrown a spanner in the works. It’s made them doubt what they need to do, and now they need to readjust their consolidation plan.
 
-### Motivation
-Many motivation researchers have proposed that motivation operates at different levels (e.g., Vallerand, 1997; Vallerand & Blssonnette, 1992). In particular, self-determination theorists have proposed three levels of motivation: dispositional motives (i.e., goals for life in general), participatory motives (i.e., what someone hopes to achieve or avoid by participating in a behaviour), and regulatory motives (i.e., the perceived loci of causality of behavioural goals) (Deci & Ryan, 2000; Ingledew, Markland, & Ferguson, 2009). All seven participants gave examples of candidates with different participatory motives who also had different regulatory motives within those participatory motives. They suggested that both levels of motive influence candidates’ likelihood of attending assessment.
 
-#####	Participatory motives.
+#### Motivation. {#qual-gta-motivation}
 
-All participants said that candidates with extrinsic participatory motives (i.e., to achieve an external goal), particularly allowing them to work, are more likely to complete than those with participatory intrinsic motives (i.e., doing something for its own sake). P1 said “The ones where there’s a driver, are more likely to [complete] .... If they’re not doing it for work and they’re using it in an informal thing, they are probably less likely to [complete].” P1 went on to say, “People who want to use it for their work: formally or informally, directed or volunteer ... they’re pretty motivated to do it, and so I would say I think that the success rates are pretty good.” Similarly, O3 said:
+Many motivation researchers have proposed that motivation operates at different levels [e.g., @Vallerand1997; @Vallerand1992]. In particular, self-determination theorists have proposed three levels of motivation: dispositional motives (i.e., goals for life in general), participatory motives (i.e., what someone hopes to achieve or avoid by participating in a behaviour), and regulatory motives [i.e., the perceived loci of causality of behavioural goals; e.g., @Deci2000; @Ingledew2009]. All seven participants gave examples of candidates with different participatory motives who also had different regulatory motives within those participatory motives. They suggested that both levels of motive influence candidates’ likelihood of attending an assessment.
+
+
+#####	Participatory Motives. {#qual-part-motives}
+
+All participants said that candidates with extrinsic participatory motives (i.e., to achieve an external goal), particularly allowing them to work, are more likely to complete than those with participatory intrinsic motives (i.e., doing something for its own sake). Provider 1 said “The ones where there’s a driver, are more likely to [complete] .... If they’re not doing it for work and they’re using it in an informal thing, they are probably less likely to [complete].” Provider 1 went on to say, “People who want to use it for their work: formally or informally, directed or volunteer ... they’re pretty motivated to do it, and so I would say I think that the success rates are pretty good.” Similarly, Officer 3 said:
 
 > If there's an expectation that somebody's going to have their ML to be able to do their job ... I should imagine they get on with it. But if there's no real drive ... [they] kick it down the road and, "I'll get around to it, maybe, or maybe not. It's not a big deal." sort of thing.
 
-Five participants said that some candidates had registered for the ML to develop their personal skills and that for some of these candidates passing an assessment was not important, O4 said, “The ones doing it for their own skill improvement, it's not part of a definite plan ... they're not so concerned if they complete or when they complete the award.” However, O3 did not believe that candidates attend a training course without any intention of going onto assessment but did think that some will decide not to continue:
+Five participants said that some candidates had registered for the Mountain Leader qualification to develop their personal skills and that for some of these candidates passing an assessment was not important, Officer 4 said, “The ones doing it for their own skill improvement, it's not part of a definite plan ... they're not so concerned if they complete or when they complete the award.” However, Officer 3 did not believe that candidates attend a training course without any intention of going onto assessment but did think that some will decide not to continue:
 
 > I don't transpire [sic] to this “doing the mountain leader training course for a skills course”, to up-skill for an individual .... I can see how people would do it to start with, thinking they were going to progress to assessment, work out what were the demands upon them of attending an assessment, decide that we're going to call it a day there.
 
-P2 did not talk about candidates who only registered for the ML to develop their personal skills.
+Provider 2 did not talk about candidates who only registered for the Mountain Leader qualification to develop their personal skills.
 
 
-#####	Regulatory motives.
+#####	Regulatory Motives.
 
-Regulatory motives can be placed on a continuum from autonomous to controlled. Intrinsic-, integrated-, and identified regulatory motives are examples of autonomous regulatory motives, where behaviour is self-determined behaviour as the value of it is internalised. Whereas controlled regulation includes introjected- and external regulation, where behaviour is nonself-determined and the value of it may only be slightly internalised or not at all, thus controlled by external factors (Deci & Ryan, 2000). In these data, participants gave examples of candidates who had different regulatory motives and the influence that these had on candidates’ likelihood of attending an assessment.
-
-
-###### Autonomous regulatory motives.
-
-All seven participants said that those candidates who wanted to be outdoor instructors got to assessment. O1 said, “[If] they’re wanting to work in the outdoor sector they will naturally get [to assessment].” P3 suggested that those with autonomous regulatory motives were more likely to get to assessment, “If you’ve got people that are thinking about a full-time career in the outdoors ... they are going to be more inclined to follow the process through.”
-
-Another example of candidates having different types of participatory- and regulatory motives was seen in candidates who aspired to hold higher Mountain Training qualifications, of which the ML is a prerequisite for. O2 said, “they’ll tell you, ‘I am doing this because I want to do my MIA.’” Participants suggested that these candidates were extrinsically motivated but had autonomous behavioural motives. O3 gave supported this when describing his own experience of becoming a Mountain Leader, “I didn’t even want to do my ML, I just wanted to go and be an MIA. I was only interested in that .... I was pretty flipping motivated to get through this thing as fast as I could.”
-
-O4 suggested that candidates who aspired to hold higher Mountain Training qualifications wanted to complete the ML quickly to progress, “Folk that have got a definite plan for using their ML, like they want to become an IML or whatever either will pursue it in a shorter time frame.”
+Regulatory motives can be placed on a continuum from autonomous to controlled. Intrinsic-, integrated-, and identified regulatory motives are examples of autonomous regulatory motives, where behaviour is self-determined behaviour as the value of it is internalised. Whereas controlled regulation includes introjected- and external regulation, where behaviour is nonself-determined and the value of it may only be slightly internalised or not at all, thus controlled by external factors [@Deci2000]. In these data, participants gave examples of candidates who had different regulatory motives and the influence that these had on candidates’ likelihood of attending an assessment.
 
 
-###### Controlled regulatory motives.
-All seven participants talked about candidates who had controlled regulatory motives and suggested that these candidates were less likely to be assessed than those with more autonomous regulatory motives. When talking about which candidates attend assessments O1 said, “If the school has sent them there because they're going to run a Duke of Edinburgh, then no. They won’t do it.” P3 supported this and said that is because these candidates had not gained the necessary experience:
+###### Autonomous Regulatory Motives.
+
+All seven participants said that those candidates who wanted to be outdoor instructors got to assessment. Officer 1 said, “[If] they’re wanting to work in the outdoor sector they will naturally get [to assessment].” Provider 3 suggested that those with autonomous regulatory motives were more likely to get to assessment, “If you’ve got people that are thinking about a full-time career in the outdoors ... they are going to be more inclined to follow the process through.”
+
+Another example of candidates having different types of participatory- and regulatory motives was seen in candidates who aspired to hold higher Mountain Training qualifications, of which the Mountain Leader qualification is a prerequisite for. Officer 2 said, “they’ll tell you, ‘I am doing this because I want to do my MIA.’” Participants suggested that these candidates were extrinsically motivated but had autonomous behavioural motives. Officer 3 gave supported this when describing his own experience of becoming a Mountain Leader, “I didn’t even want to do my ML, I just wanted to go and be an MIA. I was only interested in that .... I was pretty flipping motivated to get through this thing as fast as I could.”
+
+Officer 4 suggested that candidates who aspired to hold higher Mountain Training qualifications wanted to complete the Mountain Leader qualification quickly to progress, “Folk that have got a definite plan for using their ML, like they want to become an IML [International Mountain Leader] or whatever either will pursue it in a shorter time frame.”
+
+
+###### Controlled Regulatory Motives.
+
+All seven participants talked about candidates who had controlled regulatory motives and suggested that these candidates were less likely to be assessed than those with more autonomous regulatory motives. When talking about which candidates attend assessments Officer 1 said, “If the school has sent them there because they're going to run a Duke of Edinburgh, then no. They won’t do it.” Provider 3 supported this and said that is because these candidates had not gained the necessary experience:
 
 > We see a lot of people coming through with Duke of Edinburgh and Scouts who I’d say are pushed into it ... they don’t have the experience – the mountain experience as opposed to, sort of, hill and moorland experience – and it can be a shock. And then actually progressing through to assessment: they sort of realise, “Hang on.” Yes, “I can’t do this,” or, “This isn’t for me.”
 
 
-######	Intrinsic regulatory motives.
+######	Intrinsic Regulatory Motives.
 
-Candidates with intrinsic regulatory motives also had intrinsic participatory motives, at least to attend training. Those who did not feel that they wanted to be assessed were intrinsically motivated to attend a training course but amotivated to complete the qualification. P1 suggested that if candidates registered for the ML to develop their personal skills and found their training course inspiring then they were more likely to want to be assessed:
+Candidates with intrinsic regulatory motives also had intrinsic participatory motives, at least to attend training. Those who did not feel that they wanted to be assessed were intrinsically motivated to attend a training course but amotivated to complete the qualification. Provider 1 suggested that if candidates registered for the Mountain Leader qualification to develop their personal skills and found their training course inspiring then they were more likely to want to be assessed:
 
 > If you run a good course, you enthuse them so much that there’s no requirement on them to come back and do the assessment, but they actually want to do the assessment because they feel that it’s a good challenge for their hobby.
 
-This was supported by P3:
+This was supported by Provider 3:
 
 > Quite a few who come on training courses and say, “Oh, I’m just doing this for a personal thing,” actually really enjoy it, and then they go, “Oh, I’m going to carry on now and do the assessment, and actually this seems like a really cool thing.”
 
-O4 suggested that candidates’ motivation and self-efficacy can be influence by course staff:
+Officer 4 suggested that candidates’ motivation and self-efficacy can be influence by course staff:
 
 > It’s a combination, isn’t it? Of helping them believe they can do it and helping them want to do it, to see value in completing, because a lot of folk come on training courses not being sure they need to do the assessment.
 
 
-#####	Negative disconfirmatory experience.
+#####	Negative Disconfirmatory Experience.
 
-All participants talked about disconfirmatory experiences that reduced candidates’ motivation to attend assessments. However, three of the participants also provided evidence that not all candidates who have these experiences will drop out. O2 proposed that all candidates will have at least one such experience, “I would be really surprised if they have never had a disconfirmatory experience.” O1 and O3 go further and suggest that some candidates may become more motivated following a negative disconfirmatory experience. O1 summarised the possible effects of negative events on getting to assessment by saying that, “[candidates] either do a U-turn and don’t bother or they up their game.”
+All participants talked about disconfirmatory experiences that reduced candidates’ motivation to attend assessments. However, three of the participants also provided evidence that not all candidates who have these experiences will drop out. Officer 2 proposed that all candidates will have at least one such experience, “I would be really surprised if they have never had a disconfirmatory experience.” Officer 1 and Officer 3 go further and suggest that some candidates may become more motivated following a negative disconfirmatory experience. Officer 1 summarised the possible effects of negative events on getting to assessment by saying that, “[candidates] either do a U-turn and don’t bother or they up their game.”
 
-Five participants gave examples where candidates were part way through the ML process and realised that it was not something that they either needed to or could do. O1 gave the following example:
+Five participants gave examples where candidates were partway through the Mountain Leader qualification process and realised that it was not something that they either needed to or could do. Officer 1 gave the following example:
 
->Someone who ... saw a Mountain Leader working, thought, “That’s the thing for me,” ... and then once they started the process realised [that] actually there's a lot more to it than they were hoping and then become disinterested with how much experience they needed to gain from then on it, and then dropped off.
-
-
-######	Negative experiences at training.
-
-Six participants suggested that in some instances an ML Training Course itself could be a negative experience. When asked for an example of a disconfirmatory experience, O3 said, “[a disconfirmatory experience] might be just feeling they are well off the mark during a training course ... that can be quite depressing ... just not really nailing it on the training and then getting disillusioned.”
-
-When talking about candidates who felt less willing to attend an assessment P2 said, “People say, ‘It really put me off. The training course really put me off,’ and that's a shame when you hear that because they say, ‘It was just awful.’" P2 repeated examples that candidates had previously given to them of reasons they had become less willing to attend an assessment:
-
-> A lot of comments come, "Our training was worse than the assessment." ... "We never had any feedback. We were assessed basically." ... These people went on their training course and felt like they were beasted and battered and scrutinised like as if they were being assessed.
-
-Six participants spoke about candidates who had not understood the purpose of the qualification when they registered for the ML and once they better understood the purpose of the qualification they realised/decided that they could/would not complete it. P3 explained that the training course had sometimes ben the stimulus for candidates making that choice, “We definitely get [candidates] that are coming forward and then they do the training course and they realise it is just not for them, they are not going to be able to put the time and effort in.”
-
-Some of the candidates who decided that they could/would not complete the qualification following their training course may have done so based on incorrect information. O1 said:
-
-> We have had cases where someone has asked about experience [needed prior to assessment] and a provider has gone, “Well, in my view everyone needs to go to Scotland and go to the Highlands to gain experience.” ... Suddenly people are going, “Oh, my God. I live in the South East .... If I have to go to Scotland that’s a whole different ballgame.”
-
-O1 went on to explain that the quality of information provided by training staff determined if it had a positive or negative influence on candidates, “The wrong kind of responses [from training staff] can have an impact. Whereas the right answers might mean that people get the correct information and can then plan accordingly.”
-
-O3 provided an example where candidates’ perception of the course staff as role models might discourage them from completing, “I am sure there is nothing more disengaging than seeing somebody out of shape, out of currency doing a crap job on the hill. It is hard to engage with that.”
+> Someone who ... saw a Mountain Leader working, thought, “That’s the thing for me,” ... and then once they started the process realised [that] actually there's a lot more to it than they were hoping and then become disinterested with how much experience they needed to gain from then on it, and then dropped off.
 
 
-#####	Competing influences.
+######	Negative Experiences at Training.
 
-Five participants spoke about candidates who wanted to complete the ML but were not motivated enough to find the time to prepare for and then attend an assessment. There was some evidence that those who take longer to complete the ML will need more enduring motivation. O3 said, “Sometimes I think momentum is everything.” O1 supported this:
+Six participants suggested that in some instances a Mountain Leader Training Course itself could be a negative experience. When asked for an example of a disconfirmatory experience, Officer 3 said, “[a disconfirmatory experience] might be just feeling they are well off the mark during a training course ... that can be quite depressing ... just not really nailing it on the training and then getting disillusioned.”
+
+When talking about candidates who felt less willing to attend an assessment Provider 2 said, “People say, ‘It really put me off. The training course really put me off,’ and that's a shame when you hear that because they say, ‘It was just awful.’" Provider 2 repeated examples that candidates had previously given to them of reasons they had become less willing to attend an assessment:
+
+> A lot of comments come, "Our training was worse than the assessment" .... "We never had any feedback. We were assessed basically" .... These people went on their training course and felt like they were beasted and battered and scrutinised like as if they were being assessed.
+
+Six participants spoke about candidates who had not understood the purpose of the qualification when they had registered for the Mountain Leader qualification and once the candidates better understood the purpose of the qualification, they realised/decided that they could/would not complete it. Provider 3 explained that the training course had sometimes been the stimulus for candidates making that choice, “We definitely get [candidates] that are coming forward and then they do the training course and they realise it is just not for them, they are not going to be able to put the time and effort in.”
+
+Some of the candidates who decided that they could/would not complete the qualification following their training course may have done so based on incorrect information. Officer 1 said:
+
+> We have had cases where someone has asked about experience [needed prior to assessment] and a provider has gone, “Well, in my view everyone needs to go to Scotland and go to the Highlands to gain experience” .... Suddenly people are going, “Oh, my God. I live in the South East .... If I have to go to Scotland that’s a whole different ballgame.”
+
+Officer 1 went on to explain that the quality of the information provided by training staff determined if it had a positive or negative influence on candidates, “The wrong kind of responses [from training staff] can have an impact. Whereas the right answers might mean that people get the correct information and can then plan accordingly.”
+
+Officer 3 provided an example where candidates’ perception of the course staff as role models might discourage them from completing, “I am sure there is nothing more disengaging than seeing somebody out of shape, out of currency doing a crap job on the hill. It is hard to engage with that.”
+
+
+#####	Competing Influences.
+
+Five participants spoke about candidates who wanted to complete the Mountain Leader qualification but were not motivated enough to find the time to prepare for and then attend an assessment. There was some evidence that those who take longer to complete the Mountain Leader qualification will need more enduring motivation. Officer 3 said, “Sometimes I think momentum is everything.” Officer 1 supported this:
 
 > I think those who see it as the end goal take longer, and the more time that you put in between that training and assessment there are more variables of life that can get in the way that would then push that to the back burner.
 
-When asked about candidates who were ready for assessment yet did not attend one, O3 said that the ML is, “an easy can to kick on down the street if you’re busy with other parts of your life.” O2 supported this idea of candidates having put their assessment off because they were busy with other things:
+When asked about candidates who were ready for assessment yet did not attend one, Officer 3 said that the Mountain Leader qualification is, “an easy can to kick on down the street if you’re busy with other parts of your life.” Officer 2 supported this idea of candidates having put their assessment off because they were busy with other things:
 
 > Maybe they haven’t turned up to assessment at that point because they haven’t got the days, and said, “You know what, I haven’t managed to get the days in, I’ll leave it this year, I’ll do it next year.” That’s fairly common .... There are just other things, life’s got busy in other ways.
 
-O1 explained that following a training course some candidates realised that they would need longer than previously expected to complete the ML. For some of those candidates their motivation to complete the ML did not last: 
+Officer 1 explained that following a training course some candidates realised that they would need longer than previously expected to complete the Mountain Leader qualification. For some of those candidates their motivation to complete the Mountain Leader qualification did not last: 
 
 > Where candidates lose focus is if they’ve found that the training course has brought lots of new skills to them that they haven't seen before, they start pushing back when their assessment time’s going to be. I think once that goes beyond 12 months, they kind of come off the boil with their consolidation time because it feels like there's no urgency .... I think once they do that they're less committed, so making good use of their free time to consolidate and gain further experience becomes less of a priority, so the further that goal is the less a priority it becomes in their everyday life. Then that opens up lots of opportunity for life events to get in the way.
 
 
-####	Gaining experience
+####	Barriers to Gaining Experience. {#qual-gta-gaining-experience}
 
-One prerequisite for a candidate to attend an assessment is having a minimum experience of 40 Quality Mountain Days (QMDs). Accruing 40 QMDs requires the investment of both time and money. All seven participants discussed reasons that candidates had not meet this prerequisite and thus did not attend assessments. 
+One prerequisite for a candidate to attend an assessment is having a minimum experience of 40 Quality Mountain Days (QMDs). Accruing 40 QMDs requires the investment of both time and money. All seven participants discussed reasons that candidates had not met this prerequisite and thus did not attend assessments. All seven participants spoke about aspects of candidates’ lives that prevented them from gaining sufficient experience to get to assessment. Officer 1 said, “If people can’t get the experience they can’t proceed.” Provider 3 supported this by saying, “Location and time, I would say are the biggest two handicaps for people. So, if you don’t live in the mountains and you’ve got a fulltime job and a family, really hard.” When asked how different motives for doing the Mountain Leader qualification influenced a candidates’ chances of completion Provider 1 said:
 
+> Well, really, it boils back to, “Are they in a position to gain that experience to go forward to assessment?” That’s the actual crucial thing, I think, more so than any one group where you go, “Yes, they’re much more likely to do it.”
 
-#####	Barriers.
-
-All seven participants spoke about aspects of candidates’ lives that prevented them from gaining sufficient experience to get to assessment. O1 said, “If people can’t get the experience they can’t proceed.” P3 supported this by saying, “Location and time, I would say are the biggest two handicaps for people. So, if you don’t live in the mountains and you’ve got a fulltime job and a family, really hard.” When asked how different motives for doing the ML influenced a candidates’ chances of completion P1 said:
-
-Well, really, it boils back to, “Are they in a position to gain that experience to go forward to assessment?” That’s the actual crucial thing, I think, more so than any one group where you go, “Yes, they’re much more likely to do it.”
-O3 supported this saying, “I think timing is critical, you have got to have the time to gain experience. You have got to have enough money in the bank to get through the process.”
+Officer 3 supported this saying, “I think timing is critical, you have got to have the time to gain experience. You have got to have enough money in the bank to get through the process.”
 
 
-######	Lack of time.
-Participants gave three main reasons that candidates felt they lacked time to prepare for their ML assessment: profession, family, and doing other multiple qualifications at the same time. These other domains of candidates’ lives became barriers to completion for them as they were more important to those candidates than becoming Mountain Leaders.
+#####	Lack of Time. {#qual-gta-lack-of-time}
 
-#######	Profession.
+Participants gave three main reasons that candidates felt they lacked time to prepare for their Mountain Leader assessment: profession, family, and doing other multiple qualifications at the same time. These other domains of candidates’ lives became barriers to completion for them as they were more important to those candidates than becoming Mountain Leaders.
+
+######	Profession.
 
 All seven participants suggested that candidates whose profession allowed them time to prepare were more likely to be assessed than those whose profession did not. How a candidate’s job is set up appears to be more important than what that job is. 
 
-An example of candidates in the same profession having different amounts of time to prepare is clearly illustrated amongst trainee instructors; five participants spoke about how different trainee instructor schemes influenced how much time candidates felt they had to prepare. When asked how being a trainee might affect a candidate’s chances of completion P3 said, “[Outdoor Centre A] and people like that with, some of their staff are very good at giving them time off, or sometimes even paid time to go and do a bit of personal development.” And when talking about candidates from outdoor-activity centres P2 said:
+An example of candidates in the same profession having different amounts of time to prepare is clearly illustrated amongst trainee instructors; five participants spoke about how different trainee instructor schemes influenced how much time candidates felt they had to prepare. When asked how being a trainee might affect a candidate’s chances of completion Provider 3 said, “[Outdoor Centre A] and people like that with, some of their staff are very good at giving them time off, or sometimes even paid time to go and do a bit of personal development.” And when talking about candidates from outdoor-activity centres Provider 2 said:
 
 > If you’re just given week after week of programmes that demand your time, working at low level, and the organisation is not giving time to develop their own skills ... It’s down to the company you’re working for and it’s down to the organisation. They’re the ones who will decide what they need and how much time they’ve got available to release.
 
-This was also evident in the five interviews where participants spoke about how being a teacher influenced a candidate’s likelihood of attending an assessment. P1 explained that teachers who felt that they only had their holidays to prepare for the ML might have felt that they could not “fit it in” and that teachers available time is dependent on their school’s view of the ML:
+This was also evident in the five interviews where participants spoke about how being a teacher influenced a candidate’s likelihood of attending an assessment. Provider 1 explained that teachers who felt that they only had their holidays to prepare for the Mountain Leader might have felt that they could not “fit it in” and that teachers available time is dependent on their school’s view of the Mountain Leader qualification:
 
 > I mean, schools can be helpful or not so helpful .... If the head teacher gets outdoor ed. and all the good things that spin out of it, then they can be very supportive. If the head teacher doesn’t, then the teacher’s kind of fighting them as well with all the other pressures: family, money and whatever.
 
-#######	Family.
+######	Family.
 
-All participants said that candidates having family commitments would make them feel that they had less time to prepare, so were less likely to get to assessment. For some candidates, this was moderated by support from their family, allowing candidates to prepare for the ML instead of fulfilling their family commitments. When asked for examples of reasons people have given for not completing the ML O2 said:
-Family. Family and work. Kids, or family circumstances, maybe elderly parents. That seems to be the main thing, or work commitments .... Sometimes they come back ... they have resurfaced on the other side to say, “I am picking this back up again.”
+All participants said that candidates having family commitments would make them feel that they had less time to prepare, so were less likely to get to assessment. For some candidates, this was moderated by support from their family, allowing candidates to prepare for the Mountain Leader assessment instead of fulfilling their family commitments. When asked for examples of reasons people have given for not completing the Mountain Leader qualification Officer 2 said:
 
-O1 gave an example of a candidate whose family situation, and thus priorities, changed between training and assessment, which meant that they had not and were unlikely to complete the ML:
+> Family. Family and work. Kids, or family circumstances, maybe elderly parents. That seems to be the main thing, or work commitments .... Sometimes they come back ... they have resurfaced on the other side to say, “I am picking this back up again.”
+
+Officer 1 gave an example of a candidate whose family situation, and thus priorities, changed between training and assessment, which meant that they had not and were unlikely to complete the Mountain Leader qualification:
 
 > Three years ago, I talked to her about doing the ML. She cracks on with doing that. She’s done the training. She hasn’t done the assessment. She’s now had a kid, and it’s almost totally irrelevant to talk to her about ML these days.
 
-O2 explained that candidates from different backgrounds will have different levels of family responsibility when talking about candidates from minority groups, “Sometimes when folk in other communities get involved in the outdoors there are religious, cultural and social pressures .... Family commitments come first, and it has a big impact on free time ... suddenly your free time isn’t free.”
+Officer 2 explained that candidates from different backgrounds will have different levels of family responsibility when talking about candidates from minority groups, “Sometimes when folk in other communities get involved in the outdoors there are religious, cultural and social pressures .... Family commitments come first, and it has a big impact on free time ... suddenly your free time isn’t free.”
 
-#######	Multiple qualifications.
+######	Multiple Qualifications.
 
-Some candidates also work towards other qualifications at the same time as the ML. Five participants suggested that working towards multiple qualifications at the same time has a negative impact on the time available to candidates and thus their likelihood of attending an assessment. O2 explained that working towards multiple qualifications at the same time made it harder to do one well:
+Some candidates also work towards other qualifications at the same time as the Mountain Leader qualification. Five participants suggested that working towards multiple qualifications at the same time negatively impacts the time available to candidates and thus their likelihood of attending an assessment. Officer 2 explained that working towards multiple qualifications at the same time made it harder to do one well:
 
 >[Candidates] who tried to then spread with paddle sports and that really suffered .... You have to have a bit of a focus .... You have to decide which one it is you are going to do. Unless you are one of these really rare people who’s brilliant at everything.
 
-P3 suggested that working towards multiple qualifications at the same time may be detrimental to a candidate’s chances of attending an assessment because of changes in their regulatory motives:
+Provider 3 suggested that working towards multiple qualifications at the same time may be detrimental to a candidate’s chances of attending an assessment because of changes in their regulatory motives:
 
 > Sometimes they’re trying to do quite a lot of tickets all at the same time and it can become a chore for them, and it’s almost like a hoop that they feel they need to jump through as opposed to actually enjoying the process ... I think a lot of them find it really hard to put the time in.
 
-O4 also recognised that working towards multiple qualifications at the same time may limit the amount of time that candidates can gain experience in but suggested that there might be some advantages to this as well:
+Officer 4 also recognised that working towards multiple qualifications at the same time may limit the amount of time that candidates can gain experience in but suggested that there might be some advantages to this as well:
 
 > [Trainees] might be preparing for other things at the time. But equally, they’re in a particular phase of their life and mind-set, which is award focused. So, therefore, they will be quite good at preparing for assessments and more likely to have access to other people that have got MLs that can help them.
 
-######	Location
-Six participants discussed how the place where a candidate lives influences how easily they can accrue QMDs. It is harder for candidates who live further from the mountains to accrue QMDs as they must both travel for longer and often feel that they need to take block of time off to get to the mountains. O2 explained that candidates living in Scotland could gain QMDs “in a day rather than two days” because they did not “have a day’s travelling to get there and back.” This was supported by P1 who said:
 
->“People for whom the mountains are a long way away: by definition, it’s going to be harder because they’ve got to have the time and the money to get themselves there.” P1 went on to say, “They’re going to do it more as bunches of days, so they’re quite likely to do multi-day expeditions .... Whereas, the people who live closer can do it weekend and weekend, once a month on a Sunday.”
+#####	Location. {#qual-gta-location}
 
-In addition, candidates living further from the mountains will face a higher financial cost. For some candidates, this can seem beyond their means, O1 said:
+Six participants discussed how the place where a candidate lives influences how easily they can accrue QMDs. It is harder for candidates who live further from the mountains to accrue QMDs as they must both travel for longer and often feel that they need to take a block of time off to get to the mountains. Officer 2 explained that candidates living in Scotland could gain QMDs “in a day rather than two days” because they did not “have a day’s travelling to get there and back.” This was supported by Provider 1 who said, "People for whom the mountains are a long way away: by definition, it’s going to be harder because they’ve got to have the time and the money to get themselves there.” Provider 1 went on to say, “They’re going to do it more as bunches of days, so they’re quite likely to do multi-day expeditions .... Whereas, the people who live closer can do it weekend and weekend, once a month on a Sunday.”
+
+Further, candidates living further from the mountains will face a higher financial cost. For some candidates, this can seem beyond their means, Officer 1 said:
 
 > The financial cost of gaining the experience is a massive challenge. When you’re talking to someone from the South East, telling them they need to get up into Snowdonia and The Lakes, or The Highlands, on 40 occasions, they start going, “Bloody hell. I can’t afford that.”
 
-#####	Social support.
 
-######	Development plans.
+####	Social Support. {#qual-gta-social-support}
 
-All seven participants said that it was important for candidates to leave their assessment with an understanding of what they needed to do to prepare for an assessment (i.e., have a development plan). When asked what the most important part of support was for candidates, P2 said:
+#####	Development Plans. {#qual-gta-development-plan}
+
+All seven participants said that it was important for candidates to leave their assessment with an understanding of what they needed to do to prepare for an assessment (i.e., have a development plan). When asked what the most important part of support was for candidates, Provider 2 said:
 
 > Once they’ve got onto the training a really good training course, which makes it clear to the candidates what it’s all about, and then directs them the right way. You need to individually debrief people and get to know what their personal needs are ... A generic debrief really sometimes doesn’t cover it thoroughly enough for individuals.
 
+When asked what influence they thought the post-training debrief has on candidates Provider 3 suggested that it could have a profound impact on candidates’ expectations:
 
-When asked what influence they thought the post-training debrief has on candidates P3 suggested that it could have a profound impact on candidates’ expectations:
+> It’s a really important chat ... it’s really common on a debrief when you sit down with somebody and say, “That was an awesome performance. All you need to do is pad this logbook a bit, and you could come forward for assessment really quickly.” They sit there and go, “But I was thinking about doing it in four years’ time.” and you’re like, “What? You could do it next spring, no problems at all” .... You can have a big impact.
 
-> It’s a really important chat, ... it’s really common on a debrief when you sit down with somebody and say, “That was an awesome performance. All you need to do is pad this logbook a bit, and you could come forward for assessment really quickly.” They sit there and go, “But I was thinking about doing it in four years’ time.” and you’re like, “What? You could do it next spring, no problems at all.” ... You can have a big impact.
+However, Officer 3 explained that providing individualised feedback can be at odds with preventing training courses feeling like an assessment, an issue highlighted above (see [Negative experiences at training]), “I don't believe that candidates should feel they're under any sort of assessment process while on the training course. Once you have a formalised one-to-one debrief it can feel like an assessment.” Provider 1 suggests that it is possible to provide individualised feedback without making candidates feel that they have been assessed:
 
-However, O3 explained that providing individualised feedback can be at odds with preventing training courses feeling like an assessment, an issue highlighted above (see [Negative experiences at training]), “I don't believe that candidates should feel they're under any sort of assessment process while on the training course. Once you have a formalised one-to-one debrief it can feel like an assessment.” P1 suggests that it is possible to provide individualised feedback without making candidates feel that they have been assessed:
-
->My debrief is actually getting them to tell me what they think they need to do rather than me telling them what they need to do, because I would’ve had to assess them somehow to do that .... I’m asking them to self-assess and tell me what they think they need to do to get to the assessment.
-
-
-######	Time support.
-
-As shown above (see [Profession] and [Family]) some candidates felt that they did not have enough time to prepare for an ML assessment. However, different candidates with the same demands on their time can feel differently about the amount of available time they have. One reason for this is that some candidates are supported by their employers and families. When asked what sort of support candidates might look for O2 said, 
-
-> Having the support of their family is going to be absolutely paramount .... Having support from family to free up time and then actually having the time both from family and work that coincides with the others .... It is an acknowledgement within the family that [the ML] is important to the person. The ones who have succeeded against the odds have had that support. That’s been really obvious.
-
-Employers are another source of time support for some candidates. When talking about support candidates received with practical matters, P1 said, “Some of them are in organisations and centres where the management are on the ball enough to allow them development time.”
+> My debrief is actually getting them to tell me what they think they need to do rather than me telling them what they need to do, because I would’ve had to assess them somehow to do that .... I’m asking them to self-assess and tell me what they think they need to do to get to the assessment.
 
 
-######	Financial support.
+#####	Time Support.
 
-Six participants spoke about candidates who had received financial support. In some instances, this was essential to candidates’ progression to assessment. P2 said that, “A lot of people wouldn’t be able to do ML if they didn’t get financial assistance” and went on to say, "However, participants also suggested that financial support will only benefit candidates if they are also sufficiently motivated to complete the ML." O3 said:
+As shown above (see [Profession] and [Family]) some candidates felt that they did not have enough time to prepare for a Mountain Leader assessment. However, different candidates with the same demands on their time can feel differently about the amount of available time they have. One reason for this is that some candidates are supported by their employers and families. When asked what sort of support candidates might look for Officer 2 said, 
+
+> Having the support of their family is going to be absolutely paramount .... Having support from family to free up time and then actually having the time both from family and work that coincides with the others .... It is an acknowledgement within the family that [the Mountain Leader qualification] is important to the person. The ones who have succeeded against the odds have had that support. That’s been really obvious.
+
+Employers are another source of time support for some candidates. When talking about support candidates received with practical matters, Provider 1 said, “Some of them are in organisations and centres where the management are on the ball enough to allow them development time.”
+
+
+#####	Financial Support.
+
+Six participants spoke about candidates who had received financial support. In some instances, this was essential to candidates’ progression to assessment. Provider 2 said that “A lot of people wouldn’t be able to do ML if they didn’t get financial assistance” and went on to say, "However, participants also suggested that financial support will only benefit candidates if they are also sufficiently motivated to complete the ML." Officer 3 said:
 
 > In my experience, those [whose] pathway has been paid for or financially supported, they don’t really seem to engage with the actual role of taking responsibility for a group in the mountains .... Heavily subsided or full payment I tend to find they don’t get a good solid engagement and on occasions people just don’t turn up because there’s no engagement at all.
 
-When talking about candidates who want to use the ML for work P1 supported this paradox associated with financial support, saying, “they’re pretty motivated to do it, and so I would say I think that the success rates are pretty good for that, particularly if they’ve paid for it.”
+When talking about candidates who want to use the Mountain Leader qualification for work Provider 1 supported this paradox associated with financial support, saying, “they’re pretty motivated to do it, and so I would say I think that the success rates are pretty good for that, particularly if they’ve paid for it.”
 
-####	Reengaging later in life
 
-Five participants discussed candidates who had disengaged with the ML and then but reengaged with it later in life. P2 gave an example where candidates had an enduring motivation to become Mountain Leaders but had not completed the qualification because they were busy with other aspects of their lives:
+####	Re-engaging Later in Life.
+
+Five participants discussed candidates who had disengaged with the Mountain Leader qualification and then but re-engaged with it later in life. Provider 2 gave an example where candidates had an enduring motivation to become Mountain Leaders but had not completed the qualification because they were busy with other aspects of their lives:
 
 > They start the process when they were young, free and single. They meet somebody, get married, have kids, they don’t do it for years and years and years. Then they come back to it. It’s something they’ve always wanted to do.
 
-P1 also suggested that changes in family circumstances can be the reason that candidates reengaged with the ML:
+Provider 1 also suggested that changes in family circumstances can be the reason that candidates re-engaged with the Mountain Leader qualification:
 
 > The Scouts, the Guides and the D of E are often the kick-start to get people back into it again because they’ve suddenly found that their kids are actually at that stage .... Then, they want some formal training on top of that.
 
-P3 suggested that retirement might also provide candidates with an opportunity to reengage, “[Candidates] who did their training a long, long time ago and then their career is coming to an end .... They’ll reengage as well.”
+Provider 3 suggested that retirement might also provide candidates with an opportunity to re-engage, “[Candidates] who did their training a long, long time ago and then their career is coming to an end .... They’ll re-engage as well.”
 
-####	Redirection to lower qualifications
 
-Five participants suggested that after ML training some candidates decided to pursue a lower qualification instead, O1 said, “They can’t put [the ML] as the priority in their life, so they may drop back to the Hill and Moorland Leader or the Lowland Leader course as a more achievable objective.” This was supported by O2 above (see [Family]) and when talking about candidates who have struggled with the Mountain Leader training course, “We get a reasonable number that then convert to Hill and Moorland Leader .... They decide that they are going to do that, because that is a shorter assessment and less intensive.”
+####	Redirection to Lower Qualifications. {#ml-qualitative-gta-redirection-lower}
 
-It is unclear how this will ultimately influence getting to an ML assessment. For some candidates this lower qualification will suit their needs and they will not continue with the ML but for others, completing the lower qualification becomes another step in the process of becoming a Mountain Leader. When talking about training debriefs, P2 said, “Sometimes, we would advise somebody to go and do the Hill and Moorland assessment .... They worked really hard to get the Hill and Moorland ... then eventually, after a couple of years, they’ve done the ML assessment.”
+Five participants suggested that after Mountain Leader training some candidates decided to pursue a lower qualification instead, Officer 1 said, “They can’t put [the Mountain Leader qualification] as the priority in their life, so they may drop back to the Hill and Moorland Leader or the Lowland Leader course as a more achievable objective.” This was supported by Officer 2 above (see [Family]) and when talking about candidates who have struggled with the Mountain Leader training course, “We get a reasonable number that then convert to Hill and Moorland Leader .... They decide that they are going to do that, because that is a shorter assessment and less intensive.”
 
+It is unclear how this will ultimately influence getting to a Mountain Leader assessment. For some candidates, this lower qualification will suit their needs and they will not continue with the Mountain Leader qualification but for others, completing the lower qualification becomes another step in the process of becoming a Mountain Leader. When talking about training debriefs, Provider 2 said, “Sometimes, we would advise somebody to go and do the Hill and Moorland assessment .... They worked really hard to get the Hill and Moorland ... then eventually, after a couple of years, they’ve done the ML assessment.”
 
 ### Passing
+
+Factors that influenced the likelihood of a candidate passing an assessment could be considered under two broad headings, experience and resilience. Whilst these are presented as two separate themes, participants suggested that they are linked, as discussed below.
+
+#### Resilience. {#qual-passing-resilience}
+
+All seven participants spoke about the need for candidates to be able to recover from setbacks to pass an assessment. Indeed, mountaineering and leading others in the mountains can often be a stressful experience. When talking about the perception that Mountain Leader assessments are stressful Officer 2 said:
+
+> I’ve been in really shit situations with clients, and there are no assessments as stressful as when things aren’t going well when you’ve got real people there. So therefore, if you haven’t got the mechanisms and strategies to deal with assessment nerves and stress, then actually you’re not really going to cope well when things go horribly wrong with a group.
+
+Five participants felt that at some point during a Mountain Leader assessment it was inevitable that candidates would make a mistake, even the most competent, and how candidates deal with those mistakes is important, Provider 2 said:
+
+> I always say to people, “It’s very, very unlikely that you will not make a mistake because making mistakes is part of it. We all mistakes so if you make mistakes, learn from them and move on. Be positive with it.” It’s very difficult to be assessed or watched for five days without making an error of some kind, and I said, “When you make mistakes you will blow those mistakes right out of proportion because you’ll be hard on yourself. You’ll have your moment where you’ve got to get through that. It’ll happen to everybody probably. It’s really unlikely to get through this week without making mistakes so you mustn’t let these mistakes get you down. You’ve got to keep coming back. When you rectify mistakes, it tells us [assessors] a lot about you. It’s no good you getting disoriented a bit and throwing the towel in because what we want to see you do is get disoriented and sort it out because we’ve got to think if you were with a group in that situation, what would you do? Throw the towel in or would you sit down, concentrate, re-orientate, think about it and sort it out?"
+
+Five participants spoke specifically about experience building resilience as candidates with more experience are more likely to have dealt with setbacks as part of that experience. Provider 1 said, “we want people to be able to bounce back, that’s perhaps a product of experience, and greater experience means that they’re more likely to have to do that because if you’re in the mountains long enough things go wrong.” Officer 2 explained how Mountain Training has incorporated this phenomenon into the concept of a QMD:
+
+> One of the reasons for creating the concept of Quality Mountain Days, I try and explain to people, it’s not just any old day, it’s challenging days. And the idea really … is to develop resilience. So, you go into situations where you’re challenged on a wide variety of levels, both technically, and physically, and mentally. And if you have loads of quality [mountain] days, where all of these elements are taxed and challenged. Then you come through it, or sometimes you don’t but you learn from it, you’ll develop resilience. And you’re used to dealing with adversity. And that’s what a Mountain Leader, I guess, at the end of the day, when push comes to shove, that’s what they’ve got to deal with. But I think folk short-circuit the quality mountain day experience. So, any day is a quality mountain day, and therefore that resilience isn’t necessarily as great.
+
+Officer 3 explained that candidates' experience outside of the mountains may also help them to cope with adversity: 
+
+> Candidates’ experience and abilities that is important… I guess we touched on yesterday, it’s that ability, the resilience and robustness of the candidate. That might be born partly from their mountaineering experience, it could also be lessons they’ve learned in other aspects of their lives that they can very easily transfer to coping with adversity in that mountain context.
+
+#### Experience. {#ml-qual-pass-exp}
+
+All seven participants discussed the importance of candidates' experience in relation to pass a Mountain Leader assessment. Above, experience has been related to increased levels of confidence (Section \@ref(qual-gta-confidence)) and resilience (Section \@ref(qual-passing-resilience)), in addition, influences on candidates' ability to gain experience have been discussed concerning candidates getting to an assessment (Section \@ref(qual-gta-gaining-experience)). Participants discussed three facets of experience that were important when considering the outcome of an assessment: quantity, quality, and variety. The relationship between each of these facets and candidates' performance at an assessment are discussed below.
+
+
+##### Quantity.
+
+All seven participants spoke about how the quantity of experience a candidate had influenced the outcome of their assessment and suggested that, in general, candidates with more experience would be more competent and therefore more likely to pass. When asked about the performance of candidates at an assessment, Provider 1 said that, “A lot of it is about experience, that you build up … by being in the mountains and having done all that stuff.” Provider 2 supported this, saying, "People’s performance is more down to the level of experience and the amount of preparation they’ve done for that week."
+
+Having 40 QMDs is a prerequisite for passing a Mountain Leader assessment and all seven participants emphasised the fact that 40 QMDs is the minimum, explaining that having the minimum experience is not always enough for candidates to demonstrate competence. Officer 1 said:
+
+> If we have a candidate that reads the assessment criteria and does the minimum, is aiming for the minimum, so that is visiting 3 areas, getting 40 quality mountain days, then typically you find that they're struggling to make the right decisions and adapt to different scenarios and different places.
+
+However, four participants suggested that for a minority of candidates, 40 QMDs were more than enough. Officer 3 said:
+
+> It's a bit of an issue for course directors sometimes, where during the practical assessment, the candidates show evidence satisfying all the competencies, as such. Therefore, they want to pass the person. But when they look back in their DLOG, they find that, actually, they've got less than 40 Quality Mountain Days, so it's a logbook deferral. Which seems a bit weird to me, that, if they've shown evidence that they can do the job on the hill. Almost, the logbook becomes less relevant. But it's what we do. I guess they're few and far between, those. Regularly, poor performance goes hand in hand with a weak logbook.
+
+Three participants spoke about the relationship between the quantity of experience that a candidate has and their level of confidence. All three suggested that experience develops confidence and confident candidates usually perform well. Provider 2 explained that:
+
+> Loads of people turn up really confident because they’re really good and they’ve got really strong logbooks and they are confident in their skills. That is from the word go. They have done so much preparation, so much, they are so used to what we’re going to do now this week, so they just cruise it .... At the end of the day, we’re going mountain walking and if they do a lot of mountain walking and they’re comfortable with that then they’re just good aren’t they and they’re confident.
+
+Four participants described reasons that candidates had not been able to gain as much experience as they would have liked to before being assessed. Section \@ref(qual-gta-gaining-experience) discussed barriers to candidates gaining enough experience to get to an assessment; for some candidates, these barriers did not stop them getting to an assessment, but they did prevent them gaining the experience that the candidates would like to have before being assessed. Officer 1 gave an example of this and the effect it had on the candidate:
+
+> They made the decision to book [an assessment]. Then a life event got in the way, didn’t allow them to consolidate as much as they wanted to, but they still went through with it, to try and give it a go. Then I think when they arrive, having not done the preparation that they knew they needed to do, day one you do introductions around the room, and then they’ve got other people in the room who appear very well prepared, that then knocks them back.
+
+However, having a large quantity of experience on its own is not enough. Candidates also need to have sufficient quality and variety of experience, Provider 1, “If they’ve got a huge mountain experience, yes, it will serve them better. It can’t help but not, really, and the wider that experience almost the better.”
+
+
+##### Quality.
+
+All seven participants spoke about the importance of candidates having suitable quality experience, as it is possible for candidates to gain 40 QMDs, but not develop their skills as the experiences would not have been challenging enough.
+
+
+###### Weather
+
+All seven participants spoke about the importance of candidates having experience in bad weather. Officer 1 said, “There's less value in lots of good weather days in terms of gaining experience.” Provider 1 explained that a lack of experience in bad weather before assessment could leave candidates unprepared, “In the past, [candidates] have come adrift on assessments because they’ve not been out in bad weather.” Officer 2 supported this, and explained how they thought having experience of bad weather developed candidates’ resilience:
+
+> We could tell the ones who’d been out [in] really crap weather, really stormy, horrific weather; natural propensity was not to go out in it. Well actually, some did. And when they all came to do the assessment, you knew the ones who’d been out in it, because they could deal with it. And the ones who couldn’t just went to pieces. And that was resilience. And you knew that they’d paid their dues, and it had been probably really tough. And hats off to them, they’d put themselves into quite unpleasant, and probably quite dangerous situations, potentially, and they’ve come through it. And then they’ve paid their dues when they came on the assessment, and they were facing similar conditions. “Well, this is… I’ve done this before.” Whereas the ones who avoided that, because it was unpleasant, didn’t. So I think, in a way, we rely on that resilience to be developed, just by doing experience.
+
+
+###### Off the Beaten Track {#qual-off-the-beaten-track}
+
+All seven participants spoke about the importance of candidates gaining experience “off the beaten track.” To pass a Mountain Leader assessment, candidates must be able to navigate in a variety of mountainous terrain. However, it is easy for one to spend time in the mountains, but never venture from an established path; Provider 1 said, “Let’s face it. Most mountains you walk up you walk up the path .... When do you ever go up a mountain that you don’t walk up the path? You would have to deliberately not walk up the path.” Provider 2 explained that candidates may have lots of experience, but not in appropriate terrain, which results in their skills not being at the standard required at an assessment:
+
+> They might have done 100 mountains but every mountain they’ve done is on a major footpath, for example, and they’ve never really ever gone into any steep, complex territory so they’re struggling as soon as they’re in that territory and you’ve got to test people in that territory just in case they go there or they end up being there or they choose to be there for any particular reason and that is the standard isn’t it? Sometimes people struggle off the beaten track, they can’t get their head around that side of things and you look at their logbook and they’ve done a lot of footpaths. But then again, why shouldn’t they? If you go up Scafell, you’re going to go up a footpath aren’t you? If you go up Snowdon and you’ve never been here before you’re going to go up the footpath. It’s logical so it’s pretty normal I think.
+
+
+##### Variety.
+
+All seven participants discussed various ways in which candidates’ experiences varied and the effect these differences had on their performance at an assessment. In general, the more varied *relevant* experience a candidate had, the better their performance was, however, any experience that was not relevant was not related to performance. Participants spoke about four different aspects of variety of experience: variety of QMDs, experience of other assessments, climbing and mountaineering experience, and international trekking experience.
+
+
+###### Variety of QMDs
+
+Five participants discussed the variety of QMDs that a candidate may have, and all five participants suggested that the more variety in QMDs that a candidate had the better. Indeed, Officer 4 suggested that the variety of QMDs a candidate has is more important than the quantity:
+
+> I guess the type of experience they’ve been getting is more important than the absolute volume. A lot of folk do quite repetitive stuff, feeling they’re gaining good experience, where actually, if it was condensed into fewer but more varied; they would be learning a lot more.
+
+More specifically, Provider 1 suggested that one benefit of gaining experience in different geographic locations was that it has exposed candidates to a wider variety of terrain:
+
+> If somebody had 40 days only in Snowdonia, compared to 40 days where that was spread across Snowdonia, the Lakes, the odd days in the Peaks, and the West and East in Scotland, would the second one be better? Yes, of course they would, because they’ve just got a greater experience of different types of terrain.
+
+Officer 3 supported this and also suggested that it was important that QMDs were gained in areas unfamiliar to the candidates, “I think if somebody just goes out and does loads of varied days in the mountains in all sorts of weathers in places they don't know, then I think they will get through.”
+
+
+###### Experience of Other Assessments
+
+Five participants spoke about the benefits of candidates having previously attended assessments, especially if the assessments were similar in nature to a Mountain Leader assessment (e.g., practical, continuous in nature). When asked for examples of the types of candidates who are confident that they will pass when arriving for their assessment, Provider 3 said:
+
+>Anybody that’s been through a similar process already, so maybe they’ve done their paddling qualifications, so a similar outdoor qualification, will have a better idea of what to expect. Military personnel who have already been through a military process have a better expectation of that. And, maybe people who are further along in professional careers that require some sort of continual assessment, you know, so they’re just used to being looked at and being assessed and having to revalidate with qualifications and things like that, they tend to be a little bit happier in that environment as well.
+
+In contrast, it was suggested that candidates who were less familiar with assessments were more anxious. Indeed, Provider 2 said, “when I did my first training and assessment, I would say that I was probably a bag of nerves and I wasn’t sleeping properly the night before it started.” Officer 2 suggested that candidates who were less familiar with assessments sometimes behaved in ways that were unusual for them:
+
+> You also get people that might be a little bit older who haven't been assessed for a very long time .... When you review it with them they go, “I don't know why I did that. I wouldn't normally do that. I thought that might be what you wanted to see” .... Whereas an outdoor instructor who’s going through multiple qualifications is getting very used to peer review, receiving feedback, being trained, being assessed, and they're enjoying the process. That is going to make a difference to how people then do things throughout their assessment week.
+
+
+######	Climbing/Mountaineering Experience
+
+Five participants discussed the influence of climbing and mountaineering experience on candidates’ performance at an assessment, however, their views were somewhat nuanced. All five participants felt that climbing and mountaineering experience could benefit a candidate’s performance, as they were more likely to be confident and proficient in their mountaineering skills. Officer 2 said:
+
+> Candidates with a much more broader mountaineering experience, they're generally more relaxed because they've been to lots of different environments, they've made a lot more decisions, they've had different circumstances and that makes it more adaptable. So their approaches to the technical skills it’s more common sense approach I guess rather than a clinical, “This is how I need to navigate to get out of here.” Yes, broader experiences is something that I think would really help someone towards getting through an assessment successfully.
+
+Whilst the potential benefits were recognised, four participants (including all three providers) described candidates with climbing experience being overconfident or not appreciating the difference in climbing and mountain walking. Provider 3 said:
+
+> There can be a negative side of things: People that are on climbing quals – you know, SPAs and things like that – can be overconfident in what they think is suitable terrain to jig people around on; I see that quite a lot. And yes, that’s not nice when you see that. And I warn them. (Laughter) I do give them a heads-up that this is their Summer ML and not their SPA and they need to be behaving appropriately. So unfortunately yes, I’ve seen some quite poor performances because of overconfidence because they think they’re a climbing instructor and there’s a lack of appreciation of the difference between the two.
+
+Interestingly, Officer 4 linked this inability to differentiate the context to experience, with those who were less experience being less able to make appropriate judgements, “If your experience is quite limited, it's quite hard to know, to sort of sift through that difference to ML rope work, climbing rope work and the two can get a bit confused.”
+
+
+######	International Trekking
+
+Four participants discussed the influence of international trekking experience on candidates’ performance at an assessment. Whilst this experience would prove somewhat useful, it was something that could compliment QMDs, not replace them, as some skills that are required for the Mountain Leader are unique to the UK, an example of this is navigating away from paths, the importance of which is discussed in Section \@ref(qual-off-the-beaten-track). Officer 3 said:
+
+> The reality is, unless they've actually hung out in the British mountains a bit, they don't perform very well. Irrespective of how compatible they think the [non-UK] environment is to the UK, it's very unique. So experience in the UK mountains is the most important thing, and developing a personal skillset.
 
 
 ### Reassessment
 
 Candidates who do not pass their initial assessment may or may not return to be reassessed. Whilst the interview was not designed to answer questions about what factors influence if candidates return to be reassessed, the semi-structured nature of them meant that some data emerged that provides some insight into this. However, these results are not as clear as those in previous sections.
 
-####	Understanding the Original Result
 
-All seven participants spoke about candidates either understanding and accepting their original assessment result or not. Participants suggested that candidates who understand and accept their result are in a better position to decide if they want to continue with the ML and if they do, understand what they need to do to pass a reassessment.
+####	Understanding the Original Result.
 
-#####	Preparing for reassessment.
+All seven participants spoke about candidates either understanding and accepting their original assessment result or not. Participants suggested that candidates who understand and accept their result are in a better position to decide if they want to continue with the Mountain Leader qualification and if they do, understand what they need to do to pass a reassessment.
 
-Four participants spoke about candidates who realised that they were below the standard and then went away to prepare for reassessment, P3 said:
+
+#####	Preparing for Reassessment.
+
+Four participants spoke about candidates who realised that they were below the standard and then went away to prepare for reassessment, Provider 3 said:
 
 > You’ll get lots of candidates who get deferred on their navigation, and are like, “Urgh,” then they go away, sort themselves out, come back for reassessment, and at the reassessment process they go, “I definitely wasn’t good enough, and I’ve gone away and done all this stuff, I know realise I’m a much better navigator than I was before.”
 
-#####	Disagree/don’t understand result
 
-Three participants spoke about candidates who did not either agree with or understand their original assessment result. O4 gives an example of why candidates might not agree with their result:
-I guess there's a danger that [candidates] don't fully understand, the reasons for having been deferred. If they're pinning it on isolated, you know, isolated mistakes that they've made or errors. Maybe they haven't grasped that it's a pattern that's emerged.
+#####	Disagree With/Do Not Understand Result.
 
-#####	Consequences of not understanding/accepting the result.
+Three participants spoke about candidates who did not either agree with or understand their original assessment result. Officer 4 gives an example of why candidates might not agree with their result:
 
-O1 explained that candidates who felt that their result was unfair would do one of two things:
-They would literally finish that assessment. Get the result they didn’t want to hear. Then they will either do one of two things, complain, or just get annoyed, and try and book onto the next earliest assessment they can.
+> I guess there's a danger that [candidates] don't fully understand, the reasons for having been deferred. If they're pinning it on isolated, you know, isolated mistakes that they've made or errors. Maybe they haven't grasped that it's a pattern that's emerged.
 
-They don’t believe they need to retrain. They believe they need to just be assessed again. Then they go to that next assessment and, hey presto, the same result .... Because nothing has changed. Unless it is about the assessor/candidate relationship .... If it’s about the system, rather than about the assessor, then if they go on to the next assessment they will just get the same result again.
 
-#####	Reasons for not understanding/agreeing.
+#####	Consequences of Not Understanding/Accepting the Result.
 
-P2 suggested that clashes between candidates and staff are not uncommon:
+Officer 1 explained that candidates who felt that their result was unfair would do one of two things:
+
+> They would literally finish that assessment. Get the result they didn’t want to hear. Then they will either do one of two things, complain, or just get annoyed, and try and book onto the next earliest assessment they can. They don’t believe they need to retrain. They believe they need to just be assessed again. Then they go to that next assessment and, hey presto, the same result .... Because nothing has changed. Unless it is about the assessor/candidate relationship .... If it’s about the system, rather than about the assessor, then if they go on to the next assessment they will just get the same result again.
+
+
+#####	Reasons for Not Understanding/Agreeing.
+
+Provider 2 suggested that clashes between candidates and staff are not uncommon:
 
 > You always have people complain about something or somebody, sometimes, about situations they’re in. You get a lot of info when people are being reassessed because they’d been deferred so you run a re-assessment and because they’re being deferred, they start telling you why they think they shouldn’t have been deferred and then they start slagging off providers and organisation.
 
-P2 goes on to explain that in some instances these clashes can be highly charged, "I have heard stories of people saying, 'I nearly punched him. I nearly hit him. In fact, we all did. We all felt like turning round and hitting him.' That’s not good, is it?"
+Provider 2 goes on to explain that in some instances these clashes can be highly charged, "I have heard stories of people saying, 'I nearly punched him. I nearly hit him. In fact, we all did. We all felt like turning round and hitting him.' That’s not good, is it?"
 
-####	Nerves
 
-Three participants said that candidates who present for reassessment are nervous, P2 said, “Everybody who turns up for a re-assessment is full of nerves. They’re very nervous when they start”. Two of these three participants suggest that for some this nervousness can be so extreme that it manifests itself with physical symptoms. P1 gave an example:
+####	Nerves.
+
+Three participants said that candidates who present for reassessment are nervous, Provider 2 said, “Everybody who turns up for a re-assessment is full of nerves. They’re very nervous when they start”. Two of these three participants suggest that for some this nervousness can be so extreme that it manifests itself with physical symptoms. Provider 1 gave an example:
 
 > Some people are literally sick with worry on ML assessments. I mean, I remember doing a reassessment for this one guy and he confessed afterwards that, just before we’d met up, he was throwing up because he was that nervous about doing this.
 
-P1 supports this, suggesting that it is not a one-off occurrence:
+Provider 1 supports this, suggesting that it is not a one-off occurrence:
 
 > They are really nervous and when you meet them you’ve got to really make sure you calm them down and you’ve got to try to create a really relaxed atmosphere before you set off because they’re shaking some of them. They’re nearly sick.
 
-This nervousness may be in part due to their experience on their original assessment. P2 provided the following insight in candidates’ original experience of assessment, “[Candidates] felt like [assessors] were quite harsh and quite lacking in any form of feedback or lacking in any form of empathy, which made them feel very uncomfortable, which made their performance even worse”
-
-####	Redirected towards a lower qualification
-
-Some candidate will not return for a reassessment because following their initial assessment because the assessment staff have redirected them towards a lower level qualification, as the assessment staff feel that would be more appropriate for them. Whilst only P2 spoke about candidates being directed towards a lower level qualification rather than reassessment this redirection is also spoken about in Getting to Assessment. P2 said, “When you get people like that, we advise them to do Hill and Moorland.... You will get that candidate who will be better off, definitely, doing Hill and Moorland.”
-
-+++from what is here it seems like only understanding and accepting results (or not) is the thing that influences returning to reassessment, with this understanding and acceptance likely influenced by the relationship between candidates and assessors. There are other things in your diagram (reprepare for the standard) that are not really mentioned here. A lot of the diagram makes sense to me, but it doesn’t feel like all the things from the diagram necessarily come through in the story. This might just be me though, we can discuss+++
-
-Should this be returning and passing reassessment?
-
-Make about reassessment in general rather than returning for reassessment. 
+This nervousness may be in part due to their experience on their original assessment. Provider 2 provided the following insight in candidates’ original experience of assessment, “[Candidates] felt like [assessors] were quite harsh and quite lacking in any form of feedback or lacking in any form of empathy, which made them feel very uncomfortable, which made their performance even worse”
 
 
-## Discussion
+####	Redirected Towards a Lower Qualification.
+
+Some candidate will not return for a reassessment because following their initial assessment because the assessment staff have redirected them towards a lower level qualification, as the assessment staff feel that would be more appropriate for them. Whilst only Provider 2 spoke about candidates being directed towards a lower level qualification rather than reassessment this redirection is also spoken about in Section \@ref(qual-gta) [Getting to Assessment](#qual-gta). Provider 2 said, “When you get people like that, we advise them to do Hill and Moorland .... You will get that candidate who will be better off, definitely, doing Hill and Moorland.”
 
 
-## Conclusions
+## Concluding Remarks
+
+In this study, we aimed to identify factors that influence the completion rate of the Mountain Leader qualification. To do so, we conducted in-depth interviews with Mountain Training staff and experiences course staff, which covered candidates: background, career history and social influence, personal characteristics, ability and experience, and support. The findings of this study suggest that a multitude of factors influence the completion rate of the Mountain Leader qualification. 
+
+For candidates to get to assessment it is important that they are confident they can become Mountain Leaders, have an extrinsic participatory motive that is autonomously regulated, were able to gain enough experience, and received appropriate support. Further, to pass an assessment, candidates needed to have sufficient experience that was varied and challenging enough, as well as being resilient enough to deal with setbacks on the assessment course. Finally, it was important that candidates who did not pass their assessment understood their result, were able to deal with the "nerves" associated with being reassessed, and were not directed towards a lower qualification if they were to be reassessed.
+
+The findings presented in this study represent the views of organisational managers and course staff and given the relativist epistemology adopted for this study, it is important that the findings are validated in a study with participants "from the other side" (i.e., candidates). Such a study may also include factors that we felt it was too difficult to collect meaningful data for in the present study.
