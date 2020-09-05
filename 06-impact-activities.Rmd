@@ -1,35 +1,39 @@
 # PhD Impact and Dissemination {#impact-activities}
 
-Given the applied nature of the PhD, it was important that the results were disseminated to the organisation. To do so, we produced a report, which is largely a lay summary of Chapter \@ref(ml-pra), and presented to various aspects of the Mountain Training organisation.
-  
+This PhD programme was part-funded by Mountain Training with the aim of better understanding the factors influencing the completion rate of the Mountain Leader qualification. This work represents the first step towards evidenced based change within Mountain Training and their qualifications. Therefore, it was important that the results were disseminated to the organisation in an accessible format and when we were confident in our interpretation of the findings, rather than just presenting Mountain Training with a copy of this thesis at the end of the PhD.
 
-## Mountain Training Report
+Dissemination of this projects findings has been ongoing and has occurred at various levels. For much of the last four years I have been considered as part of the Mountain Training team, this has allowed for regular discussion of the project with various members of staff, which has been the least formal method of dissemination. These conversations were extremely important to the project, however, were limited in scope (i.e., they were primarily with Mountain Training staff, not the wider network). Two important types of output from this project were, a report and various presentations to different parts of the Mountain Training network (e.g., course staff, board members, external stakeholders).
 
-Physical copies distributed to all Mountain Training board members (n = 106) and Mountain Leader course providers (n = 109).
+The report is largely a lay summary of Chapter \@ref(ml-pra) with additional information from the remainder of the thesis and the presentations presented progress reports along with key findings so that Mountain Training could begin to consider the implications of the work. We felt that it was important to "bring everyone along" as we conducted the research so that they would have a better understanding of the rationale for the recommendations we made to Mountain Training. The sections below include a copy of the report submitted to Mountain Training and examples of presentations given at the end of the project. One presentation is simply about this project and the Mountain Leader qualification, and the second is a presentation that was given to the providers of various Mountain Training qualifications, primarily their coaching qualifications, and it was important to try and relate the finding from this project to different Mountain Training qualifications. Following these presentations, Mountain Training Scotland wanted to understand more about candidates they were responsible for. This was a two part process, reported below.
+
+
+## Mountain Training Report {#impact-report}
+
+Physical copies of this report were distributed to all Mountain Training board members (n = 106) and Mountain Leader course providers (n = 109).
 
 \includepdf[pages=-, scale = .9, pagecommand={}, frame=true, offset = 0 -25]{impact_activity/mt_report.pdf}
 
 
-## Mountain Training Boards Presentation
+## Mountain Training Boards Presentation {#impact-board-pres}
 
-Presented to MTUKI (n = 26), MTE (n = 21), MTC (n = 16), MTS (n = 14) boards, MTS (n = 25) providers in October 2019, and Mountain Training staff (n = 15) in January 2020.
+This presentation was made on six occasions: to MTUKI (n = 26), MTE (n = 21), MTC (n = 16), MTS (n = 14) boards, MTS (n = 25) providers in October 2019, and Mountain Training staff (n = 15) in January 2020.
 
 \includepdf[pages=-, scale=.9, nup=1x2, frame=true, pagecommand={}]{impact_activity/board_presentation.pdf}
 
 
-## Mountain Training UK Coaching Provider Presentation
+## Mountain Training UK Coaching Provider Presentation {#impact-coach-pres}
 
-Presented to *all* MTUKI coaching providers (n = 22) in November 2019
+This presentation was made once, to *all* MTUKI coaching providers (n = 22), in November 2019.
 
 \includepdf[pages=-, scale=.9, nup=1x2,frame=true, pagecommand={}]{impact_activity/coaching_provider_presentation.pdf}
 
 
-## Moutain Training Scotland
+## Moutain Training Scotland {#impact-mts}
 
 Following the presentations to Mountain Training Scotland, they were keen to understand if there were any differences to the important factors in completion of their qualifications to those identified in the report. This resulted in a project with two key outputs. There were two key outputs agreed for this project: 1) A report containing summary statistics for pathway progress for Mountain Training Scotland Mountain Leader candidates and for Winter Mountain Leader candidates trained 2009-2019, and 2) A report identifying differences between MTS candidates who complete the Mountain Leader qualification and those who do not.
 
 
-### Part A: Mountain Training Scotland Mountain Leader and Winter Mountain Leader Completion Statistics
+### Part A: Mountain Training Scotland Mountain Leader and Winter Mountain Leader Completion Statistics  {#impact-mts-a}
 
 
 ```{r mts-walking completion-setup, include=FALSE}
@@ -485,7 +489,7 @@ There are some similarities between the journeys of candidates in these analyses
 For both the ML and WML MTS may want to consider ways in which they can support candidates in getting to an assessment having been trained (particularly female candidates) and also understand why a third of the candidates who register with them for the ML do not attend a training course. MTS may also wish to consider ways in which the number of non-white candidates can be increased, if appropriate, and also understand why non-white MTS candidates are more likely to be assessed than non-white candidates in other areas of the UK.
 
 
-### Part B: Mountain Leader Completion: Mountain Training Scotland
+### Part B: Mountain Leader Completion: Mountain Training Scotland  {#impact-mts-b}
 
 
 ```{r mts-ml-completion-setup, include=FALSE}
@@ -894,7 +898,7 @@ This study reports a set of variables for identifying female candidate who had b
 
 As in the MTUKI project, how becoming a Mountain Leader fitted into candidates' lives was important. An additional aspect of this was identified as important for both female and male candidates, access to the nearest mountainous area. For females this was perceived ease of access and for males, it was perceived travel time. **Finding ways to support those candidates with less good access to the mountains may increase the likelihood of them being assessed, by making it easier for them to gain the necessary experience.** This may be in the form of specific initiatives targeted at these candidates (e.g., travel bursaries, shared transport arrangements), or may be a broader scheme with the aim of improving access to the mountains for people from these areas. 
 
-*Self-determination theory* (SDT) suggests that every motivated behaviour can be placed on a continuum, from autonomous to controlled. Intrinsic motives (e.g., a person engaging in an activity because they find it interesting and enjoyable) will be closer to the autonomous end of this continuum, whereas extrinsic motives (e.g., to gain external approval or reward) will be closer to the controlled end [@Deci1985; @Deci2000]. Candidates with higher levels of controlled forms of motivation were more likely to have been assessed.^[External motives for female candidates and introjected motives for male candidates.] Neither male nor female candidates reported high levels of intrinsic motivation and we did not measure integrated or identified motives. These findings may simply be a result of candidates registering for the Mountain Leader qualification to use if for work (e.g., so they could run Duke of Gainsborough) which would likely be seen as a controlled form of motivation.
+*Self-determination theory* (SDT) suggests that every motivated behaviour can be placed on a continuum, from autonomous to controlled. Intrinsic motives (e.g., a person engaging in an activity because they find it interesting and enjoyable) will be closer to the autonomous end of this continuum, whereas extrinsic motives (e.g., to gain external approval or reward) will be closer to the controlled end [@Deci1985b; @Deci2000]. Candidates with higher levels of controlled forms of motivation were more likely to have been assessed.^[External motives for female candidates and introjected motives for male candidates.] Neither male nor female candidates reported high levels of intrinsic motivation and we did not measure integrated or identified motives. These findings may simply be a result of candidates registering for the Mountain Leader qualification to use if for work (e.g., so they could run Duke of Gainsborough) which would likely be seen as a controlled form of motivation.
 
 SDT would normally suggest that autonomous forms of motivation are better predictors of performance and goal persistence than controlled forms of motivation are [@Hagger2015]. Given that most candidates reported low scores for autonomous forms of motivation, using the training course as an opportunity to develop more autonomous forms of motivation may help some candidates get to an assessment. Perceived competence, motivational feedback, and perceived control have all been related to intrinsic motivation [@Vallerand2001] and it course staff should be able to positive influence each of these by coaching their candidates.
 
