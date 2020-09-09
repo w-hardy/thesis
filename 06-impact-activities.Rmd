@@ -28,7 +28,7 @@ This presentation was made once, to *all* MTUKI coaching providers (n = 22), in 
 \includepdf[pages=-, scale=.9, nup=1x2,frame=true, pagecommand={}]{impact_activity/coaching_provider_presentation.pdf}
 
 
-## Moutain Training Scotland {#impact-mts}
+## Mountain Training Scotland {#impact-mts}
 
 Following the presentations to Mountain Training Scotland, they were keen to understand if there were any differences to the important factors in completion of their qualifications to those identified in the report. This resulted in a project with two key outputs. There were two key outputs agreed for this project: 1) A report containing summary statistics for pathway progress for Mountain Training Scotland Mountain Leader candidates and for Winter Mountain Leader candidates trained 2009-2019, and 2) A report identifying differences between MTS candidates who complete the Mountain Leader qualification and those who do not.
 

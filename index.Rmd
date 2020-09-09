@@ -1,30 +1,96 @@
 --- 
-title: "Factors influencing the completion of the Mountain Leader qualification"
+title: |
+ ![](plots/Bangor_Logo_A1.png){width=3in}
+ 
+ **Developing excellence in outdoor provision: Enhancing training pathways for outdoor qualifications**
+
 author: "Will A. S. Hardy"
+subtitle: |
+     \hfill \break  Thesis submitted to Bangor University in fulfilment of the requirements for the Degree of Doctor of Philosophy at the School of Sport, Health, and Exercise Sciences, Bangor University.
 date: "`r Sys.Date()`"
+always_allow_html: TRUE
 site: bookdown::bookdown_site
 documentclass: book
 papersize: a4
-#fontsize: 12pt
-#linestretch: 2.0
-always_allow_html: TRUE
-bibliography: 
-  - [book.bib, packages.bib]
+geometry:
+  - inner = 2.5cm
+  - outer = 2.5cm
+  - top = 2.5cm
+  - bottom = 2.5cm
+fontsize: 12pt
+linestretch: 1.5
+bibliography:
   - [../../../references/library.bib]
+  - book.bib
+  - packages.bib
+csl: ../../../references/apa.csl
 biblio-style: apalike
+bibintoc: yes
+biblio-title: "References"
+lot: FALSE
+lof: FALSE
 link-citations: yes
-description: "This is a minimal example of using the bookdown package to write a book. The output format for this example is bookdown::gitbook."
+reference-section-title: yes
 ---
 
+```{r, include=FALSE, echo=FALSE}
+library(plyr)
+library(tidyverse)
+library(lubridate)
+library(readxl)
+library(knitr)
+library(kableExtra)
+library(ggthemes)
+library(plotly)
+library(mousetrap)
+library(randomizr)
+library(data.table)
+library(lavaan)#lavaan for CFA/SEM
+library(survival)
+library(survminer)
+library(papaja)
+library(tidytidbits)
+library(ggExtra)
+library(janitor)
+library(BayesFactor)
+library(psych)#psych for dataset + basic psychometrics
+library(semTools)#semTools for additional CFA/SEM functionality
+
+knitr::opts_chunk$set(echo = FALSE, cache = TRUE, warning = FALSE, message = FALSE, fig.pos = "H")
+options(ggplot2.discrete.fill = list(c("skyblue","orange"), RColorBrewer::brewer.pal(3, "Set2")))
+
+options(knitr.kable.NA = "-") #display "-" instead of NA in tables
+
+knitr::write_bib(c(.packages(), 'bookdown', 'knitr', 'rmarkdown'), 'packages.bib')
+```
+
+\setstretch{1.0}
 \listoftables
+\addcontentsline{toc}{section}{List of Tables}
 
 \listoffigures
+\addcontentsline{toc}{section}{List of Figures}
+\setstretch{1.5}
+
+\mainmatter
+\setcounter{page}{1}
+<!-- \setlength{\parindent}{4em} -->
+<!-- \setlength{\parskip}{1em} -->
 
 # Thesis Abstract {-}
 
-```{r include=FALSE}
-# automatically create a bib database for R packages
-knitr::write_bib(c(
-  .packages(), 'bookdown', 'knitr', 'rmarkdown'
-), 'packages.bib')
-```
+This thesis reports the findings of the first empirical investigations into the completion rates of the Mountain Leader qualification. In addition, the research reported in this thesis relied on the development of a novel methodology that provides researchers with a new tool for investigating complex real-world phenomena, where complex interactions are likely to be important. Further, the findings of the research in this thesis support those of recent investigations into the development of expertise and advances understanding of self-efficacy theory. This thesis comprises six chapters that answer the research question and five appendices that provide supplementary information that is not central to the findings of the research but was foundational in the development of the research and researcher.
+
+Chapter \@ref(gen-intro) outlines the nature of the problem investigated in the research presented in this thesis---the low completion rates of Mountain Training qualifications and notably the Mountain Leader qualification. Chapter \@ref(gen-intro) also introduces several prominent (and relevant) areas of social and sports psychology literature, along with explanations of their proposed relevance to the completion rates of the Mountain Leader. Further, the chapter briefly outlines some theoretical and methodological limitations of previous research that has tried to investigate similarly complex problems.
+
+Chapter \@ref(ml-qualitative) presents Study 1, the first empirical investigation into the completion rate of the Mountain Leader qualification. Study 1 was a large qualitative study that used in-depth interviews to identify the factors that organisational managers felt were important influences on the completion rate of the Mountain Leader qualification. The findings suggested that completion involved at least two distinct stages: (a) getting to an assessment and (b) passing an assessment. Participants felt that different factors were relevant to each of these steps. For getting to assessment, participants felt that confidence, motivation, barriers to gaining experience, and social support were important factors influencing the likelihood of candidates getting to an assessment. To pass an assessment, participants felt that it was essential that candidates were resilient and had enough experience that was good quality and suitably varied.
+
+The research in Chapter \@ref(ml-pra) built on Study 1 by collecting quantitative data from candidates and Mountain Training's database and using non-linear pattern recognition analyses to identify the most important discriminatory factors for three classification problems: (a) discriminating male candidates who are assessed within 18 months of their training course from those who are not, (b) discriminating female candidates who are assessed within 18 months of their training course from those who are not, and (c) discriminating candidates who pass their first assessment from those who do not. Whilst relatively few themes were included in the findings of Study 1, up to 168 individual factors were identified as potentially important to the completion rate of the Mountain Leader qualification. Therefore, we put significant effort into creating a survey tool for collecting quantitative data for these variables from candidates reliably. This work is reported in Appendix \@ref(survey-tool-dev).
+
+Chapter \@ref(ml-pra) presents a study for each of the classification problems listed above. Study 2 identified 16 features that classified male candidates as having been assessed within 18 months or not with up to 92.73% accuracy. These features can be considered in three groups: the context of the Mountain Leader within a candidate's life, self-efficacy and resilience, and social support. Study 3 identified 22 features that correctly classified female candidates as having been assessed within 18 months or not with up to 96.64% accuracy. These features can be considered in three groups: the context of the Mountain Leader within a candidate's life, motivation, and consolidation of experience. Study 4 identified 14 features that correctly classified candidates as having passed their first assessment or not with up to 82.61% accuracy. These features can be considered in two groups: the experience of training and preparation for assessment. The findings of Studies 2-4 broadly supported those of Study 1. This congruence allowed us to place greater confidence in the importance of the factors identified as important influences on the completion rate of the Mountain Leader qualification.
+
+Based on the findings of Studies 1-3, Chapter \@ref(self-efficacy-qmds) addresses a question that arose about the nature of the relationship between experience and self-efficacy for female and male candidates. To do so, Chapter \@ref(self-efficacy-qmds) presents two studies that examined the relationship between experience and gender differences on Mountain Leader related self-efficacy from an interactive perspective. The first of which, Study 5, developed the Mountain Leader Self-Efficacy Scale (MLSS). The MLSS had a good fit to the data, and measurement invariance analyses suggested that the MLSS factors were the same for female and male candidates. Study 6 confirmed the factor structure of the MLSS and, using moderated hierarchical regression analyses, provided evidence for an interactive effect of gender and experience on routine skill self-efficacy, where the relationship between experience and self-efficacy was stronger for female than male candidates.
+
+Chapter \@ref(general-discussion) contains a general discussion of the methodological, theoretical, and applied implications of the research reported in this thesis. Finally, Chapter \@ref(impact-activities) discusses some of the work that has been carried out to disseminate the findings of this research throughout the Mountain Training network.
+
+
