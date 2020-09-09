@@ -1,4 +1,22 @@
 \usepackage{booktabs}
 \usepackage{multirow}
 \usepackage{makeidx}
-\makeindex
+\usepackage{float}
+\usepackage[hang,flushmargin]{footmisc}
+\usepackage{lscape}
+\usepackage{lipsum}
+\usepackage{etoolbox}%package for changing quote indentation
+\usepackage{pdfpages}%package for inserting other pdf into the document
+%\usepackage[style=authoryear]{biblatex}
+%\renewcommand*{\finalnamedelim}{%change "and" to "&" in citations
+%	\ifnumgreater{\value{liststop}}{2}{\finalandcomma}{}%
+%	\addspace\&\space}
+\newcommand{\blandscape}{\begin{landscape}}
+\newcommand{\elandscape}{\end{landscape}}
+\raggedbottom%allows white space at the bottom of pages
+\raggedright%left aligned text
+\pagenumbering{gobble}%removes page numbers - just for title page as used
+\setlength{\LTcapwidth}{\textwidth} % sets width of longtable captions to the width of the text
+\setlength{\parindent}{.5in}%sets indent of paragraphs at .5 inches for APA regs
+\setlength{\parskip}{0em}%set paragraph spacing to 0
+\patchcmd{\quote}{\rightmargin}{\leftmargin .5in \rightmargin}{}{}%setting quote margins at .5 inches for APA regs

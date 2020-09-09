@@ -257,7 +257,7 @@ full_join(pilot_loadings, main_loadings, by = "item") %>%
 ```{r efficacy-mi}
 mi_colnames <- 
   if(is_latex_output())
-  {c("Model", "Y-B$\\chi$\\textsuperscript{2}", "df", "p", "$\\Delta\\Chi\\textsuperscript{2}$", "$\\Delta$df", "p", "CFI", "$\\Delta$CFI",
+  {c("Model", "Y-B$\\chi$\\textsuperscript{2}", "df", "p", "$\\Delta\\chi\\textsuperscript{2}$", "$\\Delta$df", "p", "CFI", "$\\Delta$CFI",
      "RMSEA [90\\% CI]","$\\Delta$RMSEA", "SRMR", "$\\Delta$SRMR")} else {
         c("Model", "Y-B chi^2", "df", "p","Delta Chi^2", "delta df", "p", "CFI", "delta CFI",
           "RMSEA [90% CI]", "delta RMSEA", "SRMR", "delta SRMR")}

@@ -23,7 +23,7 @@ bibliography:
   - [../../../references/library.bib]
   - book.bib
   - packages.bib
-csl: ../../../references/apa.csl
+csl: ../../../references/apa-single-spaced.csl
 biblio-style: apalike
 bibintoc: yes
 biblio-title: "References"
