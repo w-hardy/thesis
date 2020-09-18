@@ -8,11 +8,12 @@
 *.docx
 *.log
 plots/
-chapter_3_data/
+*_data/
 impact_activity/
 3_ML_quantitative_v1.2_cache/
 3_ML_quantitative_v1.2_files/
 _bookdown_files/
+rr_feedback/
 old/
 dropbox_conflicts/
 libs/

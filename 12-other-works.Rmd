@@ -1,0 +1,93 @@
+# Other Works Completed During the PhD {#other-works}
+
+I have had several opportunities to be involved in research projects outside of the PhD project. These opportunities included both applied and theoretical work, quantitative and qualitative work, working as part of a multidisciplinary team and on my own, and have been with organisations from various sectors (e.g., public health, healthcare, elite sport, academia). This appendix provides a brief summary of each project I have contributed to in the last four years.
+
+One with a myopic view of this work might see this work as a distraction from the PhD. I cannot disagree with that view. However, I suggest that this work has been foundational in my development as a researcher Consequently, I suggest that the PhD project (and this thesis) has benefited from this "distraction."
+
+## Mountain Training Organisations
+
+Whilst completing the PhD, various questions were raised within Mountain Training that were not directly related to understanding the completion rate of the Mountain Leader qualification. 
+
+### Mountaineering Instructor Award Pass Rate
+
+#### Summary.
+
+The percentage of candidates passing their first Mountaineering Instructor Award (MIA)^[The MIA was renamed "Mountaineering and Climbing Instructor" (MCI) in March 2019.] assessment declined from 61% in 2010 to only 35% in 2016. Mountain Training commissioned this mixed-method study to attempt to identify differences in the preparation of candidates who passed their first assessment and those who did not.
+
+There were several key themes that differentiated those candidates who passed first time and those who did not. It is interesting to note the similarity between these findings and those reported in the main body of the thesis. Candidates who passed their first MIA assessment were more likely to
+
+* feel that they could commit to their preparation for assessment
+* feel they had prepared more thoroughly for assessment
+* feel more confident in their skills prior to assessment
+* have spent more time practising scrambling and navigation
+* have received more input from qualified instructors with current knowledge of the MIA
+* have received more social support beyond the technicalities of the MIA process
+
+#### Skills Developed.
+
+* Survey design. The survey for this study was the first online survey that I had created. The lessons learnt during this process were extremely valuable when designing the studies reported in Chapter \@ref(ml-pra) and Appendix \@ref(survey-tool-dev).
+* Data analysis. I analysed the qualitative data using thematic analysis and the quantitative data with a variety of standard statistical analyses (e.g., t-tests, moderated hierarchical regression).
+* Knowledge transfer. An integral component of this study was working with Mountain Training to understand their needs and to glean subject-specific knowledge that was important in making the research credible, both to stakeholders and from a research perspective.
+* Report writing. Reporting the results of this study to Mountain Training and the MIA course providers was important. I worked with Mountain Training staff to create a report that explained the findings of the study in a manner that would be both interpretable and credible to a variety of readers.
+
+#### Outputs.
+
+The final report [@Hardy2017b] can be found using the following link: https://www.mountain-training.org/qualifications/climbing/mountaineering-and-climbing-instructor/mia-preparation-research
+
+### MTE Impact Survey and Report
+
+Climbing, hill walking, and mountaineering make up the fifth largest participation sport in the UK [@MTE2019b]. Mountain Training qualifications underpin many of these outdoor activities. This may be where the activity is run by a Mountain Training qualification holder, participants have previously been trained by a Mountain Training qualification holder or where a Mountain Training qualification holder is involved as a technical consultant for an activity centre. 
+
+Mountain Training's CMS provides information about the numbers of candidates who are at each stage of the pathways, but it does not contain data about candidates use of their qualifications. Mountain Training wished to understand the extent of their qualification holders impact on society.
+
+The mains skills required for this project were survey design and data cleaning and preparation. For this project, I retrieved data from CMS using SQL queries and joined it to survey responses. I also anonymised the data so an independent researcher could analyse it.
+
+This project had two main outputs. The main report [@MTE2019] https://www.mountain-training.org/Content/Uploaded/Downloads/MLT/24a01711-d7ac-4fb6-a742-df18a4ae4a99.pdf and a summary report [@MTE2019b] https://www.mountain-training.org/about/structure-and-governance/mountain-training-england.
+
+### MCI Study 2019
+
+As described above, Mountain Training is interested in understanding the factors that influence the completion rate of the MCI (formerly the MIA). As an extension to the work by @Hardy2017b, we designed a study using the methodology developed in the present thesis. More specifically, we conducted a focus group with three organisational managers for the MCI (two Mountain Training staff and one course director) and the three members of the research team (WH, RR, and LH). Analysis of data collected from the focus group were analysed, and we identified 44 constructs as potentially important. Using similar methods to those in \@ref(survey-tool-dev), we operationalised these constructs as 144 items. We contacted the 739 candidates who attended an MCI training course between 2009 And 2018, 183 candidates started the survey and 145 completed the survey (80%). We have not analysed these data yet.
+
+### Financial Impact of COVID-19
+
+There are four professional associations that Mountain Training qualification holders can be members of. In March 2020, these organisations wanted to understand the potential financial impact of COVID-19 restrictions on their members. I provided support for the collection and analysis of data for this project. A report of the findings is available using the following link: https://www.mountain-training.org/latest-news/impact-of-covid-19-on-the-professional-mountaineering-community and the code used for analyses is available here: https://github.com/w-hardy/prof-mtnrs-covid-19. This project required me to learn a new statistical technique to account for sampling bias (Montecarlo simulations) and better understand a field (economics).
+
+## UK Sport
+
+I have worked on two separate projects for UK Sport during the PhD, one in 2018 and the other in 2020. The first of which involved the qualitative analysis of three focus groups that had been conducted with athletes, where perceptions of culture and success were discussed. In this project, I worked alongside one other researcher and the project was overseen by LH. I was responsible for data analysis and report writing. 
+
+The second project was an analysis of situational analysis and sporting and organisational health documents. I carried out this project on my own and was therefore solely responsible for analysing the documents and writing the report. The project resulted in a 38 page report, in which I presented the findings of qualitative and quantitative analyses.
+
+These projects have helped me to develop my qualitative analysis skills, offering me the opportunity to work on both focus group and document-based data---different from the data in my PhD. Further, this work provided me with an insight into a different domain, namely elite sport.
+
+## Profiling Elite Athletes
+
+I am involved in an ongoing project for a national level sports team that profiles elite athletes. My role in this project has been to streamline the collection and reporting of data for other members of the project team to work with. This project has given me the opportunity to apply my programming skills to a real-world problem; work with an elite sport organisation, who often require work to be carried out quickly and to a high standard; and to refine the report generated to provide the team with the data they need in the best format for them.
+
+## Perceptions of Healthy Ageing
+
+In 2019 I was part of a research team tasked with providing NRS Healthcare (a large healthcare company) with a better understanding of perceptions of healthy ageing. I was involved to varying degrees throughout the project. I was involved in the initial project set up, where we developed the project parameters with NRS Healthcare, which subsequently informed the study design. I then provided support to another member of the research team who developed the focus group discussion guide and conducted the interviews. Following this, I analysed the focus group data (four focus groups, approximate two hours each) and wrote large sections of the final report (24 pages). Finally, I presented the research with the research team lead (Dr. Jamie Macdonald) to NRS Healthcare's board of directors, including future directions for the project. Discussion about continuations of this work are ongoing.
+
+This project provided me with the opportunity to conduct research in a commercial setting and apply the knowledge that I have developed in the PhD (e.g., theoretical knowledge of self-determination theory) in a very different setting. This work further developed my qualitative research skills and presenting research in both written and oral formats to lay audiences. 
+
+## Public Health Wales
+
+At the end of 2019, I was asked to provide quality assurance for a public health project that evaluated a training programme. The evaluation aimed "to capture [the training's] immediate impact on police and [multi-agency] partners’ knowledge, practice, competence and confidence when responding to vulnerability" [@Glendinning2020]. This project introduced me to the complexities of large multi-organisation collaborations and to public health research. Further, this project required me to work closely with the first author of the report to ensure that the statistical results were communicated correctly, but in a relatively simple manner.
+
+## Innsbruck Collaboration
+
+After attending the International Society for Skiing Safety's 2017 conference in Innsbruck, I was invited to collaborate on two papers with them. The first of these was a qualitative study that aimed to better understand the motives for free ride skiing [@Fruhauf2017]. In this study, I rewrote large sections of the manuscript and acted as a critical friend for the first author. The second paper [@Fruhauf2018] used Bayesian structural equation modelling [cf. @Muthen2012] initial evidence of validity for German language versions of the Sensation Seeking, Emotion Regulation and Agency Scale [@Barlow2013] and the Risk-Taking Inventory [@Woodman2013]. Working on these papers gave me the opportunity to work as part of an international team on a topic of personal interest that was not related to my PhD.
+
+## Dictionary entries
+
+In 2017 I was offered the opportunity to coauthor two entries (risk-taking and sensation seeking) for the Dictionary of Sports Psychology by Prof. Tim Woodman [@Hardy2019; @Hardy2019a]. This work required me to synthesise literature and provide succinct definitions (200-400 words).
+
+## Robustness and Resilience Poster Presentation at SPSP
+
+In 2019 I presented a research poster at the Society for Personality and Social Psychology conference in Portland, Oregon [@Hardy2019c]. The two studies presented aimed to disentangle the construct *robsutness* (i.e., not being knocked back) from resilience (i.e., bouncing back). These studies were based on postgraduate student collaboration within SSHES. Use the following link to view the poster: https://osf.io/q4z3w/. This project provided me with the opportunity to coordinate a collaborative project, engage with basic rather than applied research, and to present research to an academic audience. 
+
+## Introduction to Bayesian Structural Equation Modelling
+
+A researcher from a UK university employed me to provide them with a short course that would introduce them to Bayesian structural equation modelling (BSEM) and support in applying the technique to their own research. Materials for this course are publicly available (https://github.com/w-hardy/BSEM_intro). This course included the following sessions: introduction to structural equation modelling, introduction to Bayesian statistics, introduction to BSEM, and BSEM in SPSS AMOS. Following these sessions, and follow up conversations, the researcher said
+
+> I wanted to say THANK YOU again for helping me with the SEM statistics. I found it very helpful, very accessible and you were very approachable. Last year when I was setting this up I was sceptical that it was the best way to approach the statistics, possibly thinking of employing someone to do the stats for me. However I do enjoy the statistics and it definitely was the right thing to do and I have benefited greatly from your expertise and your skill in passing on that knowledge.

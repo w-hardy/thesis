@@ -1,0 +1,51 @@
+This is BibTeX, Version 0.99d (TeX Live 2020)
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: thesis.aux
+The style file: apa.bst
+Reallocated field_info (elt_size=4) to 10214 items from 5000.
+Database file #1: ../../../references/library.bib
+Database file #2: book.bib
+Database file #3: packages.bib
+Warning--there's a number but no series in Cutrona1990a
+You've used 237 entries,
+            1940 wiz_defined-function locations,
+            1930 strings with 46015 characters,
+and the built_in function-call counts, 98027 in all, are:
+= -- 9734
+> -- 3933
+< -- 189
++ -- 1298
+- -- 1288
+* -- 8910
+:= -- 16792
+add.period$ -- 727
+call.type$ -- 237
+change.case$ -- 1796
+chr.to.int$ -- 227
+cite$ -- 238
+duplicate$ -- 3617
+empty$ -- 6834
+format.name$ -- 1695
+if$ -- 19097
+int.to.chr$ -- 11
+int.to.str$ -- 0
+missing$ -- 234
+newline$ -- 1176
+num.names$ -- 759
+pop$ -- 1438
+preamble$ -- 1
+purify$ -- 1805
+quote$ -- 0
+skip$ -- 2747
+stack$ -- 0
+substring$ -- 7111
+swap$ -- 724
+text.length$ -- 42
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 1372
+warning$ -- 1
+while$ -- 879
+width$ -- 0
+write$ -- 3115
+(There was 1 warning)

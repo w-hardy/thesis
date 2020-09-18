@@ -1,19 +1,40 @@
 \addvspace {10\p@ }
 \addvspace {10\p@ }
+\contentsline {table}{\numberline {2.1}{\ignorespaces Expectancy value exercise.}}{24}{table.2.1}%
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {3.1}{\ignorespaces Participant descriptive statistics.}}{37}{table.3.1}%
-\contentsline {table}{\numberline {3.2}{\ignorespaces Candidates pathway progress when completing the survey.}}{37}{table.3.2}%
-\contentsline {table}{\numberline {3.3}{\ignorespaces Group 5 male candidates getting to assessment within 18 months of training, unstandardised group descriptive statistics}}{42}{table.3.3}%
-\contentsline {table}{\numberline {3.4}{\ignorespaces Group 5 male candidates getting to assessment within 18 months of training, prediction model performance (n = 164).}}{44}{table.3.4}%
-\contentsline {table}{\numberline {3.5}{\ignorespaces Group 5 male candidates getting to assessment within 18 months of training, prediction model performance}}{44}{table.3.5}%
-\contentsline {table}{\numberline {3.6}{\ignorespaces Group 5 female candidates getting to assessment within 18 months of training, unstandardised group descriptive statistics}}{46}{table.3.6}%
-\contentsline {table}{\numberline {3.7}{\ignorespaces Survey variables}}{58}{table.3.7}%
-\contentsline {table}{\numberline {3.8}{\ignorespaces Classification rates for the feature subset with the highest classification rates for each data set (percentage accuracy).}}{59}{table.3.8}%
-\contentsline {table}{\numberline {3.9}{\ignorespaces Group 5 male candidates getting to assessment within 18 months of training, training model performance}}{60}{table.3.9}%
-\contentsline {table}{\numberline {3.10}{\ignorespaces Group 5 female candidates getting to assessment within 18 months of training, training model performance}}{61}{table.3.10}%
-\contentsline {table}{\numberline {3.11}{\ignorespaces Group 5 passing first time, training model performance. Data standardised within sex}}{62}{table.3.11}%
+\contentsline {table}{\numberline {3.1}{Overview of the theoretical domains included in the survey tool and the rationale for their relevance.}}{68}{table.3.1}%
+\contentsline {table}{\numberline {3.2}{\ignorespaces Participant descriptive statistics.}}{73}{table.3.2}%
+\contentsline {table}{\numberline {3.3}{\ignorespaces Candidates pathway progress when completing the survey.}}{74}{table.3.3}%
+\contentsline {table}{\numberline {3.4}{\ignorespaces Male candidates getting to assessment within 18 months of training, classification rates for feature subsets included in the final classification step.}}{84}{table.3.4}%
+\contentsline {table}{\numberline {3.5}{\ignorespaces Male candidates getting to assessment within 18 months of training, test and validation data model performance.}}{85}{table.3.5}%
+\contentsline {table}{\numberline {3.6}{\ignorespaces Male candidates getting to assessment within 18 months of training, sub-group prediction model performance.}}{86}{table.3.6}%
+\contentsline {table}{\numberline {3.7}{\ignorespaces Unstandardised group descriptive statistics of the features that discriminate male candidates who are assessed within 18 months of their training course from those who are not.}}{90}{table.3.7}%
+\contentsline {table}{\numberline {3.8}{\ignorespaces Female candidates getting to assessment within 18 months of training, classification rates for feature subsets included in final classification.}}{98}{table.3.8}%
+\contentsline {table}{\numberline {3.9}{\ignorespaces Female candidates getting to assessment within 18 months of training, unstandardised group descriptive statistics}}{102}{table.3.9}%
+\contentsline {table}{\numberline {3.10}{\ignorespaces Passing first time, classification rates for feature subsets included in final classification.}}{108}{table.3.10}%
+\contentsline {table}{\numberline {3.11}{\ignorespaces Candidates passing first time, unstandardised group descriptive statistics}}{111}{table.3.11}%
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {4.1}{\ignorespaces Factor loadings and model fit indices for the two-factor MLSS in Study 5 and 6.}}{127}{table.4.1}%
+\contentsline {table}{\numberline {4.2}{\ignorespaces MLSS measurement invariance results for Study 5 and 6.}}{128}{table.4.2}%
+\contentsline {table}{\numberline {4.3}{\ignorespaces Descriptive statistics and correlations between study variables (N = 433.)}}{131}{table.4.3}%
+\contentsline {table}{\numberline {4.4}{\ignorespaces Regression analyses examining interactions between gender and experience on self-efficacy to perform routine and emergency Mountain Leader skills.}}{133}{table.4.4}%
 \addvspace {10\p@ }
 \addvspace {10\p@ }
+\contentsline {table}{\numberline {6.1}{\ignorespaces MTS ML and WML candidate demographics}}{227}{table.6.1}%
+\contentsline {table}{\numberline {6.2}{\ignorespaces MTS ML first time pass rates per year by ethnicity}}{233}{table.6.2}%
+\contentsline {table}{\numberline {6.3}{\ignorespaces Female Winter ML first time pass rates per year}}{239}{table.6.3}%
+\contentsline {table}{\numberline {6.4}{\ignorespaces Winter ML first time pass rates per year by ethnicity}}{239}{table.6.4}%
+\contentsline {table}{\numberline {6.5}{\ignorespaces Participant descriptive statistics.}}{242}{table.6.5}%
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {A.1}{\ignorespaces Latent variable correlations between full- and short-form measures.}}{73}{table.A.1}%
-\contentsline {table}{\numberline {A.2}{\ignorespaces Survey participants per group}}{76}{table.A.2}%
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {B.1}{\ignorespaces Latent variable correlations between full- and short-form measures.}}{290}{table.B.1}%
+\contentsline {table}{\numberline {B.2}{\ignorespaces Survey participants per group}}{292}{table.B.2}%
+\contentsline {table}{\numberline {B.3}{\ignorespaces Classification rates for the feature subset with the highest classification rates for each data set (percentage accuracy).}}{295}{table.B.3}%
+\contentsline {table}{\numberline {B.4}{Survey variables.}}{297}{table.B.4}%
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {C.1}{Group 5 male candidates getting to assessment within 18 months of training, initial classification, training model performance.}}{315}{table.C.1}%
+\contentsline {table}{\numberline {C.2}{Group 5 female candidates getting to assessment within 18 months of training, initial classification, training model performance.}}{316}{table.C.2}%
+\contentsline {table}{\numberline {C.3}{\ignorespaces Group 5 passing first time, initial classification, training model performance. Data standardised within sex.}}{318}{table.C.3}%
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {D.1}{\ignorespaces Summary statistics for candidates who had not been assessed when completing the survey.}}{320}{table.D.1}%
+\addvspace {10\p@ }

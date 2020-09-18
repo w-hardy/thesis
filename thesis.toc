@@ -1,131 +1,292 @@
-\contentsline {chapter}{Thesis Abstract}{9}{chapter*.4}%
-\contentsline {chapter}{\numberline {1}General Introduction}{11}{chapter.1}%
-\contentsline {chapter}{\numberline {2}Qualitative}{13}{chapter.2}%
-\contentsline {section}{\numberline {2.1}Introduction}{13}{section.2.1}%
-\contentsline {section}{\numberline {2.2}Methods}{13}{section.2.2}%
-\contentsline {subsection}{\numberline {2.2.1}Philosophical orientation}{13}{subsection.2.2.1}%
-\contentsline {subsection}{\numberline {2.2.2}Participants}{13}{subsection.2.2.2}%
-\contentsline {subsection}{\numberline {2.2.3}Interview guide}{15}{subsection.2.2.3}%
-\contentsline {subsection}{\numberline {2.2.4}Credibility and trustworthiness}{15}{subsection.2.2.4}%
-\contentsline {section}{\numberline {2.3}Results}{16}{section.2.3}%
-\contentsline {subsection}{\numberline {2.3.1}Getting to Assessment}{16}{subsection.2.3.1}%
-\contentsline {subsubsection}{\numberline {2.3.1.1}Confidence}{16}{subsubsection.2.3.1.1}%
-\contentsline {paragraph}{\numberline {2.3.1.1.1}Level of confidence.}{16}{paragraph.2.3.1.1.1}%
-\contentsline {subparagraph}{\numberline {2.3.1.1.1.1}Individual differences in thresholds of confidence.}{17}{subparagraph.2.3.1.1.1.1}%
-\contentsline {subparagraph}{\numberline {2.3.1.1.1.2}Understanding the standard.}{18}{subparagraph.2.3.1.1.1.2}%
-\contentsline {subparagraph}{\numberline {2.3.1.1.1.3}Raising candidates' confidence levels.}{18}{subparagraph.2.3.1.1.1.3}%
-\contentsline {paragraph}{\numberline {2.3.1.1.2}Gender differences in robustness of confidence.}{19}{paragraph.2.3.1.1.2}%
-\contentsline {subsection}{\numberline {2.3.2}Motivation}{19}{subsection.2.3.2}%
-\contentsline {paragraph}{\numberline {2.3.2.0.1}Participatory motives.}{19}{paragraph.2.3.2.0.1}%
-\contentsline {paragraph}{\numberline {2.3.2.0.2}Regulatory motives.}{20}{paragraph.2.3.2.0.2}%
-\contentsline {subparagraph}{\numberline {2.3.2.0.2.1}Autonomous regulatory motives.}{20}{subparagraph.2.3.2.0.2.1}%
-\contentsline {subparagraph}{\numberline {2.3.2.0.2.2}Controlled regulatory motives.}{21}{subparagraph.2.3.2.0.2.2}%
-\contentsline {subparagraph}{\numberline {2.3.2.0.2.3}Intrinsic regulatory motives.}{21}{subparagraph.2.3.2.0.2.3}%
-\contentsline {paragraph}{\numberline {2.3.2.0.3}Negative disconfirmatory experience.}{22}{paragraph.2.3.2.0.3}%
-\contentsline {subparagraph}{\numberline {2.3.2.0.3.1}Negative experiences at training.}{22}{subparagraph.2.3.2.0.3.1}%
-\contentsline {paragraph}{\numberline {2.3.2.0.4}Competing influences.}{23}{paragraph.2.3.2.0.4}%
-\contentsline {subsubsection}{\numberline {2.3.2.1}Gaining experience}{24}{subsubsection.2.3.2.1}%
-\contentsline {paragraph}{\numberline {2.3.2.1.1}Barriers.}{24}{paragraph.2.3.2.1.1}%
-\contentsline {subparagraph}{\numberline {2.3.2.1.1.1}Lack of time.}{24}{subparagraph.2.3.2.1.1.1}%
-\contentsline {subparagraph}{\numberline {2.3.2.1.1.2}Location}{26}{subparagraph.2.3.2.1.1.2}%
-\contentsline {paragraph}{\numberline {2.3.2.1.2}Social support.}{27}{paragraph.2.3.2.1.2}%
-\contentsline {subparagraph}{\numberline {2.3.2.1.2.1}Development plans.}{27}{subparagraph.2.3.2.1.2.1}%
-\contentsline {subparagraph}{\numberline {2.3.2.1.2.2}Time support.}{28}{subparagraph.2.3.2.1.2.2}%
-\contentsline {subparagraph}{\numberline {2.3.2.1.2.3}Financial support.}{28}{subparagraph.2.3.2.1.2.3}%
-\contentsline {subsubsection}{\numberline {2.3.2.2}Reengaging later in life}{29}{subsubsection.2.3.2.2}%
-\contentsline {subsubsection}{\numberline {2.3.2.3}Redirection to lower qualifications}{29}{subsubsection.2.3.2.3}%
-\contentsline {subsection}{\numberline {2.3.3}Passing}{30}{subsection.2.3.3}%
-\contentsline {subsection}{\numberline {2.3.4}Reassessment}{30}{subsection.2.3.4}%
-\contentsline {subsubsection}{\numberline {2.3.4.1}Understanding the Original Result}{30}{subsubsection.2.3.4.1}%
-\contentsline {paragraph}{\numberline {2.3.4.1.1}Preparing for reassessment.}{30}{paragraph.2.3.4.1.1}%
-\contentsline {paragraph}{\numberline {2.3.4.1.2}Disagree/don't understand result}{30}{paragraph.2.3.4.1.2}%
-\contentsline {paragraph}{\numberline {2.3.4.1.3}Consequences of not understanding/accepting the result.}{30}{paragraph.2.3.4.1.3}%
-\contentsline {paragraph}{\numberline {2.3.4.1.4}Reasons for not understanding/agreeing.}{31}{paragraph.2.3.4.1.4}%
-\contentsline {subsubsection}{\numberline {2.3.4.2}Nerves}{31}{subsubsection.2.3.4.2}%
-\contentsline {subsubsection}{\numberline {2.3.4.3}Redirected towards a lower qualification}{32}{subsubsection.2.3.4.3}%
-\contentsline {section}{\numberline {2.4}Discussion}{32}{section.2.4}%
-\contentsline {section}{\numberline {2.5}Conclusions}{32}{section.2.5}%
-\contentsline {chapter}{\numberline {3}Key Discrimantory Factors}{33}{chapter.3}%
-\contentsline {section}{\numberline {3.1}Introduction}{33}{section.3.1}%
-\contentsline {subsection}{\numberline {3.1.1}The Mountain Leader qualification}{33}{subsection.3.1.1}%
-\contentsline {subsection}{\numberline {3.1.2}Pathways}{35}{subsection.3.1.2}%
-\contentsline {subsection}{\numberline {3.1.3}This paper}{36}{subsection.3.1.3}%
-\contentsline {section}{\numberline {3.2}Study 3 - Identifying the most important factors}{36}{section.3.2}%
-\contentsline {subsection}{\numberline {3.2.1}Method}{36}{subsection.3.2.1}%
-\contentsline {subsubsection}{\numberline {3.2.1.1}participants table}{36}{subsubsection.3.2.1.1}%
-\contentsline {subsubsection}{\numberline {3.2.1.2}Participants}{36}{subsubsection.3.2.1.2}%
-\contentsline {paragraph}{\numberline {3.2.1.2.1}Getting to assessment within 18 months of training - Male candidates}{37}{paragraph.3.2.1.2.1}%
-\contentsline {paragraph}{\numberline {3.2.1.2.2}Getting to assessment within 18 months of training - Female candidates}{38}{paragraph.3.2.1.2.2}%
-\contentsline {paragraph}{\numberline {3.2.1.2.3}Passing first time}{38}{paragraph.3.2.1.2.3}%
-\contentsline {subsubsection}{\numberline {3.2.1.3}Measures}{40}{subsubsection.3.2.1.3}%
-\contentsline {subsubsection}{\numberline {3.2.1.4}Procedure}{40}{subsubsection.3.2.1.4}%
-\contentsline {subsubsection}{\numberline {3.2.1.5}Analytical method}{40}{subsubsection.3.2.1.5}%
-\contentsline {paragraph}{\numberline {3.2.1.5.1}Preprocessing}{40}{paragraph.3.2.1.5.1}%
-\contentsline {paragraph}{\numberline {3.2.1.5.2}Feature selection}{40}{paragraph.3.2.1.5.2}%
-\contentsline {paragraph}{\numberline {3.2.1.5.3}Initial classification}{41}{paragraph.3.2.1.5.3}%
-\contentsline {paragraph}{\numberline {3.2.1.5.4}Final classification}{41}{paragraph.3.2.1.5.4}%
-\contentsline {paragraph}{\numberline {3.2.1.5.5}Model selection}{41}{paragraph.3.2.1.5.5}%
-\contentsline {paragraph}{\numberline {3.2.1.5.6}Model testing}{41}{paragraph.3.2.1.5.6}%
-\contentsline {subsection}{\numberline {3.2.2}Results}{42}{subsection.3.2.2}%
-\contentsline {subsubsection}{\numberline {3.2.2.1}Getting to assessment within 18 months of training}{42}{subsubsection.3.2.2.1}%
-\contentsline {paragraph}{\numberline {3.2.2.1.1}Male candidates}{42}{paragraph.3.2.2.1.1}%
-\contentsline {subparagraph}{\numberline {3.2.2.1.1.1}Model selection}{42}{subparagraph.3.2.2.1.1.1}%
-\contentsline {subparagraph}{\numberline {3.2.2.1.1.2}Model testing}{44}{subparagraph.3.2.2.1.1.2}%
-\contentsline {subparagraph}{\numberline {3.2.2.1.1.3}Model validation}{44}{subparagraph.3.2.2.1.1.3}%
-\contentsline {paragraph}{\numberline {3.2.2.1.2}Female candidates}{44}{paragraph.3.2.2.1.2}%
-\contentsline {paragraph}{\numberline {3.2.2.1.3}Passing first time}{46}{paragraph.3.2.2.1.3}%
-\contentsline {subsection}{\numberline {3.2.3}Discussion}{46}{subsection.3.2.3}%
-\contentsline {subsubsection}{\numberline {3.2.3.1}Model performance}{46}{subsubsection.3.2.3.1}%
-\contentsline {paragraph}{\numberline {3.2.3.1.1}Male candidates - Getting to assessment}{46}{paragraph.3.2.3.1.1}%
-\contentsline {subsubsection}{\numberline {3.2.3.2}Features selected}{49}{subsubsection.3.2.3.2}%
-\contentsline {paragraph}{\numberline {3.2.3.2.1}GTA Commonalities}{49}{paragraph.3.2.3.2.1}%
-\contentsline {paragraph}{\numberline {3.2.3.2.2}Male GTA}{50}{paragraph.3.2.3.2.2}%
-\contentsline {paragraph}{\numberline {3.2.3.2.3}Female GTA}{50}{paragraph.3.2.3.2.3}%
-\contentsline {paragraph}{\numberline {3.2.3.2.4}FTP}{50}{paragraph.3.2.3.2.4}%
-\contentsline {subsubsection}{\numberline {3.2.3.3}Female candidates - Getting to assessment}{52}{subsubsection.3.2.3.3}%
-\contentsline {subsubsection}{\numberline {3.2.3.4}Passing first time}{54}{subsubsection.3.2.3.4}%
-\contentsline {subsubsection}{\numberline {3.2.3.5}Limitations}{55}{subsubsection.3.2.3.5}%
-\contentsline {section}{\numberline {3.3}Discussion}{56}{section.3.3}%
-\contentsline {section}{\numberline {3.4}Future}{56}{section.3.4}%
-\contentsline {section}{\numberline {3.5}Conclusion}{57}{section.3.5}%
-\contentsline {section}{\numberline {3.6}Study 2 supplementary information}{57}{section.3.6}%
-\contentsline {subsection}{\numberline {3.6.1}Variables}{57}{subsection.3.6.1}%
-\contentsline {subsection}{\numberline {3.6.2}Study 2 classificaiton rates}{57}{subsection.3.6.2}%
-\contentsline {section}{\numberline {3.7}Study 3 supplementary information}{57}{section.3.7}%
-\contentsline {subsection}{\numberline {3.7.1}Example ominbus feature subsets}{57}{subsection.3.7.1}%
-\contentsline {subsection}{\numberline {3.7.2}Male getting to assessment training model performance}{62}{subsection.3.7.2}%
-\contentsline {subsection}{\numberline {3.7.3}Female getting to assessment training model performance}{62}{subsection.3.7.3}%
-\contentsline {subsection}{\numberline {3.7.4}First time pass model performance}{62}{subsection.3.7.4}%
-\contentsline {chapter}{\numberline {4}Self-Efficacy and Quality Mountain Days}{63}{chapter.4}%
-\contentsline {chapter}{\numberline {5}General Discussion}{65}{chapter.5}%
-\contentsline {chapter}{\numberline {A}Developing the survey tool}{67}{appendix.A}%
-\contentsline {section}{\numberline {A.1}Study 1 - Item selection}{67}{section.A.1}%
-\contentsline {subsection}{\numberline {A.1.1}Method}{68}{subsection.A.1.1}%
-\contentsline {subsubsection}{\numberline {A.1.1.1}Procedure}{68}{subsubsection.A.1.1.1}%
-\contentsline {subsubsection}{\numberline {A.1.1.2}Measures}{69}{subsubsection.A.1.1.2}%
-\contentsline {paragraph}{\numberline {A.1.1.2.1}Personality measures}{69}{paragraph.A.1.1.2.1}%
-\contentsline {paragraph}{\numberline {A.1.1.2.2}Socio-demographic}{69}{paragraph.A.1.1.2.2}%
-\contentsline {paragraph}{\numberline {A.1.1.2.3}Self-efficacy scale}{70}{paragraph.A.1.1.2.3}%
-\contentsline {paragraph}{\numberline {A.1.1.2.4}Personal projects}{70}{paragraph.A.1.1.2.4}%
-\contentsline {paragraph}{\numberline {A.1.1.2.5}Motives}{71}{paragraph.A.1.1.2.5}%
-\contentsline {paragraph}{\numberline {A.1.1.2.6}Course staff coaching behaviours}{71}{paragraph.A.1.1.2.6}%
-\contentsline {paragraph}{\numberline {A.1.1.2.7}Need supportive environment}{72}{paragraph.A.1.1.2.7}%
-\contentsline {paragraph}{\numberline {A.1.1.2.8}Perceived conflict on courses}{72}{paragraph.A.1.1.2.8}%
-\contentsline {paragraph}{\numberline {A.1.1.2.9}Social Support}{72}{paragraph.A.1.1.2.9}%
-\contentsline {paragraph}{\numberline {A.1.1.2.10}Preparation for assessment}{72}{paragraph.A.1.1.2.10}%
-\contentsline {paragraph}{\numberline {A.1.1.2.11}Life events}{72}{paragraph.A.1.1.2.11}%
-\contentsline {paragraph}{\numberline {A.1.1.2.12}Aspirations, intentions, and expectations}{73}{paragraph.A.1.1.2.12}%
-\contentsline {subsubsection}{\numberline {A.1.1.3}Data}{73}{subsubsection.A.1.1.3}%
-\contentsline {subsection}{\numberline {A.1.2}Results}{73}{subsection.A.1.2}%
-\contentsline {subsection}{\numberline {A.1.3}Discussion}{74}{subsection.A.1.3}%
-\contentsline {section}{\numberline {A.2}Study 2 - Item reduction}{74}{section.A.2}%
-\contentsline {subsection}{\numberline {A.2.1}Method}{74}{subsection.A.2.1}%
-\contentsline {subsubsection}{\numberline {A.2.1.1}Participants}{74}{subsubsection.A.2.1.1}%
-\contentsline {subsubsection}{\numberline {A.2.1.2}Analytical method - pattern recognition}{76}{subsubsection.A.2.1.2}%
-\contentsline {paragraph}{\numberline {A.2.1.2.1}Pre-processing}{78}{paragraph.A.2.1.2.1}%
-\contentsline {paragraph}{\numberline {A.2.1.2.2}Feature Selection}{79}{paragraph.A.2.1.2.2}%
-\contentsline {paragraph}{\numberline {A.2.1.2.3}Initial Classification}{79}{paragraph.A.2.1.2.3}%
-\contentsline {paragraph}{\numberline {A.2.1.2.4}Final Classification}{80}{paragraph.A.2.1.2.4}%
-\contentsline {subsection}{\numberline {A.2.2}Results}{80}{subsection.A.2.2}%
-\contentsline {subsubsection}{\numberline {A.2.2.1}Classification rates}{80}{subsubsection.A.2.2.1}%
-\contentsline {subsection}{\numberline {A.2.3}Discussion}{81}{subsection.A.2.3}%
+\contentsline {section}{Declaration and Consent}{i}{section*.1}%
+\contentsline {section}{Funding}{i}{section*.2}%
+\contentsline {section}{Acknowledgements}{ii}{section*.3}%
+\contentsline {section}{List of Tables}{viii}{chapter*.5}%
+\contentsline {section}{List of Figures}{x}{chapter*.6}%
+\contentsline {chapter}{Thesis Abstract}{1}{chapter*.7}%
+\contentsline {chapter}{\numberline {1}General Introduction}{5}{chapter.1}%
+\contentsline {section}{\numberline {1.1}Mountain Training}{5}{section.1.1}%
+\contentsline {section}{\numberline {1.2}The Mountain Leader Qualification}{7}{section.1.2}%
+\contentsline {section}{\numberline {1.3}Thesis Rationale}{9}{section.1.3}%
+\contentsline {section}{\numberline {1.4}Terminology}{10}{section.1.4}%
+\contentsline {section}{\numberline {1.5}Pathways to Expertise}{10}{section.1.5}%
+\contentsline {section}{\numberline {1.6}Personality and Individual Differences}{11}{section.1.6}%
+\contentsline {section}{\numberline {1.7}Self-Determination Theory}{12}{section.1.7}%
+\contentsline {subsection}{\numberline {1.7.1}Basic Psychological Needs Theory.}{13}{subsection.1.7.1}%
+\contentsline {subsection}{\numberline {1.7.2}Organismic Integration Theory.}{13}{subsection.1.7.2}%
+\contentsline {subsection}{\numberline {1.7.3}Hierarchical Models of Motivation.}{14}{subsection.1.7.3}%
+\contentsline {section}{\numberline {1.8}Self-Efficacy Theory.}{15}{section.1.8}%
+\contentsline {section}{\numberline {1.9}Theory of Planned Behaviour}{16}{section.1.9}%
+\contentsline {section}{\numberline {1.10}Support}{16}{section.1.10}%
+\contentsline {subsection}{\numberline {1.10.1}Coaching.}{17}{subsection.1.10.1}%
+\contentsline {subsection}{\numberline {1.10.2}Social Support.}{17}{subsection.1.10.2}%
+\contentsline {section}{\numberline {1.11}Thesis Structure}{18}{section.1.11}%
+\contentsline {chapter}{\numberline {2}Study 1: Qualitative}{21}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Introduction}{21}{section.2.1}%
+\contentsline {subsection}{\numberline {2.1.1}Refinement of the Research Questions}{22}{subsection.2.1.1}%
+\contentsline {subsubsection}{\numberline {2.1.1.1}Candidate Background.}{23}{subsubsection.2.1.1.1}%
+\contentsline {subsubsection}{\numberline {2.1.1.2}Candidate Career History and Social Influence.}{23}{subsubsection.2.1.1.2}%
+\contentsline {subsubsection}{\numberline {2.1.1.3}Candidate Personal Characteristics.}{23}{subsubsection.2.1.1.3}%
+\contentsline {subsubsection}{\numberline {2.1.1.4}Candidate Experience and Ability.}{23}{subsubsection.2.1.1.4}%
+\contentsline {subsubsection}{\numberline {2.1.1.5}Candidate Support.}{25}{subsubsection.2.1.1.5}%
+\contentsline {section}{\numberline {2.2}Methods}{25}{section.2.2}%
+\contentsline {subsection}{\numberline {2.2.1}Philosophical Orientation}{25}{subsection.2.2.1}%
+\contentsline {subsection}{\numberline {2.2.2}Participants}{26}{subsection.2.2.2}%
+\contentsline {subsection}{\numberline {2.2.3}Semi-Structured Interviews}{26}{subsection.2.2.3}%
+\contentsline {subsection}{\numberline {2.2.4}Procedure}{28}{subsection.2.2.4}%
+\contentsline {subsection}{\numberline {2.2.5}Data Analysis}{28}{subsection.2.2.5}%
+\contentsline {section}{\numberline {2.3}Findings}{29}{section.2.3}%
+\contentsline {subsection}{\numberline {2.3.1}Getting to Assessment}{29}{subsection.2.3.1}%
+\contentsline {subsubsection}{\numberline {2.3.1.1}Confidence.}{29}{subsubsection.2.3.1.1}%
+\contentsline {paragraph}{\numberline {2.3.1.1.1}Level of Confidence.}{30}{paragraph.2.3.1.1.1}%
+\contentsline {subparagraph}{\numberline {2.3.1.1.1.1}Individual Differences in Thresholds of Confidence.}{30}{subparagraph.2.3.1.1.1.1}%
+\contentsline {subparagraph}{\numberline {2.3.1.1.1.2}Understanding the Standard.}{32}{subparagraph.2.3.1.1.1.2}%
+\contentsline {subparagraph}{\numberline {2.3.1.1.1.3}Raising Candidates' Confidence Levels.}{32}{subparagraph.2.3.1.1.1.3}%
+\contentsline {paragraph}{\numberline {2.3.1.1.2}Gender Differences in Robustness of Confidence.}{33}{paragraph.2.3.1.1.2}%
+\contentsline {subsubsection}{\numberline {2.3.1.2}Motivation.}{33}{subsubsection.2.3.1.2}%
+\contentsline {paragraph}{\numberline {2.3.1.2.1}Participatory Motives.}{33}{paragraph.2.3.1.2.1}%
+\contentsline {paragraph}{\numberline {2.3.1.2.2}Regulatory Motives.}{34}{paragraph.2.3.1.2.2}%
+\contentsline {subparagraph}{\numberline {2.3.1.2.2.1}Autonomous Extrinsic Regulatory Motives.}{35}{subparagraph.2.3.1.2.2.1}%
+\contentsline {subparagraph}{\numberline {2.3.1.2.2.2}Controlled Regulatory Motives.}{36}{subparagraph.2.3.1.2.2.2}%
+\contentsline {subparagraph}{\numberline {2.3.1.2.2.3}Intrinsic Regulatory Motives.}{36}{subparagraph.2.3.1.2.2.3}%
+\contentsline {paragraph}{\numberline {2.3.1.2.3}Negative Disconfirmatory Experience.}{37}{paragraph.2.3.1.2.3}%
+\contentsline {subparagraph}{\numberline {2.3.1.2.3.1}Negative Experiences at Training.}{37}{subparagraph.2.3.1.2.3.1}%
+\contentsline {paragraph}{\numberline {2.3.1.2.4}Competing Influences.}{38}{paragraph.2.3.1.2.4}%
+\contentsline {subsubsection}{\numberline {2.3.1.3}Barriers to Gaining Experience.}{40}{subsubsection.2.3.1.3}%
+\contentsline {paragraph}{\numberline {2.3.1.3.1}Lack of Time.}{40}{paragraph.2.3.1.3.1}%
+\contentsline {subparagraph}{\numberline {2.3.1.3.1.1}Profession.}{40}{subparagraph.2.3.1.3.1.1}%
+\contentsline {subparagraph}{\numberline {2.3.1.3.1.2}Family.}{41}{subparagraph.2.3.1.3.1.2}%
+\contentsline {subparagraph}{\numberline {2.3.1.3.1.3}Multiple Qualifications.}{42}{subparagraph.2.3.1.3.1.3}%
+\contentsline {paragraph}{\numberline {2.3.1.3.2}Location.}{43}{paragraph.2.3.1.3.2}%
+\contentsline {subsubsection}{\numberline {2.3.1.4}Social Support.}{44}{subsubsection.2.3.1.4}%
+\contentsline {paragraph}{\numberline {2.3.1.4.1}Informational Support.}{44}{paragraph.2.3.1.4.1}%
+\contentsline {paragraph}{\numberline {2.3.1.4.2}Tangible Support.}{45}{paragraph.2.3.1.4.2}%
+\contentsline {subsubsection}{\numberline {2.3.1.5}Re-engaging Later in Life.}{46}{subsubsection.2.3.1.5}%
+\contentsline {subsubsection}{\numberline {2.3.1.6}Redirection to Lower Qualifications.}{47}{subsubsection.2.3.1.6}%
+\contentsline {subsection}{\numberline {2.3.2}Passing}{48}{subsection.2.3.2}%
+\contentsline {subsubsection}{\numberline {2.3.2.1}Resilience.}{48}{subsubsection.2.3.2.1}%
+\contentsline {subsubsection}{\numberline {2.3.2.2}Experience.}{50}{subsubsection.2.3.2.2}%
+\contentsline {paragraph}{\numberline {2.3.2.2.1}Quantity.}{50}{paragraph.2.3.2.2.1}%
+\contentsline {paragraph}{\numberline {2.3.2.2.2}Quality.}{52}{paragraph.2.3.2.2.2}%
+\contentsline {subparagraph}{\numberline {2.3.2.2.2.1}Weather}{52}{subparagraph.2.3.2.2.2.1}%
+\contentsline {subparagraph}{\numberline {2.3.2.2.2.2}Off the Beaten Track}{53}{subparagraph.2.3.2.2.2.2}%
+\contentsline {paragraph}{\numberline {2.3.2.2.3}Variety.}{54}{paragraph.2.3.2.2.3}%
+\contentsline {subparagraph}{\numberline {2.3.2.2.3.1}Variety of QMDs}{54}{subparagraph.2.3.2.2.3.1}%
+\contentsline {subparagraph}{\numberline {2.3.2.2.3.2}Experience of Other Assessments}{55}{subparagraph.2.3.2.2.3.2}%
+\contentsline {subparagraph}{\numberline {2.3.2.2.3.3}Climbing/Mountaineering Experience}{55}{subparagraph.2.3.2.2.3.3}%
+\contentsline {subparagraph}{\numberline {2.3.2.2.3.4}International Trekking}{56}{subparagraph.2.3.2.2.3.4}%
+\contentsline {subsection}{\numberline {2.3.3}Reassessment}{57}{subsection.2.3.3}%
+\contentsline {subsubsection}{\numberline {2.3.3.1}Understanding the Original Result.}{57}{subsubsection.2.3.3.1}%
+\contentsline {paragraph}{\numberline {2.3.3.1.1}Preparing for Reassessment.}{57}{paragraph.2.3.3.1.1}%
+\contentsline {paragraph}{\numberline {2.3.3.1.2}Disagree With/Do Not Understand Result.}{58}{paragraph.2.3.3.1.2}%
+\contentsline {paragraph}{\numberline {2.3.3.1.3}Consequences of Not Understanding/Accepting the Result.}{58}{paragraph.2.3.3.1.3}%
+\contentsline {paragraph}{\numberline {2.3.3.1.4}Reasons for Not Understanding/Agreeing.}{58}{paragraph.2.3.3.1.4}%
+\contentsline {subsubsection}{\numberline {2.3.3.2}Nerves.}{59}{subsubsection.2.3.3.2}%
+\contentsline {subsubsection}{\numberline {2.3.3.3}Redirected Towards a Lower Qualification.}{59}{subsubsection.2.3.3.3}%
+\contentsline {section}{\numberline {2.4}General Discussion}{60}{section.2.4}%
+\contentsline {subsection}{\numberline {2.4.1}Potential Links}{61}{subsection.2.4.1}%
+\contentsline {subsection}{\numberline {2.4.2}Future Research Directions}{62}{subsection.2.4.2}%
+\contentsline {section}{\numberline {2.5}Concluding Remarks}{63}{section.2.5}%
+\contentsline {chapter}{\numberline {3}Key Discriminatory Factors}{65}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Introduction}{65}{section.3.1}%
+\contentsline {subsection}{\numberline {3.1.1}Chapter Structure}{65}{subsection.3.1.1}%
+\contentsline {subsection}{\numberline {3.1.2}Relevant Constructs}{67}{subsection.3.1.2}%
+\contentsline {section}{\numberline {3.2}General Method}{73}{section.3.2}%
+\contentsline {subsection}{\numberline {3.2.1}Participants}{73}{subsection.3.2.1}%
+\contentsline {subsection}{\numberline {3.2.2}Measures}{74}{subsection.3.2.2}%
+\contentsline {subsection}{\numberline {3.2.3}Procedure}{76}{subsection.3.2.3}%
+\contentsline {subsection}{\numberline {3.2.4}Analytical Method}{76}{subsection.3.2.4}%
+\contentsline {subsubsection}{\numberline {3.2.4.1}Preprocessing.}{77}{subsubsection.3.2.4.1}%
+\contentsline {subsubsection}{\numberline {3.2.4.2}Feature Selection.}{78}{subsubsection.3.2.4.2}%
+\contentsline {subsubsection}{\numberline {3.2.4.3}Classification.}{80}{subsubsection.3.2.4.3}%
+\contentsline {subsubsection}{\numberline {3.2.4.4}Model Selection.}{81}{subsubsection.3.2.4.4}%
+\contentsline {section}{\numberline {3.3}Study 2: Male Candidates Getting to Assessment}{82}{section.3.3}%
+\contentsline {subsection}{\numberline {3.3.1}Method}{82}{subsection.3.3.1}%
+\contentsline {subsubsection}{\numberline {3.3.1.1}Participants.}{82}{subsubsection.3.3.1.1}%
+\contentsline {subsubsection}{\numberline {3.3.1.2}Analytical Method.}{82}{subsubsection.3.3.1.2}%
+\contentsline {paragraph}{\numberline {3.3.1.2.1}Model Testing and Validation.}{82}{paragraph.3.3.1.2.1}%
+\contentsline {subsection}{\numberline {3.3.2}Results}{83}{subsection.3.3.2}%
+\contentsline {subsubsection}{\numberline {3.3.2.1}Model Selection.}{83}{subsubsection.3.3.2.1}%
+\contentsline {subsubsection}{\numberline {3.3.2.2}Model Testing and Validation.}{84}{subsubsection.3.3.2.2}%
+\contentsline {subsubsection}{\numberline {3.3.2.3}Key Discriminatory Features.}{87}{subsubsection.3.3.2.3}%
+\contentsline {subsection}{\numberline {3.3.3}Discussion}{91}{subsection.3.3.3}%
+\contentsline {subsubsection}{\numberline {3.3.3.1}Features selected.}{91}{subsubsection.3.3.3.1}%
+\contentsline {paragraph}{\numberline {3.3.3.1.1}Context.}{91}{paragraph.3.3.3.1.1}%
+\contentsline {paragraph}{\numberline {3.3.3.1.2}Self-Efficacy and Resilience.}{93}{paragraph.3.3.3.1.2}%
+\contentsline {paragraph}{\numberline {3.3.3.1.3}Social support.}{96}{paragraph.3.3.3.1.3}%
+\contentsline {subsubsection}{\numberline {3.3.3.2}Model Testing and Validation.}{96}{subsubsection.3.3.3.2}%
+\contentsline {section}{\numberline {3.4}Study 3: Female Candidates Getting to Assessment}{97}{section.3.4}%
+\contentsline {subsection}{\numberline {3.4.1}Method}{97}{subsection.3.4.1}%
+\contentsline {subsubsection}{\numberline {3.4.1.1}Participants.}{97}{subsubsection.3.4.1.1}%
+\contentsline {subsection}{\numberline {3.4.2}Results}{98}{subsection.3.4.2}%
+\contentsline {subsection}{\numberline {3.4.3}Discussion}{103}{subsection.3.4.3}%
+\contentsline {subsubsection}{\numberline {3.4.3.1}Motivation.}{103}{subsubsection.3.4.3.1}%
+\contentsline {subsubsection}{\numberline {3.4.3.2}Consolidation of Experience.}{104}{subsubsection.3.4.3.2}%
+\contentsline {section}{\numberline {3.5}Study 4: Passing First Time}{107}{section.3.5}%
+\contentsline {subsection}{\numberline {3.5.1}Method}{107}{subsection.3.5.1}%
+\contentsline {subsubsection}{\numberline {3.5.1.1}Participants.}{107}{subsubsection.3.5.1.1}%
+\contentsline {subsection}{\numberline {3.5.2}Results}{107}{subsection.3.5.2}%
+\contentsline {subsection}{\numberline {3.5.3}Discussion}{112}{subsection.3.5.3}%
+\contentsline {subsubsection}{\numberline {3.5.3.1}Experience of Training.}{112}{subsubsection.3.5.3.1}%
+\contentsline {subsubsection}{\numberline {3.5.3.2}Preparation for Assessment.}{113}{subsubsection.3.5.3.2}%
+\contentsline {section}{\numberline {3.6}General Discussion}{115}{section.3.6}%
+\contentsline {subsection}{\numberline {3.6.1}Overview}{115}{subsection.3.6.1}%
+\contentsline {subsection}{\numberline {3.6.2}Applied Implications}{116}{subsection.3.6.2}%
+\contentsline {subsection}{\numberline {3.6.3}Methodological Considerations}{117}{subsection.3.6.3}%
+\contentsline {subsection}{\numberline {3.6.4}Future Directions}{118}{subsection.3.6.4}%
+\contentsline {section}{\numberline {3.7}Conclusion}{119}{section.3.7}%
+\contentsline {chapter}{\numberline {4}Self-Efficacy and Quality Mountain Days}{121}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Introduction}{121}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Study 5: The Mountain Leader Self-Efficacy Scale}{124}{section.4.2}%
+\contentsline {subsection}{\numberline {4.2.1}Methods}{124}{subsection.4.2.1}%
+\contentsline {subsubsection}{\numberline {4.2.1.1}Participants.}{124}{subsubsection.4.2.1.1}%
+\contentsline {subsubsection}{\numberline {4.2.1.2}Measures.}{124}{subsubsection.4.2.1.2}%
+\contentsline {subsubsection}{\numberline {4.2.1.3}Analyses.}{125}{subsubsection.4.2.1.3}%
+\contentsline {subsection}{\numberline {4.2.2}Results}{126}{subsection.4.2.2}%
+\contentsline {subsection}{\numberline {4.2.3}Discussion}{129}{subsection.4.2.3}%
+\contentsline {section}{\numberline {4.3}Study 6}{129}{section.4.3}%
+\contentsline {subsection}{\numberline {4.3.1}Methods}{129}{subsection.4.3.1}%
+\contentsline {subsubsection}{\numberline {4.3.1.1}Participants.}{129}{subsubsection.4.3.1.1}%
+\contentsline {subsubsection}{\numberline {4.3.1.2}Measures.}{129}{subsubsection.4.3.1.2}%
+\contentsline {subsubsection}{\numberline {4.3.1.3}Analyses.}{130}{subsubsection.4.3.1.3}%
+\contentsline {subsection}{\numberline {4.3.2}Results}{130}{subsection.4.3.2}%
+\contentsline {subsubsection}{\numberline {4.3.2.1}MLSS Model Fit and Invariance.}{130}{subsubsection.4.3.2.1}%
+\contentsline {subsubsection}{\numberline {4.3.2.2}Self-efficacy, Experience, and Gender.}{131}{subsubsection.4.3.2.2}%
+\contentsline {paragraph}{\numberline {4.3.2.2.1}Routine Skills.}{131}{paragraph.4.3.2.2.1}%
+\contentsline {paragraph}{\numberline {4.3.2.2.2}Emergency Skills.}{132}{paragraph.4.3.2.2.2}%
+\contentsline {subsection}{\numberline {4.3.3}Discussion}{134}{subsection.4.3.3}%
+\contentsline {section}{\numberline {4.4}Applied Implications}{137}{section.4.4}%
+\contentsline {section}{\numberline {4.5}Future Directions}{138}{section.4.5}%
+\contentsline {section}{\numberline {4.6}Summary and Concluding Discussion}{138}{section.4.6}%
+\contentsline {chapter}{\numberline {5}General Discussion}{141}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Summary of Results}{141}{section.5.1}%
+\contentsline {section}{\numberline {5.2}Theoretical and Methodological Implications}{143}{section.5.2}%
+\contentsline {subsection}{\numberline {5.2.1}A Methodology for Researching Development Pathways}{144}{subsection.5.2.1}%
+\contentsline {subsection}{\numberline {5.2.2}Gender differences in the Relationship Between Experience and Self-Efficacy}{146}{subsection.5.2.2}%
+\contentsline {subsection}{\numberline {5.2.3}Quality and Variety Over Quantity}{147}{subsection.5.2.3}%
+\contentsline {section}{\numberline {5.3}Applied Implications}{147}{section.5.3}%
+\contentsline {subsection}{\numberline {5.3.1}Quick Wins}{148}{subsection.5.3.1}%
+\contentsline {subsubsection}{\numberline {5.3.1.1}Information About the Mountain Leader Qualification.}{148}{subsubsection.5.3.1.1}%
+\contentsline {subsubsection}{\numberline {5.3.1.2}Information About the Importance of Experience.}{149}{subsubsection.5.3.1.2}%
+\contentsline {subsection}{\numberline {5.3.2}Long Term Goals}{150}{subsection.5.3.2}%
+\contentsline {subsubsection}{\numberline {5.3.2.1}Development Plans.}{150}{subsubsection.5.3.2.1}%
+\contentsline {subsubsection}{\numberline {5.3.2.2}Course Staff Training.}{151}{subsubsection.5.3.2.2}%
+\contentsline {subsubsection}{\numberline {5.3.2.3}Reviewing Assessment Prerequisites.}{152}{subsubsection.5.3.2.3}%
+\contentsline {subsubsection}{\numberline {5.3.2.4}Supporting Access to the Mountains.}{154}{subsubsection.5.3.2.4}%
+\contentsline {subsubsection}{\numberline {5.3.2.5}Changes to DLOG.}{155}{subsubsection.5.3.2.5}%
+\contentsline {section}{\numberline {5.4}Strengths and Limitations}{155}{section.5.4}%
+\contentsline {subsection}{\numberline {5.4.1}Strengths}{155}{subsection.5.4.1}%
+\contentsline {subsection}{\numberline {5.4.2}Limitations}{156}{subsection.5.4.2}%
+\contentsline {subsection}{\numberline {5.4.3}Future Research Directions}{157}{subsection.5.4.3}%
+\contentsline {section}{\numberline {5.5}Conclusion}{158}{section.5.5}%
+\contentsline {section}{\numberline {5.6}Personal Reflections}{158}{section.5.6}%
+\contentsline {chapter}{\numberline {6}PhD Impact and Dissemination}{159}{chapter.6}%
+\contentsline {section}{\numberline {6.1}Mountain Training Report}{160}{section.6.1}%
+\contentsline {section}{\numberline {6.2}Mountain Training Boards Presentation}{197}{section.6.2}%
+\contentsline {section}{\numberline {6.3}Mountain Training UK Coaching Provider Presentation}{212}{section.6.3}%
+\contentsline {section}{\numberline {6.4}Mountain Training Scotland}{225}{section.6.4}%
+\contentsline {subsection}{\numberline {6.4.1}Part A: Mountain Training Scotland Mountain Leader and Winter Mountain Leader Completion Statistics}{225}{subsection.6.4.1}%
+\contentsline {subsubsection}{\numberline {6.4.1.1}Introduction.}{225}{subsubsection.6.4.1.1}%
+\contentsline {subsubsection}{\numberline {6.4.1.2}Data.}{225}{subsubsection.6.4.1.2}%
+\contentsline {paragraph}{\numberline {6.4.1.2.1}Demographics.}{226}{paragraph.6.4.1.2.1}%
+\contentsline {paragraph}{\numberline {6.4.1.2.2}Outcomes.}{226}{paragraph.6.4.1.2.2}%
+\contentsline {subsubsection}{\numberline {6.4.1.3}Methods.}{227}{subsubsection.6.4.1.3}%
+\contentsline {paragraph}{\numberline {6.4.1.3.1}Survival Analyses.}{227}{paragraph.6.4.1.3.1}%
+\contentsline {paragraph}{\numberline {6.4.1.3.2}Pass Rates.}{228}{paragraph.6.4.1.3.2}%
+\contentsline {subsubsection}{\numberline {6.4.1.4}Mountain Leader.}{229}{subsubsection.6.4.1.4}%
+\contentsline {paragraph}{\numberline {6.4.1.4.1}Getting to Training.}{229}{paragraph.6.4.1.4.1}%
+\contentsline {paragraph}{\numberline {6.4.1.4.2}Getting to Assessment.}{231}{paragraph.6.4.1.4.2}%
+\contentsline {paragraph}{\numberline {6.4.1.4.3}First Assessment}{233}{paragraph.6.4.1.4.3}%
+\contentsline {subsubsection}{\numberline {6.4.1.5}Winter Mountain Leader.}{234}{subsubsection.6.4.1.5}%
+\contentsline {paragraph}{\numberline {6.4.1.5.1}Getting to Training.}{234}{paragraph.6.4.1.5.1}%
+\contentsline {paragraph}{\numberline {6.4.1.5.2}Getting to Assessment.}{236}{paragraph.6.4.1.5.2}%
+\contentsline {paragraph}{\numberline {6.4.1.5.3}First Assessment.}{238}{paragraph.6.4.1.5.3}%
+\contentsline {subsubsection}{\numberline {6.4.1.6}Summary.}{240}{subsubsection.6.4.1.6}%
+\contentsline {subsection}{\numberline {6.4.2}Part B: Mountain Leader Completion: Mountain Training Scotland}{241}{subsection.6.4.2}%
+\contentsline {subsubsection}{\numberline {6.4.2.1}Introduction.}{241}{subsubsection.6.4.2.1}%
+\contentsline {subsubsection}{\numberline {6.4.2.2}Methods.}{242}{subsubsection.6.4.2.2}%
+\contentsline {paragraph}{\numberline {6.4.2.2.1}Participants.}{242}{paragraph.6.4.2.2.1}%
+\contentsline {paragraph}{\numberline {6.4.2.2.2}Analytical Procedure.}{242}{paragraph.6.4.2.2.2}%
+\contentsline {subsubsection}{\numberline {6.4.2.3}Female Candidates Getting to Assessment Within 18 Months of Training.}{243}{subsubsection.6.4.2.3}%
+\contentsline {paragraph}{\numberline {6.4.2.3.1}Results.}{243}{paragraph.6.4.2.3.1}%
+\contentsline {paragraph}{\numberline {6.4.2.3.2}Discussion.}{245}{paragraph.6.4.2.3.2}%
+\contentsline {subsubsection}{\numberline {6.4.2.4}Male Candidates Getting to Assessment Within 18 Months of Training.}{248}{subsubsection.6.4.2.4}%
+\contentsline {paragraph}{\numberline {6.4.2.4.1}Results.}{248}{paragraph.6.4.2.4.1}%
+\contentsline {paragraph}{\numberline {6.4.2.4.2}Discussion}{249}{paragraph.6.4.2.4.2}%
+\contentsline {subsubsection}{\numberline {6.4.2.5}General Discussion.}{251}{subsubsection.6.4.2.5}%
+\contentsline {subsubsection}{\numberline {6.4.2.6}Conclusion and Potential Implications}{253}{subsubsection.6.4.2.6}%
+\contentsline {chapter}{\numberline {A}Mountain Training Executive Officer Interview Guide}{255}{appendix.A}%
+\contentsline {section}{\numberline {A.1}Interview A}{255}{section.A.1}%
+\contentsline {subsection}{\numberline {A.1.1}Candidate Background.}{256}{subsection.A.1.1}%
+\contentsline {subsection}{\numberline {A.1.2}Candidate Career History and Social Influence.}{258}{subsection.A.1.2}%
+\contentsline {subsubsection}{\numberline {A.1.2.1}Motives/Motivation.}{258}{subsubsection.A.1.2.1}%
+\contentsline {subsubsection}{\numberline {A.1.2.2}Intentions/Expectations.}{258}{subsubsection.A.1.2.2}%
+\contentsline {subsubsection}{\numberline {A.1.2.3}Critical Developmental Events.}{261}{subsubsection.A.1.2.3}%
+\contentsline {subsubsection}{\numberline {A.1.2.4}Other Qualifications.}{262}{subsubsection.A.1.2.4}%
+\contentsline {subsubsection}{\numberline {A.1.2.5}Subjective Norms/Social Influence.}{262}{subsubsection.A.1.2.5}%
+\contentsline {subsubsection}{\numberline {A.1.2.6}Relevant Media Influence.}{263}{subsubsection.A.1.2.6}%
+\contentsline {subsubsection}{\numberline {A.1.2.7}Role Models}{264}{subsubsection.A.1.2.7}%
+\contentsline {subsection}{\numberline {A.1.3}Personal Characteristics.}{265}{subsection.A.1.3}%
+\contentsline {subsubsection}{\numberline {A.1.3.1}Attitudes/Outcome Expectations.}{265}{subsubsection.A.1.3.1}%
+\contentsline {subsubsection}{\numberline {A.1.3.2}Self-efficacy.}{266}{subsubsection.A.1.3.2}%
+\contentsline {subsubsection}{\numberline {A.1.3.3}Mastery Aspirations.}{267}{subsubsection.A.1.3.3}%
+\contentsline {subsubsection}{\numberline {A.1.3.4}Disconfirmatory Experiences.}{268}{subsubsection.A.1.3.4}%
+\contentsline {subsubsection}{\numberline {A.1.3.5}Resilience \& Robustness.}{268}{subsubsection.A.1.3.5}%
+\contentsline {subsubsection}{\numberline {A.1.3.6}End.}{269}{subsubsection.A.1.3.6}%
+\contentsline {section}{\numberline {A.2}Interview B}{270}{section.A.2}%
+\contentsline {subsection}{\numberline {A.2.1}Candidate Experience \& Ability.}{270}{subsection.A.2.1}%
+\contentsline {subsubsection}{\numberline {A.2.1.1}Personal Experience.}{270}{subsubsection.A.2.1.1}%
+\contentsline {subsubsection}{\numberline {A.2.1.2}Personal Competency.}{272}{subsubsection.A.2.1.2}%
+\contentsline {subsection}{\numberline {A.2.2}Candidate Support.}{273}{subsection.A.2.2}%
+\contentsline {subsubsection}{\numberline {A.2.2.1}Training Staff/Centre.}{273}{subsubsection.A.2.2.1}%
+\contentsline {subsubsection}{\numberline {A.2.2.2}Instructor Support.}{274}{subsubsection.A.2.2.2}%
+\contentsline {subsubsection}{\numberline {A.2.2.3}Mentoring.}{275}{subsubsection.A.2.2.3}%
+\contentsline {subsubsection}{\numberline {A.2.2.4}Social Support.}{276}{subsubsection.A.2.2.4}%
+\contentsline {subsubsection}{\numberline {A.2.2.5}End.}{280}{subsubsection.A.2.2.5}%
+\contentsline {chapter}{\numberline {B}Developing the Survey Tool}{281}{appendix.B}%
+\contentsline {section}{\numberline {B.1}Introduction}{281}{section.B.1}%
+\contentsline {section}{\numberline {B.2}Method}{282}{section.B.2}%
+\contentsline {subsection}{\numberline {B.2.1}Measures}{282}{subsection.B.2.1}%
+\contentsline {paragraph}{\numberline {B.2.1.0.1}Personality measures.}{283}{paragraph.B.2.1.0.1}%
+\contentsline {subparagraph}{\numberline {B.2.1.0.1.1}Big Five.}{284}{subparagraph.B.2.1.0.1.1}%
+\contentsline {subparagraph}{\numberline {B.2.1.0.1.2}Resilience and Robustness.}{284}{subparagraph.B.2.1.0.1.2}%
+\contentsline {subparagraph}{\numberline {B.2.1.0.1.3}Perfectionism.}{284}{subparagraph.B.2.1.0.1.3}%
+\contentsline {subparagraph}{\numberline {B.2.1.0.1.4}Robustness of confidence.}{284}{subparagraph.B.2.1.0.1.4}%
+\contentsline {paragraph}{\numberline {B.2.1.0.2}Socio-demographic.}{285}{paragraph.B.2.1.0.2}%
+\contentsline {paragraph}{\numberline {B.2.1.0.3}Self-efficacy Scale.}{285}{paragraph.B.2.1.0.3}%
+\contentsline {paragraph}{\numberline {B.2.1.0.4}Personal Projects.}{286}{paragraph.B.2.1.0.4}%
+\contentsline {paragraph}{\numberline {B.2.1.0.5}Motives.}{287}{paragraph.B.2.1.0.5}%
+\contentsline {paragraph}{\numberline {B.2.1.0.6}Course Staff Coaching Behaviours.}{287}{paragraph.B.2.1.0.6}%
+\contentsline {paragraph}{\numberline {B.2.1.0.7}Need Supportive Environment.}{288}{paragraph.B.2.1.0.7}%
+\contentsline {paragraph}{\numberline {B.2.1.0.8}Perceived Conflict on Courses.}{288}{paragraph.B.2.1.0.8}%
+\contentsline {paragraph}{\numberline {B.2.1.0.9}Social Support.}{288}{paragraph.B.2.1.0.9}%
+\contentsline {paragraph}{\numberline {B.2.1.0.10}Preparation for Assessment.}{288}{paragraph.B.2.1.0.10}%
+\contentsline {paragraph}{\numberline {B.2.1.0.11}Life events.}{289}{paragraph.B.2.1.0.11}%
+\contentsline {paragraph}{\numberline {B.2.1.0.12}Aspirations, Intentions, and Expectations.}{289}{paragraph.B.2.1.0.12}%
+\contentsline {subsection}{\numberline {B.2.2}Participants and Procedure}{289}{subsection.B.2.2}%
+\contentsline {subsection}{\numberline {B.2.3}Analytical Method}{292}{subsection.B.2.3}%
+\contentsline {subsection}{\numberline {B.2.4}Item Retention}{294}{subsection.B.2.4}%
+\contentsline {section}{\numberline {B.3}Results}{294}{section.B.3}%
+\contentsline {subsection}{\numberline {B.3.1}Item Reduction}{294}{subsection.B.3.1}%
+\contentsline {subsection}{\numberline {B.3.2}Classification Rates}{295}{subsection.B.3.2}%
+\contentsline {section}{\numberline {B.4}Discussion}{296}{section.B.4}%
+\contentsline {section}{\numberline {B.5}Study 2 Supplementary Information}{296}{section.B.5}%
+\contentsline {chapter}{\numberline {C}Chapter 3 Initial Classification Rates}{315}{appendix.C}%
+\contentsline {chapter}{\numberline {D}Expectations and Intentions}{319}{appendix.D}%
+\contentsline {chapter}{\numberline {E}Other Works Completed During the PhD}{323}{appendix.E}%
+\contentsline {section}{\numberline {E.1}Mountain Training Organisations}{323}{section.E.1}%
+\contentsline {subsection}{\numberline {E.1.1}Mountaineering Instructor Award Pass Rate}{324}{subsection.E.1.1}%
+\contentsline {subsubsection}{\numberline {E.1.1.1}Summary.}{324}{subsubsection.E.1.1.1}%
+\contentsline {subsubsection}{\numberline {E.1.1.2}Skills Developed.}{324}{subsubsection.E.1.1.2}%
+\contentsline {subsubsection}{\numberline {E.1.1.3}Outputs.}{325}{subsubsection.E.1.1.3}%
+\contentsline {subsection}{\numberline {E.1.2}MTE Impact Survey and Report}{325}{subsection.E.1.2}%
+\contentsline {subsection}{\numberline {E.1.3}MCI Study 2019}{326}{subsection.E.1.3}%
+\contentsline {subsection}{\numberline {E.1.4}Financial Impact of COVID-19}{326}{subsection.E.1.4}%
+\contentsline {section}{\numberline {E.2}UK Sport}{326}{section.E.2}%
+\contentsline {section}{\numberline {E.3}Profiling Elite Athletes}{327}{section.E.3}%
+\contentsline {section}{\numberline {E.4}Perceptions of Healthy Ageing}{327}{section.E.4}%
+\contentsline {section}{\numberline {E.5}Public Health Wales}{328}{section.E.5}%
+\contentsline {section}{\numberline {E.6}Innsbruck Collaboration}{328}{section.E.6}%
+\contentsline {section}{\numberline {E.7}Dictionary entries}{329}{section.E.7}%
+\contentsline {section}{\numberline {E.8}Robustness and Resilience Poster Presentation at SPSP}{329}{section.E.8}%
+\contentsline {section}{\numberline {E.9}Introduction to Bayesian Structural Equation Modelling}{329}{section.E.9}%
