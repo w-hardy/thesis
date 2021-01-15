@@ -76,9 +76,11 @@ What do the course staff think about the Mountain Leader qualification? How does
 
 ### Philosophical Orientation
 
-We adopted a relativist epistemology for this study, as we believed that different realities exist for individuals on different "sides" of the Mountain Leader qualification [e.g., candidates and course staff; @Sparkes2009]. A relativist epistemology is incongruent with the *parallel perspective* [@Sparkes1998], where a researcher would seek to establish validity in a similar way to that of a quantitative study. Instead, we present the reader with evidence of the credibility of this research, allowing them to judge the rigour of the study for themselves [@Sparkes2009].
+`r colorize("We adopted a critical realist ontology and epistemology for this study. Critical realism posits that reality is out there, but is independent of our thoughts and impressions", "blue")` [@Bhaskar1998]. `r colorize("A central tent of critical realism is that ontology cannot be reduced to epistemology and that knowledge is only a part of reality", "blue")` [@Bhaskar1998; @Fletcher2017]. `r colorize("Therefore, we must accept that knowledge will be theory-laden and mediated by language, culture, and experience", "blue")` [@Clarke2015; @Houston2001; @Philips1987; @Ussher1999]. 
 
-Given that there has been no previous research into the factors influencing the completion rate of the Mountain Leader qualification, but there is a great deal of relevant research in sport, social, and organisational psychology, we used a concurrent inductive ("bottom-up"/data-driven) and deductive ("top-down"/theory-driven) approach in the present research. This approach is similar to that used in other research that has sought to develop knowledge about phenomena with little empirical research [e.g., @Webster2017]. It is also important to note that this concurrent inductive and deductive approach fits well with the relativist epistemology, as the reality for researchers may be different from that of the participants. Indeed, the findings of this research are the result of dialectical movement between everyday meanings and theoretical explanations [@Sparkes2014].
+`r colorize("Throughout the remainder of the methods section, we present evidence of the credibility of this research. In addition, the findings section includes rich and detailed quotes from participants. In doing so, we provide the reader the opportunity to evaluate the rigour of the study for themselves", "blue")` [@Sparkes2009].
+
+`r colorize("Given that there has been no previous research into the factors into the factors influencing the completion rate of the Mountain Leader qualification, but there is a great deal of relevant research in sport, social, and organisational psychology, we used a directed approach (i.e., primarily deductive but flexible) in the present research", "blue")` [cf. @Fletcher2017; @Hsieh2005]`r colorize(", this approach is also known abductive or a concurrent inductive and deductive", "blue")` [@Biddle2001; @Patton2002; @Webster2017]. `r colorize("This approach allows the inclusion of existing theory, but acknowledges that new knowledge may be created from the data, therefore sits well with critical realism", "blue")` [@Fletcher2017].
 
 
 ### Participants
@@ -110,7 +112,7 @@ All interviews were carried out face-to-face in a location chosen by the partici
 
 ### Data Analysis
 
-The transcripts were analysed using thematic analysis in a concurrent inductive and deductive fashion [cf. @Webster2017]. Analysing the data using a concurrent inductive and deductive approach allowed us to consider the data in relation to existing theory, but also to create new themes from the data. The flexibility of this analytical approach was important to this study as we were trying to identify potentially important factors, some of which we may not have considered *a prioi*. Acknowledging the existence of relevant literature and relating the data to it whilst also considering new themes of interest allowed us to make the best use of the rich data that were collected without sacrificing its complexity and nuance [cf. @Feilzer2009a].
+`r colorize("The transcripts were analysed using a codebook thematic analysis", "blue")` [cf. @Braun2019b] `r colorize("in the directed approach described above. Analysing the data using a  deductive approach allowed us to consider the data in relation to existing theory, but also to create new themes from the data. The flexibility of this analytical approach was important to this study as we were trying to identify potentially important factors, some of which we may not have considered a prioi. Acknowledging the existence of relevant literature and relating the data to it whilst also considering new themes of interest allowed us to make the best use of the rich data that were collected without sacrificing its complexity and nuance", "blue")` [cf. @Feilzer2010].
 
 The analysis of the transcripts involved a series of separate steps. First, WH read each transcript to familiarise himself with the data. Following this, he coded the transcripts using NVivo 11 Pro [@QSR2017] into the five *a priori* deductive codes and a sixth code---"Other." He then inductively analysed this sixth code to identify any themes not encompassed by the deductive codes. This approach is based on that of @Hardy2017 who also sought to identify important variables from a large number of variables that had been identified as potentially important to the development of expertise. 
 
@@ -122,7 +124,7 @@ Once all first-order themes had been identified, sub-themes were identified with
 When conducting the interviews, it quickly became apparent that becoming a Mountain Leader has at least two distinct steps: firstly, a candidate must *get to an assessment* and secondly, they must *pass an assessment*. If they fail to pass their first assessment, then they can return for a *reassessment*, which they may or may not pass. Consequently, we present the findings under three main headings: (a) getting to assessment, (b) passing, and (c) reassessment. This is done to aid readability and because there are differences in the factors that participants felt were important at each step.
 
 
-###	Getting to Assessment {#qual-gta}
+###	 Getting to Assessment {#qual-gta}
 
 Factors that influenced the likelihood of a candidate being assessed can be considered under four main themes: confidence, motivation, barriers to gaining experience, and social support. There were two additional themes that participants felt influenced whether candidates reached assessment (albeit to a lesser degree): re-engaging later in life and redirection to lower qualifications.
 
@@ -145,7 +147,7 @@ Officer 2 supported this when describing candidates on assessment courses by say
 This evidence shows that the candidates who have reached assessment were confident in their abilities and that some of those who have not reached assessment did not feel confident. The findings also suggest that candidate’s confidence was not always dependant on their abilities.
 
 
-######	Individual Differences in Thresholds of Confidence. {#study1-ind-diff-conf}
+######	 Individual Differences in Thresholds of Confidence. {#study1-ind-diff-conf}
 
 This section presents evidence that candidates have their own thresholds for confidence that they must surpass before they will attend an assessment, together with factors that influence that threshold (thus moderating the relationship between the level of confidence and the likelihood of booking an assessment). 
 
@@ -162,7 +164,7 @@ Provider 2 gave an example where high-levels of perfectionistic strivings may ha
 Officer 3 suggested that female candidates had higher levels of perfectionistic concerns, thus were more likely to feel that they were “below the standard” incorrectly, “A female might actually be overly cautious about exposing themselves, and potentially failing ... through believing they're actually below the standard. Whereas they're probably higher than that.” Officer 1 and Provider 3 did not discuss how perfectionism may or may not influence the candidates’ confidence threshold.
 
 
-######	Understanding the Standard. {#ml-qualitative-gta-understanding-the-standard}
+######	 Understanding the Standard. {#ml-qualitative-gta-understanding-the-standard}
 
 Throughout the interviews all participants referenced “the standard” (i.e., the standard required to pass) and commented that it is often hard for candidates, and sometimes staff, to understand what the standard is. The five participants that discussed “the standard” and how it related to getting to assessment all suggested that a candidate’s confidence level may not surpass the threshold needed to attend an assessment because they did not understand “the standard,” thus making it hard to be confident. Provider 3 explained that this holds some candidates back from being assessed:
 
@@ -170,7 +172,7 @@ Throughout the interviews all participants referenced “the standard” (i.e., 
 
 Three other participants made similar comments, and Officer 2 did not refer to understanding the standard. 
 
-######	Raising Candidates’ Confidence Levels.
+######	 Raising Candidates’ Confidence Levels.
 
 Six participants discussed how support helped close the gap between candidates’ confidence levels and their confidence thresholds by raising confidence levels rather than lowering confidence thresholds. When talking about candidates who lacked confidence, Provider 3 said:
 
@@ -193,7 +195,7 @@ Many motivation researchers have proposed that motivation operates at different 
 
 #####	Participatory Motives. {#qual-part-motives}
 
-All participants said that candidates with extrinsic (i.e., to achieve an external goal), participatory motives particularly relating to them being able to work in the outdoors following completion,, are more likely to complete than those with intrinsic participatory motives (i.e., doing something for its own sake). Provider 1 said “The ones where there’s a driver, are more likely to [complete] …. If they’re not doing it for work and they’re using it in an informal thing, they are probably less likely to [complete].” Provider 1 went on to say, “People who want to use it for their work: formally or informally, directed or volunteer … they’re pretty motivated to do it, and so I would say I think that the success rates are pretty good.” Similarly, Officer 3 said:
+All participants said that candidates with extrinsic (i.e., to achieve an external goal), participatory motives particularly relating to them being able to work in the outdoors following completion,, are more likely to complete than those with intrinsic participatory motives (i.e., doing something for its own sake). Provider 1 said “The ones where there’s a driver, are more likely to [complete] .... If they’re not doing it for work and they’re using it in an informal thing, they are probably less likely to [complete].” Provider 1 went on to say, “People who want to use it for their work: formally or informally, directed or volunteer ... they’re pretty motivated to do it, and so I would say I think that the success rates are pretty good.” Similarly, Officer 3 said:
 
 > If there's an expectation that somebody's going to have their ML to be able to do their job ... I should imagine they get on with it. But if there's no real drive ... [they] kick it down the road and, "I'll get around to it, maybe, or maybe not. It's not a big deal." sort of thing.
 
@@ -206,7 +208,7 @@ Provider 2 did not talk about candidates who only registered for the Mountain Le
 
 #####	Regulatory Motives.
 
-**2.3.1.2.2     Regulatory Motives.** Regulatory motives can be placed on a continuum from autonomous to controlled. Intrinsic motives are considered the most autonomous. Integrated and identified regulatory motives are examples of autonomous extrinsic regulatory motives, where behaviour is self-determined as the value of it is (somewhat) internalised. In contrast, controlled regulation includes introjected and external regulation, where behaviour is nonself-determined and the value of it may only be slightly internalised or not at all [@Deci2000]. In these data, participants gave examples of candidates who had different regulatory motives and the influence that these had on candidates’ likelihood of attending an assessment.
+Regulatory motives can be placed on a continuum from autonomous to controlled. Intrinsic motives are considered the most autonomous. Integrated and identified regulatory motives are examples of autonomous extrinsic regulatory motives, where behaviour is self-determined as the value of it is (somewhat) internalised. In contrast, controlled regulation includes introjected and external regulation, where behaviour is nonself-determined and the value of it may only be slightly internalised or not at all [@Deci2000]. In these data, participants gave examples of candidates who had different regulatory motives and the influence that these had on candidates’ likelihood of attending an assessment.
 
 
 ###### Autonomous Extrinsic Regulatory Motives.
