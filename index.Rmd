@@ -31,6 +31,7 @@ lot: FALSE
 lof: FALSE
 link-citations: yes
 reference-section-title: yes
+pandoc_args: ["--lua-filter=color-text.lua"]
 ---
 
 ```{r, include=FALSE, echo=FALSE}
@@ -62,7 +63,53 @@ options(ggplot2.discrete.fill = list(c("skyblue","orange"), RColorBrewer::brewer
 options(knitr.kable.NA = "-") #display "-" instead of NA in tables
 
 knitr::write_bib(c(.packages(), 'bookdown', 'knitr', 'rmarkdown'), 'packages.bib')
+
+colorize <- function(x, color) {
+  if (knitr::is_latex_output()) {
+    sprintf("\\textcolor{%s}{%s}", color, x)
+  } else if (knitr::is_html_output()) {
+    sprintf("<span style='color: %s;'>%s</span>", color, 
+      x)
+  } else x
+}
 ```
+
+
+```{cat, engine.opts = list(file = "color-text.lua")}
+Span = function(el)
+  color = el.attributes['color']
+  -- if no color attribute, return unchange
+  if color == nil then return el end
+  
+  -- tranform to <span style="color: red;"></span>
+  if FORMAT:match 'html' then
+    -- remove color attributes
+    el.attributes['color'] = nil
+    -- use style attribute instead
+    el.attributes['style'] = 'color: ' .. color .. ';'
+    -- return full span element
+    return el
+  elseif FORMAT:match 'latex' then
+    -- remove color attributes
+    el.attributes['color'] = nil
+    -- encapsulate in latex code
+    table.insert(
+      el.content, 1,
+      pandoc.RawInline('latex', '\\textcolor{'..color..'}{')
+    )
+    table.insert(
+      el.content,
+      pandoc.RawInline('latex', '}')
+    )
+    -- returns only span content
+    return el.content
+  else
+    -- for other format return unchanged
+    return el
+  end
+end
+```
+
 
 \setstretch{1.0}
 \listoftables
