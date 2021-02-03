@@ -264,7 +264,7 @@ x <- nph::logrank.test(time = GTA_Survival2008$TimeToAssessment,
 surv_df <- x$test$df
 surv_n <- sum(x$n)
 surv_chisq <- x$test$Chisq
-surv_p <- if (x$test$p >.001) {paste0(c("=",x$test$p))} else {">.001"}
+surv_p <- if (x$test$p >.001) {paste0(c("=",x$test$p))} else {"<.001"}
 
 ```
 
@@ -381,7 +381,7 @@ group_5_pra %>%
 ```
 
 
-When responding to the survey, candidates were at different stages of the pathway. Some candidates had been assessed, whereas others had not. In addition, some candidates had completed their training course at least 18 months before responding to the survey, and the remainder responded to the survey less than 18 months after their training course. Therefore, candidates could have completed the survey either prospectively or retrospectively with regards to *both* the event (the assessment itself) and the criterion variable (getting to assessment within 18 months of training) *separately*. As such, we were able to create four groups within each sex (see Table \@ref(tab:g5-candidate-survey-time) for descriptive data).
+When responding to the survey, candidates were at different stages of the pathway. Some candidates had been assessed, whereas others had not. In addition, some candidates had completed their training course at least 18 months before responding to the survey, and the remainder responded to the survey less than 18 months after their training course. Therefore, candidates could have completed the survey either prospectively or retrospectively with regards to *both* the event (the assessment itself) and the criterion variable (getting to `r colorize("an", "blue")` assessment within 18 months of training) *separately*. As such, we were able to create four groups within each sex (see Table \@ref(tab:g5-candidate-survey-time) for descriptive data).
 
 \setstretch{1.0}
 ```{r g5-candidate-survey-time}
