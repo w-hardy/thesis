@@ -1,4 +1,4 @@
-# Study 1: Qualitative {#ml-qualitative}
+# Study 1: Factors Influencing the Completion of the Mountain Leader Qualification: A Qualitative Inquiry {#ml-qualitative}
 
 ```{r setup-01, include=FALSE}
 library(tidyverse)
@@ -50,7 +50,7 @@ interview_factors %>%
 
 #### Candidate Background. {#qual-research-questions-background}
 
-Does a candidate's socioeconomic background influence their progression through the Mountain Leader qualification? How does a candidates age influence their progression? Are there any professions that help or hinder candidates' progression?
+Does a candidate's socioeconomic background influence their progression through the Mountain Leader qualification? How does a `r colorize("candidates'","blue")` age influence their progression? Are there any professions that help or hinder candidates' progression?
 
 
 #### Candidate Career History and Social Influence. {#qual-research-questions-career}
@@ -100,7 +100,7 @@ Each section ended with two final questions. Firstly, we asked participants if t
 
 We completed eight pilot interviews with Mountain Leader course staff and a Mountain Training Officer to familiarise the interviewer with the interview guide, to identify any factors not included in the interview guide that may be important, and to ensure that participants were able to provide sufficiently detailed answers to the questions. We made minor changes to the final interview guide following each pilot interview (e.g., rewording questions to make them clearer for participants). The final interview guide can be found in [Appendix A](#appendix-interview-guide).
 
-RR and LH instructed WH instructed in qualitative research methods, and additional knowledge was gleaned from recent literature on qualitative research methods [e.g., @Smith2018a]. The research team all had mountaineering experience and an understanding of the Mountain Leader qualification at the time the interviews were conducted. This experience allowed us to be more sensitive to the specific experiences and language of the participants, reducing the likelihood of introducing bias through insinuation and assumption [@Denzin2005]. 
+RR and LH instructed WH in qualitative research methods, and additional knowledge was gleaned from recent literature on qualitative research methods [e.g., @Smith2018a]. The research team all had mountaineering experience and an understanding of the Mountain Leader qualification at the time the interviews were conducted. This experience allowed us to be more sensitive to the specific experiences and language of the participants, reducing the likelihood of introducing bias through insinuation and assumption [@Denzin2005]. 
 
 WH, who had 10 years of outdoor experience across the world, conducted all the interviews. Most of this experience was gained in a recreational context rather than a professional one. The nature of this experience is seen as a strength because the analysis was less likely to be influenced by his personal experiences of Mountain Training qualifications, ensuring that it is the participants' experiences that are presented. In addition to this, RR is a senior lecturer in sports psychology with over 20 years of outdoor experience; and LH is a professor in sports psychology, has over 50 years of outdoor experience, and is an IFMGA Mountain Guide. The experiences of the research team meant that a good rapport could be established with participants and that the subtleties of the phenomena of interest could be fully understood.
 
@@ -183,7 +183,7 @@ Talking about isolated candidates, Officer 4 said, “I suppose the ones without
 
 #####	Gender Differences in Robustness of Confidence. {#qual-gender-diffs-robsut-conf}
 
-In addition to the gender differences in confidence thresholds discussed above, three participants spoke about gender differences in the robustness of candidates’ confidence (i.e., the extent to which confidence is maintained in the face of disconfirming experiences). When talking about the different influences of negative events on candidates, Officer 3 said, “Who can take it in their stride? Blokes, I suppose. Not because they perform well afterwards, they will probably be weaker. They are more Bolshie, I suppose.” Officer 2 supported this: 
+In addition to the gender differences in confidence thresholds discussed above, three participants spoke about gender differences in the robustness of candidates’ confidence (i.e., the extent to which confidence is maintained in the face of disconfirming experiences). When talking about the different influences of negative events on candidates, Officer 3 said, “Who can take it in their stride? Blokes, I suppose. Not because they perform well afterwards, they will probably be weaker. They are more `r colorize("bolshie", "blue")`, I suppose.” Officer 2 supported this: 
 
 > For some candidates, particularly men, those effects of that bit of negative feedback or that bad day they had on the hill, they try and brush off and just carry on ... and get it right next time .... What you might find with many females is that’s thrown a spanner in the works. It’s made them doubt what they need to do, and now they need to readjust their consolidation plan.
 
@@ -208,7 +208,7 @@ Provider 2 did not talk about candidates who only registered for the Mountain Le
 
 #####	Regulatory Motives.
 
-Regulatory motives can be placed on a continuum from autonomous to controlled. Intrinsic motives are considered the most autonomous. Integrated and identified regulatory motives are examples of autonomous extrinsic regulatory motives, where behaviour is self-determined as the value of it is (somewhat) internalised. In contrast, controlled regulation includes introjected and external regulation, where behaviour is nonself-determined and the value of it may only be slightly internalised or not at all [@Deci2000]. In these data, participants gave examples of candidates who had different regulatory motives and the influence that these had on candidates’ likelihood of attending an assessment.
+Regulatory motives can be placed on a continuum from autonomous to controlled. Intrinsic motives are considered the most autonomous. Integrated and identified regulatory motives are examples of autonomous extrinsic regulatory motives, where behaviour is self-determined as the value of it is (somewhat) internalised. In contrast, controlled regulation includes introjected and external regulation, where behaviour is `r colorize("non-self-determined", "blue")` and the value of it may only be slightly internalised or not at all [@Deci2000]. In these data, participants gave examples of candidates who had different regulatory motives and the influence that these had on candidates’ likelihood of attending an assessment.
 
 
 ###### Autonomous Extrinsic Regulatory Motives.
@@ -298,7 +298,7 @@ Officer 3 supported this saying, “I think timing is critical, you have got to 
 
 Participants gave three main reasons that candidates felt they lacked time to prepare for their Mountain Leader assessment: profession, family, and doing other multiple qualifications at the same time. These other domains of candidates’ lives became barriers to completion for them as they were more important to those candidates than becoming Mountain Leaders.
 
-######	Profession. {#qual-lack-time-profession}
+######	Profession. {#qual-gta-lack-time-profession}
 
 All seven participants suggested that candidates whose profession allowed them time to prepare were more likely to be assessed than those whose profession did not. How a candidate’s job is set up appears to be more important than what that job is. 
 
@@ -310,7 +310,7 @@ The influence that employers have over the time candidates feel they have availa
 
 > I mean, schools can be helpful or not so helpful .... If the head teacher gets outdoor ed. and all the good things that spin out of it, then they can be very supportive. If the head teacher doesn’t, then the teacher’s kind of fighting them as well with all the other pressures: family, money and whatever.
 
-######	Family. {#qual-lack-time-familiy}
+######	Family. {#qual-gta-lack-time-family}
 
 All participants said that candidates having family commitments would make them feel that they had less time to prepare, so were less likely to get to assessment. For some candidates, this potential constraint was moderated by support from their family, allowing candidates to prepare for the Mountain Leader assessment instead of fulfilling their family commitments. When asked for examples of reasons people have given for not completing the Mountain Leader qualification, Officer 2 said:
 
@@ -581,7 +581,7 @@ Some candidates will not return for a reassessment following their initial asses
 
 ## General Discussion {#qual-general-discussion}
 
-The present chapter reports the findings of a large multidisciplinary qualitative study that is the first investigation into the factors influencing the completion rate of the Mountain Leader qualification. To do so, we conducted in-depth interviews with Mountain Training staff and experiences course staff, which covered candidates': background, career history and social influence, personal characteristics, ability and experience, and support. The flexible nature of the concurrent inductive and deductive analytical approach allowed us to combine extant literature and the expert knowledge of the study's participants. The findings of the present study suggest that a multitude of factors influence the completion rate of the Mountain Leader qualification, with different factors being important at each stage of the pathway. This position supports the conclusions of other recent works that have used a multidisciplinary approach to study expertise development [e.g., @Hardy2017; @Gullich2019; @Jones2020].
+The present chapter reports the findings of a `r colorize("large qualitative", "blue")` study that is the first investigation into the factors influencing the completion rate of the Mountain Leader qualification. To do so, we conducted in-depth interviews with Mountain Training staff and experiences course staff, which covered candidates': background, career history and social influence, personal characteristics, ability and experience, and support. The flexible nature of the concurrent inductive and deductive analytical approach allowed us to combine extant literature and the expert knowledge of the study's participants. The findings of the present study suggest that a multitude of factors influence the completion rate of the Mountain Leader qualification, with different factors being important at each stage of the pathway. This position supports the conclusions of other recent works that have used a multidisciplinary approach to study expertise development [e.g., @Hardy2017; @Gullich2019; @Jones2020].
 
 The findings of the present study suggest that there were four main themes identified as influences on candidates’ likelihood of getting to assessment: confidence, motivation, barriers to gaining experience, and social support. Candidates who get to assessment were more likely to be confident in their ability to pass an assessment. Further, candidates differed on the threshold level of confidence required to attend an assessment, and this threshold was influenced by several psychosocial factors. In terms of candidate motivation, interestingly, it was seen as important that candidates had an extrinsic participatory motive that was autonomously regulated for them to get to an assessment. Candidates with either intrinsic participatory motives or controlled regulatory motives were less likely to get to assessment. Regarding experience, participants suggested that it was important that candidates were able to gain experience before they would attend an assessment, with several barriers to gaining experience identified. These barriers mainly related to a lack of time and the influence of where candidates live on how easily they can accrue QMDs. Finally, in terms of social support, it appeared that received social support could help candidates understand what they needed to do to prepare for an assessment and free up their time to prepare for an assessment.
 
