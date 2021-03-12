@@ -1,0 +1,8 @@
+# General Introduction
+
+The results from the qualitative study suggested that motives for becoming a Mountain Leader existed on at least two of these levels, the participatory and regulatory. Therefore, in this study we measured two levels of motivation proposed by self-determination theorists: participatory motives and regulatory motives the perceived loci of causality of behavioural goals. In the [qualitative study](#qual-part-motives), all participants suggested that candidates (both female and male) with extrinsic participatory motives were more likely to be assessed than those who had intrinsic participatory motives.
+
+
+### Self-Discrepancy Theory.
+
+Self-discrepancy theory [@Higgins1987] considers three types of self: the actual-self is the way in which an individual perceives themselves, the ideal-self represents their hopes and aspirations, and the ought-self represents their obligations and responsibilities. The theory posits that individuals will be motivated to reduce discrepancies between their actual-self and their different self-guides (ideal and ought) and that different discrepancies will result in specific types of emotions: actual/ideal discrepancies will result in dejection-related emotions (e.g., sadness, disappointment, dissatisfaction) and actual/ought discrepancies will results in agitation-related emotions (e.g., guilt, worry, tension).

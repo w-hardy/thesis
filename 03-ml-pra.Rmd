@@ -610,7 +610,8 @@ Using the same data to train and test a model leads to the risk of over-fitting 
   1. Given $N$ cases, randomly select $x$ cases, where
 
   $$\frac{N}{3} > x > \frac{N}{10}$$
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for each class of the criterion variable to be held out as a test data set $D_{test}$ and the &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; remaining candidates become the training data $D_{train}$.
+
+for each class of the criterion variable to be held out as a test data set $D_{test}$ and the remaining candidates become the training data $D_{train}$.
 
   2. Prepare both the $D_{train}$ and $D_{test}$ data sets separately (e.g., standardising the data).
   3. Perform the feature selection process using $D_{train}$.
@@ -1438,9 +1439,17 @@ g5_zsex_ftp_consol %>%
   group_by(if_else(firstMLAssessmentDate < SurveyEndDate, "retro", "pros"), FirstTimePass) %>%
   rename(time = `if_else(firstMLAssessmentDate < SurveyEndDate, "retro", "pros")`) %>% 
   count() -> G5_ftp_count
+
+g5_zsex_ftp_consol %>% 
+  mutate(sex = factor(SexId, 
+                      levels = 1:2, 
+                      labels = c("Male", "Female"))) %>% 
+  group_by(sex) %>% 
+  count() -> G5_ftp_sex_count
+  
 ```
 
-We collected the data used for this study from `r nrow(g5_zsex_ftp_consol)` candidates, `r G5_ftp_count %>% group_by(time) %>% summarise(total = sum(n)) %>% filter(time == "retro") %>% .$total` of whom had been assessed prior to completing the survey, and `r G5_ftp_count %>% group_by(time) %>% summarise(total = sum(n)) %>% filter(time == "pros") %>% .$total` of whom had not been assessed before completing the survey. As with the data in female candidates getting to assessment, we combined the retrospective and prospective data to increase the sample size.^[This means that no variables about candidates' experience of assessment were included in the analyses. We have run the analyses on just the retrospective data, which allowed us to include some variables about candidates' experiences of assessment. However, none of these variables were selected in the best discriminatory subsets, nor were the classification rates significantly higher.] Of the 23 candidates who did not pass, two withdrew from their first assessment, none failed, and the remainder were deferred. Seven of those who were deferred only needed to log additional days.
+We collected the data used for this study from `r nrow(g5_zsex_ftp_consol)` candidates, `r G5_ftp_count %>% group_by(time) %>% summarise(total = sum(n)) %>% filter(time == "retro") %>% .$total` of whom had been assessed prior to completing the survey, and `r G5_ftp_count %>% group_by(time) %>% summarise(total = sum(n)) %>% filter(time == "pros") %>% .$total` of whom had not been assessed before completing the survey. `r colorize("This sample comprised 12 female candidates and 34 male candidates", "blue")`. As with the data in female candidates getting to assessment, we combined the retrospective and prospective data to increase the sample size.^[This means that no variables about candidates' experience of assessment were included in the analyses. We have run the analyses on just the retrospective data, which allowed us to include some variables about candidates' experiences of assessment. However, none of these variables were selected in the best discriminatory subsets, nor were the classification rates significantly higher.] Of the 23 candidates who did not pass, two withdrew from their first assessment, none failed, and the remainder were deferred. Seven of those who were deferred only needed to log additional days.
 
 
 ### Results {#ftp-results}

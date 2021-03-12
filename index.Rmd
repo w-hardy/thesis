@@ -64,7 +64,15 @@ options(knitr.kable.NA = "-") #display "-" instead of NA in tables
 
 knitr::write_bib(c(.packages(), 'bookdown', 'knitr', 'rmarkdown'), 'packages.bib')
 
-colorize <- function(x, color) {
+colorize <- function(x, color = "blue") {
+  if (knitr::is_latex_output()) {
+    sprintf("\\textcolor{%s}{%s}", color, x)
+  } else if (knitr::is_html_output()) {
+    sprintf("<span style='color: %s;'>%s</span>", color, 
+      x)
+  } else x
+}
+colourise <- function(x, color = "blue") {
   if (knitr::is_latex_output()) {
     sprintf("\\textcolor{%s}{%s}", color, x)
   } else if (knitr::is_html_output()) {

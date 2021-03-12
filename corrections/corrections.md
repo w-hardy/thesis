@@ -1,0 +1,11 @@
+### Philosophical Orientation
+
+We adopted a critical realist ontology and epistemology for this study. Critical realism posits that reality is out there, but is independent of our thoughts and impressions [@Bhaskar1998]. A central tent of critical realism is that ontology cannot be reduced to epistemology and that knowledge is only a part of reality [@Bhaskar1998; @Fletcher2017]. Therefore, we must accept that knowledge will be theory-laden and mediated by language, culture, and experience [@Clarke2015; @Houston2001; @Philips1987; @Ussher1999]. 
+
+Throughout the remainder of the methods section, we present evidence of the credibility of this research. In addition, the findings section includes rich and detailed quotes from participants. In doing so, we provide the reader the opportunity to evaluate the rigour of the study for themselves [@Sparkes2009].
+
+Given that there has been no previous research into the factors into the factors influencing the completion rate of the Mountain Leader qualification, but there is a great deal of relevant research in sport, social, and organisational psychology, we used a directed approach (i.e., primarily deductive but flexible) in the present research [cf. @Fletcher2017; @Hsieh2005], this approach is also known *abductive* or a *concurrent inductive and deductive* [@Biddle2001; @Patton2002; @Webster2017]. This approach allows the inclusion of existing theory, but acknowledges that new knowledge may be created from the data, therefore sits well with critical realism [@Fletcher2017].
+
+### Data Analysis
+
+The transcripts were analysed using a codebook thematic analysis [cf. @Braun2019b] in the directed approach described above. Analysing the data using a  deductive approach allowed us to consider the data in relation to existing theory, but also to create new themes from the data. The flexibility of this analytical approach was important to this study as we were trying to identify potentially important factors, some of which we may not have considered a prioi. Acknowledging the existence of relevant literature and relating the data to it whilst also considering new themes of interest allowed us to make the best use of the rich data that were collected without sacrificing its complexity and nuance [cf. Feilzer, 2010].

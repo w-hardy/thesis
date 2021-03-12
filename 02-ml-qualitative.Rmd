@@ -50,7 +50,7 @@ interview_factors %>%
 
 #### Candidate Background. {#qual-research-questions-background}
 
-Does a candidate's socioeconomic background influence their progression through the Mountain Leader qualification? How does a `r colorize("candidates'","blue")` age influence their progression? Are there any professions that help or hinder candidates' progression?
+Does a candidate's socioeconomic background influence their progression through the Mountain Leader qualification? How does a `r colorize("candidates'")` age influence their progression? Are there any professions that help or hinder candidates' progression?
 
 
 #### Candidate Career History and Social Influence. {#qual-research-questions-career}
@@ -298,6 +298,7 @@ Officer 3 supported this saying, “I think timing is critical, you have got to 
 
 Participants gave three main reasons that candidates felt they lacked time to prepare for their Mountain Leader assessment: profession, family, and doing other multiple qualifications at the same time. These other domains of candidates’ lives became barriers to completion for them as they were more important to those candidates than becoming Mountain Leaders.
 
+
 ######	Profession. {#qual-gta-lack-time-profession}
 
 All seven participants suggested that candidates whose profession allowed them time to prepare were more likely to be assessed than those whose profession did not. How a candidate’s job is set up appears to be more important than what that job is. 
@@ -310,6 +311,7 @@ The influence that employers have over the time candidates feel they have availa
 
 > I mean, schools can be helpful or not so helpful .... If the head teacher gets outdoor ed. and all the good things that spin out of it, then they can be very supportive. If the head teacher doesn’t, then the teacher’s kind of fighting them as well with all the other pressures: family, money and whatever.
 
+
 ######	Family. {#qual-gta-lack-time-family}
 
 All participants said that candidates having family commitments would make them feel that they had less time to prepare, so were less likely to get to assessment. For some candidates, this potential constraint was moderated by support from their family, allowing candidates to prepare for the Mountain Leader assessment instead of fulfilling their family commitments. When asked for examples of reasons people have given for not completing the Mountain Leader qualification, Officer 2 said:
@@ -321,6 +323,7 @@ Officer 1 gave an example of a candidate whose family situation, and thus priori
 > Three years ago, I talked to her about doing the ML. She cracks on with doing that. She’s done the training. She hasn’t done the assessment. She’s now had a kid, and it’s almost totally irrelevant to talk to her about ML these days.
 
 Officer 2 explained that candidates from different backgrounds will have different levels of family responsibility when talking about candidates from minority groups, “Sometimes when folk in other communities get involved in the outdoors there are religious, cultural and social pressures .... Family commitments come first, and it has a big impact on free time ... suddenly your free time isn’t free.”
+
 
 ######	Multiple Qualifications.
 
@@ -396,7 +399,7 @@ Provider 3 suggested that retirement might also provide candidates with an oppor
 
 ####	Redirection to Lower Qualifications. {#ml-qualitative-gta-redirection-lower}
 
-Five participants suggested that after Mountain Leader training, some candidates decided to pursue a lower qualification instead of the Mountain Leader. Officer 1 said, “They can’t put [the Mountain Leader qualification] as the priority in their life, so they may drop back to the Hill and Moorland Leader or the Lowland Leader course as a more achievable objective.” This was supported by Officer 2 above (see Section \@ref(qual-lack-time-familiy)) and when talking about candidates who have struggled with the Mountain Leader training course, “We get a reasonable number that then convert to Hill and Moorland Leader .... They decide that they are going to do that, because that is a shorter assessment and less intensive.”
+Five participants suggested that after Mountain Leader training, some candidates decided to pursue a lower qualification instead of the Mountain Leader. Officer 1 said, “They can’t put [the Mountain Leader qualification] as the priority in their life, so they may drop back to the Hill and Moorland Leader or the Lowland Leader course as a more achievable objective.” This was supported by Officer 2 above (see Section \@ref(qual-gta-lack-time-family)) and when talking about candidates who have struggled with the Mountain Leader training course, “We get a reasonable number that then convert to Hill and Moorland Leader .... They decide that they are going to do that, because that is a shorter assessment and less intensive.”
 
 It is unclear from the interviews how redirecting to a lower qualification will ultimately influence getting to a Mountain Leader assessment. For some candidates, this lower qualification will suit their needs; therefore, they will not continue with the Mountain Leader, qualification but for others completing the lower qualification becomes another step in the process of becoming a Mountain Leader. When talking about training debriefs, Provider 2 said, “Sometimes, we would advise somebody to go and do the Hill and Moorland assessment .... They worked really hard to get the Hill and Moorland ... then eventually, after a couple of years, they’ve done the ML assessment.”
 
